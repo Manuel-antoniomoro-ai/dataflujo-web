@@ -42,9 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email   = document.getElementById('wlEmail').value.trim();
-    const recurso = document.getElementById('wlRecurso').value;
-    const rgpd    = document.getElementById('wlRgpd').checked;
+    const email      = document.getElementById('wlEmail').value.trim();
+    const nombre     = document.getElementById('wlNombre')?.value.trim() || '';
+    const telefono   = document.getElementById('wlTelefono')?.value.trim() || '';
+    const empresa    = document.getElementById('wlEmpresa')?.value.trim() || '';
+    const comentario = document.getElementById('wlComentario')?.value.trim() || '';
+    const recurso    = document.getElementById('wlRecurso').value;
+    const rgpd       = document.getElementById('wlRgpd').checked;
     const msg     = document.getElementById('msgWaitlist');
     const btn     = form.querySelector('button[type="submit"]');
 
@@ -61,7 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body:    JSON.stringify({
+          nombre,
           email,
+          telefono,
+          empresa,
+          comentario,
           recurso,
           tipo:   'waitlist',
           origen: window.location.pathname
