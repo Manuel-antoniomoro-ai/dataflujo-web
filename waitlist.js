@@ -4,7 +4,7 @@
 // Sustituir FORMSPREE_WAITLIST_AQUI por tu endpoint real de formspree.io
 // =============================================================================
 
-const FORMSPREE_WAITLIST = 'FORMSPREE_WAITLIST_AQUI';
+const FORMSPREE_WAITLIST = 'https://formspree.io/f/xaqayobk';
 
 // Abrir el modal de waitlist con el nombre del recurso
 function abrirWaitlist(btn) {
