@@ -4,6 +4,10 @@ slides/*.mp4
 # ZIPs de productos (regenerables con crear_zips_v2.ps1)
 **/*.zip
 
+# Node modules (backend)
+backend/node_modules/
+node_modules/
+
 # Sistema operativo
 .DS_Store
 Thumbs.db
