@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Tutoriales en vídeo de Data Engineering y BI por Antonio Moro: Power BI, SQL avanzado, dbt, Airflow, BigQuery y más. Formación técnica gratuita.">
+<title>Tutoriales en Vídeo — DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--blue:#2563eb;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* ANIMATIONS */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.12);transition:transform 1.6s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.82}
+.iz.iz-in img{transform:scale(1);opacity:1}
+
+/* SECTIONS */
+.sec-white{padding:100px 0;background:var(--bg)}.sec-gray{padding:100px 0;background:var(--bg2)}
+.sec-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.75rem}
+.sec-title{font-family:var(--fe);font-size:clamp(2rem,4vw,2.75rem);font-weight:700;color:var(--t);line-height:1.2}
+.sec-sub{font-size:.95rem;color:var(--t2);margin-top:.75rem;max-width:560px;line-height:1.7}
+
+/* PAGE HERO */
+.page-hero{position:relative;height:420px;margin-top:64px}
+.ph-bg{position:absolute;inset:0;height:100%}
+.ph-bg img{width:100%;height:100%;object-fit:cover}
+.ph-overlay{position:absolute;inset:0;background:rgba(8,14,28,.76);display:flex;align-items:flex-end;padding-bottom:4rem}
+.ph-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.75rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.ph-sub{font-size:1rem;color:rgba(255,255,255,.7);max-width:560px;line-height:1.7}
+.ph-yt-link{display:inline-flex;align-items:center;gap:.5rem;margin-top:1.25rem;font-family:var(--fd);font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:1px;transition:color .2s}
+.ph-yt-link:hover{color:#fff}
+
+/* VIDEO FILTERS */
+.vf-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:3rem}
+.vf{background:none;border:1px solid var(--bd);padding:.4rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all .2s}
+.vf:hover,.vf.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* VIDEO GRID */
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:900px){.video-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.video-grid{grid-template-columns:1fr}}
+
+/* VIDEO CARD */
+.video-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--s);transition:box-shadow .3s,transform .3s;cursor:pointer}
+.video-card:hover{box-shadow:var(--s2);transform:translateY(-4px)}
+
+/* THUMBNAIL */
+.thumb{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden}
+.thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+.cat-bi    .thumb-bg{background:linear-gradient(135deg,#0f1f40 0%,#1a3a6b 50%,#2563eb 100%)}
+.cat-sql   .thumb-bg{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+.cat-dbt   .thumb-bg{background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#21262d 100%)}
+.cat-etl   .thumb-bg{background:linear-gradient(135deg,#1e3a5f 0%,#2d6a4f 50%,#1b4332 100%)}
+.cat-cloud .thumb-bg{background:linear-gradient(135deg,#0f1f40 0%,#5b21b6 50%,#7c3aed 100%)}
+.thumb-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:32px 32px}
+.bars{display:flex;align-items:flex-end;gap:5px;height:54px;position:relative;z-index:2}
+.bar{width:10px;border-radius:2px 2px 0 0;background:rgba(255,255,255,.35);animation:barPulse 2s ease-in-out infinite}
+.bar:nth-child(1){height:40%;animation-delay:0s}.bar:nth-child(2){height:75%;animation-delay:.15s}.bar:nth-child(3){height:55%;animation-delay:.3s}.bar:nth-child(4){height:90%;animation-delay:.45s;background:rgba(255,255,255,.7)}.bar:nth-child(5){height:65%;animation-delay:.6s}.bar:nth-child(6){height:45%;animation-delay:.75s}
+@keyframes barPulse{0%,100%{opacity:.6}50%{opacity:1}}
+.sql-lines{position:relative;z-index:2;font-family:monospace;font-size:.62rem;color:rgba(255,255,255,.55);line-height:1.7;text-align:left;padding:0 4px}
+.sql-lines .kw{color:#58a6ff}.sql-lines .fn{color:#d2a8ff}.sql-lines .num{color:#79c0ff}.sql-lines .hl{color:#fff;opacity:.9}
+.nodes{position:relative;z-index:2;display:flex;gap:10px;align-items:center}
+.node{width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.7);font-family:var(--fd);letter-spacing:.05em;animation:nodePulse 3s ease-in-out infinite}
+.node:nth-child(2){animation-delay:.5s}.node:nth-child(3){animation-delay:1s}
+.node-arrow{color:rgba(255,255,255,.3);font-size:.8rem}
+@keyframes nodePulse{0%,100%{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}50%{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5)}}
+.pipeline{position:relative;z-index:2;display:flex;flex-direction:column;gap:5px;font-family:monospace;font-size:.58rem}
+.pipe-step{padding:3px 8px;border-radius:3px;background:rgba(255,255,255,.1);border-left:2px solid rgba(255,255,255,.4);color:rgba(255,255,255,.7);animation:pipeFlow 2.5s ease-in-out infinite}
+.pipe-step:nth-child(2){animation-delay:.4s;border-left-color:#4ade80}.pipe-step:nth-child(3){animation-delay:.8s;border-left-color:#60a5fa}
+@keyframes pipeFlow{0%,100%{opacity:.5;transform:translateX(0)}50%{opacity:1;transform:translateX(3px)}}
+.play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .3s}
+.play-btn:hover{background:rgba(0,0,0,.15)}
+.play-circle{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:transform .2s,background .2s}
+.video-card:hover .play-circle{transform:scale(1.1);background:#fff}
+.play-icon{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:18px solid var(--ac);margin-left:4px}
+.duration{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;font-size:.7rem;font-weight:600;padding:2px 7px;border-radius:3px;font-family:var(--fd);letter-spacing:.05em;z-index:5}
+.cat-badge{position:absolute;top:10px;left:10px;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:rgba(37,99,235,.85);color:#fff;z-index:5}
+.cat-sql .cat-badge{background:rgba(15,52,96,.85)}.cat-dbt .cat-badge{background:rgba(33,38,45,.85)}.cat-etl .cat-badge{background:rgba(29,78,52,.85)}.cat-cloud .cat-badge{background:rgba(91,33,182,.85)}
+.soon-badge{position:absolute;top:10px;right:10px;background:rgba(245,158,11,.9);color:#fff;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;z-index:6}
+
+/* CARD BODY */
+.card-body{padding:20px 22px 22px}
+.card-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.card-author{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--t3);font-family:var(--fd)}
+.avatar{width:22px;height:22px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;font-family:var(--fd);flex-shrink:0}
+.card-level{margin-left:auto;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.card-title{font-family:var(--fe);font-size:1rem;font-weight:700;color:var(--t);line-height:1.3;margin-bottom:8px}
+.card-desc{font-size:.82rem;color:var(--t2);line-height:1.6;margin-bottom:14px}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+.tag{font-family:var(--fd);font-size:.6rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:var(--bg3);color:var(--t2)}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--bd)}
+.card-views{font-size:.75rem;color:var(--t3);font-family:var(--fd);display:flex;align-items:center;gap:5px}
+.watch-btn{font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border-radius:var(--r);background:var(--ac);color:#fff;transition:background .2s;border:none;cursor:pointer}
+.watch-btn:hover{background:var(--ac2)}
+.watch-btn.soon-btn{background:var(--bg3);color:var(--t3);cursor:default}
+.slides-btn{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:6px 12px;border-radius:var(--r);background:var(--bg3);color:var(--t2);border:1px solid var(--bd);text-decoration:none;transition:background .2s,color .2s;display:inline-flex;align-items:center;gap:4px}
+.slides-btn:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:6px;width:90%;max-width:760px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);animation:modalIn .3s cubic-bezier(.22,1,.36,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal-video{width:100%;aspect-ratio:16/9;background:#0a0a0a;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.modal-video iframe{width:100%;height:100%;border:none}
+.modal-placeholder{display:flex;flex-direction:column;align-items:center;gap:16px;color:rgba(255,255,255,.5);font-family:var(--fd);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:2rem}
+.modal-placeholder svg{opacity:.3}
+.embed-hint{font-size:.65rem;color:rgba(255,255,255,.35);font-family:monospace;letter-spacing:.05em;margin-top:4px}
+.modal-info{padding:22px 26px 24px}
+.modal-title{font-family:var(--fe);font-size:1.25rem;font-weight:700;color:var(--t);margin-bottom:6px}
+.modal-desc{font-size:.88rem;color:var(--t2);line-height:1.65;margin-bottom:16px}
+.modal-embed-label{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.modal-embed-code{background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:12px 14px;font-family:monospace;font-size:.72rem;color:var(--t2);word-break:break-all;margin-bottom:14px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;align-items:center}
+.btn-copy{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r);background:var(--ac);color:#fff;border:none;cursor:pointer;transition:background .2s}
+.btn-copy:hover{background:var(--ac2)}.btn-copy.copied{background:#16a34a}
+.btn-yt{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r);background:#ff0000;color:#fff;border:none;cursor:pointer;transition:opacity .2s;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.btn-yt:hover{opacity:.88}
+.btn-slides{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r);background:var(--ac);color:#fff;border:none;cursor:pointer;transition:opacity .2s;text-decoration:none;align-items:center;gap:.4rem}
+.btn-slides:hover{opacity:.85}
+.btn-close{font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r);background:none;color:var(--t2);border:1px solid var(--bd);cursor:pointer;transition:border-color .2s;margin-left:auto}
+.btn-close:hover{border-color:var(--t2)}
+
+/* CTA STRIP */
+.yt-cta{background:var(--ac);padding:60px 0;text-align:center}
+.yt-cta h2{font-family:var(--fe);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:700;color:#fff;margin-bottom:.75rem}
+.yt-cta p{font-size:.9rem;color:rgba(255,255,255,.65);margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7}
+.btn-yt-big{display:inline-flex;align-items:center;gap:.6rem;background:#ff0000;color:#fff;padding:.8rem 2rem;border-radius:var(--r);font-family:var(--fd);font-size:.88rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}
+.btn-yt-big:hover{opacity:.88}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}
+.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}
+.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}
+.ft-col ul li{margin-bottom:.5rem}
+.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="blog.html">Blog</a>
+      <a href="video-tutoriales.html" class="active">V&iacute;deos</a>
+      <a href="ia-tools.html">IA Tools</a>
+      <a href="sobre-mi.html">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="ia-tools.html">IA Tools</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="ph-bg iz">
+    <img src="https://images.unsplash.com/photo-1536240478700-b869ad10f6b2?w=1400&auto=format&fit=crop&q=80" alt="Tutoriales en vídeo de Data Engineering">
+  </div>
+  <div class="ph-overlay">
+    <div class="cnt">
+      <span class="ph-label rv">Formaci&oacute;n gratuita</span>
+      <h1 class="ph-title rv d1">Tutoriales en V&iacute;deo</h1>
+      <p class="ph-sub rv d2">Demos y tutoriales t&eacute;cnicos sobre Power BI, SQL, dbt, Airflow y arquitecturas cloud. C&oacute;digo real de proyectos en producci&oacute;n — sin relleno.</p>
+      <a href="https://www.youtube.com/@DataKitAcademy" target="_blank" rel="noopener" class="ph-yt-link rv d3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4444"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.9C6.8 19 12 19 12 19s4.8 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.8 14.5v-5.5l5.4 2.8-5.4 2.7z"/></svg>
+        Suscribirse al canal &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- VÍDEOS -->
+<section class="sec-white">
+  <div class="cnt">
+
+    <div class="vf-row rv">
+      <button class="vf on" data-cat="all">Todos</button>
+      <button class="vf" data-cat="bi">Power BI</button>
+      <button class="vf" data-cat="sql">SQL</button>
+      <button class="vf" data-cat="dbt">dbt</button>
+      <button class="vf" data-cat="etl">ETL / ELT</button>
+      <button class="vf" data-cat="cloud">Cloud</button>
+    </div>
+
+    <div class="video-grid" id="videoGrid"></div>
+
+  </div>
+</section>
+
+<!-- CTA SUSCRIPCIÓN -->
+<div class="yt-cta">
+  <div class="cnt">
+    <h2 class="rv">Nuevo v&iacute;deo cada semana</h2>
+    <p class="rv d1">S&uacute;scr&iacute;bete al canal para no perderte los pr&oacute;ximos tutoriales sobre Power BI, dbt, SQL avanzado y arquitecturas cloud.</p>
+    <a href="https://www.youtube.com/@DataKitAcademy" target="_blank" rel="noopener" class="btn-yt-big rv d2">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.9C6.8 19 12 19 12 19s4.8 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.8 14.5v-5.5l5.4 2.8-5.4 2.7z"/></svg>
+      Suscribirse en YouTube
+    </a>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-video" id="modalVideo"></div>
+    <div class="modal-info">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-embed-label">C&oacute;digo embed para tu web:</div>
+      <div class="modal-embed-code" id="modalEmbed"></div>
+      <div class="modal-actions">
+        <button class="btn-copy" id="btnCopy">📋 Copiar embed</button>
+        <a class="btn-yt" id="btnYt" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.9C6.8 19 12 19 12 19s4.8 0 7-.2c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.8 14.5v-5.5l5.4 2.8-5.4 2.7z"/></svg>
+          Ver en YouTube
+        </a>
+        <a class="btn-slides" id="btnSlides" href="#" target="_blank" rel="noopener" style="display:none">
+          📊 Ver slides
+        </a>
+        <button class="btn-close" id="btnClose">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+          <a href="https://www.youtube.com/@DataKitAcademy" target="_blank" class="ft-link">YouTube</a>
+        </div>
+      </div>
+      <div class="ft-col"><h4>Recursos</h4><ul><li><a href="productos.html">Power BI Templates</a></li><li><a href="productos.html">SQL Pack</a></li><li><a href="productos.html">dbt Starter</a></li><li><a href="productos.html">Cursos</a></li></ul></div>
+      <div class="ft-col"><h4>Contenido</h4><ul><li><a href="blog.html">Blog</a></li><li><a href="video-tutoriales.html">V&iacute;deos</a></li><li><a href="productos.html">SQL Cheatsheet gratis</a></li></ul></div>
+      <div class="ft-col"><h4>P&aacute;ginas</h4><ul><li><a href="sobre-mi.html">Sobre m&iacute;</a></li><li><a href="contacto.html">Contacto</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p></div>
+  </div>
+</footer>
+
+<script>
+// ── DATOS DE VÍDEOS ─────────────────────────────────────────────────────────
+// Para añadir tu vídeo de YouTube: sustituye VIDEO_ID_XXX por el ID real del vídeo
+// Ejemplo: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" → el ID es "dQw4w9WgXcQ"
+// ─────────────────────────────────────────────────────────────────────────────
+const videos = [
+  {
+    id: "v001", cat: "bi", catLabel: "Power BI",
+    titulo: "Dashboard Financiero en Power BI desde cero",
+    desc: "Construyo un P&L completo con DAX avanzado, Row Level Security por departamento y conexión DirectQuery a SQL Server. El mismo modelo que entrego a clientes enterprise.",
+    duracion: "42 min", nivel: "Intermedio",
+    tags: ["Power BI", "DAX", "DirectQuery", "RLS"],
+    vistas: null,
+    youtubeId: "VIDEO_ID_001",  // ← reemplaza con tu ID real
+    slidesUrl: "slides/powerbi-finanzas.html",
+    thumbContent: `<div class="bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>`
+  },
+  {
+    id: "v002", cat: "sql", catLabel: "SQL",
+    titulo: "Window Functions que todo Data Analyst debe dominar",
+    desc: "ROW_NUMBER, RANK, LAG, LEAD, NTILE y PERCENT_RANK con 15 casos de uso reales: cohortes, running totals, churn detection y ranking de ventas. Compatible BigQuery, Snowflake y Postgres.",
+    duracion: "28 min", nivel: "Avanzado",
+    tags: ["SQL", "BigQuery", "Snowflake", "Analytics"],
+    vistas: null,
+    youtubeId: "VIDEO_ID_002",  // ← reemplaza con tu ID real
+    slidesUrl: "slides/sql-window-functions.html",
+    thumbContent: `<div class="sql-lines"><span class="kw">SELECT</span> <span class="hl">revenue</span>,<br>&nbsp;&nbsp;<span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>(<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">PARTITION BY</span> dept<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span><br>&nbsp;&nbsp;) <span class="kw">AS</span> rnk<br><span class="kw">FROM</span> sales_fact</div>`
+  },
+  {
+    id: "v003", cat: "dbt", catLabel: "dbt",
+    titulo: "Arquitectura Medallion con dbt + BigQuery",
+    desc: "Monta un proyecto dbt completo con capas Bronze → Silver → Gold. Incluye macros reutilizables, tests genéricos y custom, seeds para lookup tables y documentación automática.",
+    duracion: "55 min", nivel: "Avanzado",
+    tags: ["dbt", "BigQuery", "Medallion", "GCP"],
+    vistas: null,
+    youtubeId: "VIDEO_ID_003",  // ← reemplaza con tu ID real
+    localVideoSrc: "slides/Pipelines_de_Datos_Modernos.mp4",
+    slidesUrl: "slides/dbt-medallion-bigquery.html",
+    thumbContent: `<div class="nodes"><div class="node">RAW</div><span class="node-arrow">→</span><div class="node">STG</div><span class="node-arrow">→</span><div class="node">MART</div></div>`
+  },
+  {
+    id: "v004", cat: "etl", catLabel: "ETL / ELT",
+    titulo: "Pipelines ELT con Apache Airflow paso a paso",
+    desc: "DAGs de producción con Airflow 2.x: sensores, XComs, retries con backoff, alertas por email y Slack. Ejemplo real migrando datos de Salesforce → BigQuery con CDC incremental.",
+    duracion: "38 min", nivel: "Intermedio",
+    tags: ["Airflow", "ELT", "Salesforce", "CDC"],
+    vistas: null,
+    youtubeId: "VIDEO_ID_004",  // ← reemplaza con tu ID real
+    localVideoSrc: "slides/Superpoderes_de_Airflow.mp4",
+    slidesUrl: null,
+    thumbContent: `<div class="pipeline"><div class="pipe-step">① Extract — Salesforce API</div><div class="pipe-step">② Transform — dbt models</div><div class="pipe-step">③ Load — BigQuery MERGE</div></div>`
+  },
+  {
+    id: "v005", cat: "cloud", catLabel: "Cloud",
+    titulo: "Snowflake vs BigQuery: ¿cuál elegir en 2026?",
+    desc: "Comparativa técnica sin filtros basada en proyectos reales: coste por query, concurrencia, clustering automático, Time Travel, y cuándo cada plataforma gana claramente a la otra.",
+    duracion: "22 min", nivel: "Todos los niveles",
+    tags: ["Snowflake", "BigQuery", "Cloud DWH", "Costes"],
+    vistas: null,
+    youtubeId: "VIDEO_ID_005",  // ← reemplaza con tu ID real
+    localVideoSrc: "slides/La_Guerra_de_Datos_se_Deshiela.mp4",
+    slidesUrl: "slides/elt_airflow_autopresentation.html",
+    thumbContent: `<div class="nodes"><div class="node" style="background:rgba(37,99,235,.3);border-color:rgba(37,99,235,.6)">BQ</div><span class="node-arrow" style="font-size:1.2rem;color:rgba(255,255,255,.5)">vs</span><div class="node" style="background:rgba(139,92,246,.3);border-color:rgba(139,92,246,.6)">SF</div></div>`
+  }
+];
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+let currentCat = 'all';
+
+function isRealVideo(id) {
+  return id && !id.startsWith('VIDEO_ID_');
+}
+
+function renderCards() {
+  const grid = document.getElementById('videoGrid');
+  const filtered = currentCat === 'all' ? videos : videos.filter(v => v.cat === currentCat);
+  grid.innerHTML = filtered.map((v, i) => {
+    const real = isRealVideo(v.youtubeId);
+    const hasLocal = !!v.localVideoSrc;
+    const clickable = real || hasLocal;
+    const vistasTxt = v.vistas ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${v.vistas} vistas` : (hasLocal ? '🎬 Ver vídeo' : '🎬 Próximamente');
+    return `
+    <div class="video-card cat-${v.cat} rv${i>0?' d'+Math.min(i,3):''}" data-id="${v.id}">
+      <div class="thumb"${clickable ? ` onclick="openModal('${v.id}')" style="cursor:pointer"` : ''}>
+        <div class="thumb-bg">
+          <div class="thumb-grid"></div>
+          ${v.thumbContent}
+        </div>
+        <span class="cat-badge">${v.catLabel}</span>
+        <span class="duration">${v.duracion}</span>
+        ${(!real && !hasLocal) ? '<span class="soon-badge">Próximamente</span>' : ''}
+        ${clickable ? '<div class="play-btn"><div class="play-circle"><div class="play-icon"></div></div></div>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <div class="card-author"><div class="avatar">AM</div>Antonio Moro</div>
+          <span class="card-level">${v.nivel}</span>
+        </div>
+        <div class="card-title">${v.titulo}</div>
+        <div class="card-desc">${v.desc}</div>
+        <div class="card-tags">${v.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <span class="card-views">${vistasTxt}</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${v.slidesUrl ? `<a href="${v.slidesUrl}" target="_blank" class="slides-btn" title="Ver presentación de slides">📊 Slides</a>` : ''}
+            <button class="watch-btn${(!real && !hasLocal)?' soon-btn':''}" ${clickable ? `onclick="openModal('${v.id}')"` : 'disabled'}>${hasLocal ? '▶ Ver vídeo' : (real ? 'Ver tutorial →' : 'En breve')}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  // Re-observe new elements
+  grid.querySelectorAll('.rv').forEach(el => ro.observe(el));
+}
+
+// ── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const v = videos.find(x => x.id === id);
+  if (!v) return;
+  const real = isRealVideo(v.youtubeId);
+  document.getElementById('modalTitle').textContent = v.titulo;
+  document.getElementById('modalDesc').textContent = v.desc;
+
+  if (v.localVideoSrc) {
+    document.getElementById('modalVideo').innerHTML =
+      `<video src="${v.localVideoSrc}" controls autoplay style="width:100%;height:100%;object-fit:contain;background:#000"></video>`;
+    document.getElementById('btnYt').style.display = 'none';
+    const btnSl = document.getElementById('btnSlides');
+    if (v.slidesUrl) { btnSl.href = v.slidesUrl; btnSl.style.display = 'inline-flex'; }
+    else { btnSl.style.display = 'none'; }
+  } else if (real) {
+    document.getElementById('modalVideo').innerHTML =
+      `<iframe src="https://www.youtube.com/embed/${v.youtubeId}?autoplay=1" title="${v.titulo}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    document.getElementById('btnYt').href = `https://www.youtube.com/watch?v=${v.youtubeId}`;
+    document.getElementById('btnYt').style.display = 'inline-flex';
+    const btnSl = document.getElementById('btnSlides');
+    if (v.slidesUrl) { btnSl.href = v.slidesUrl; btnSl.style.display = 'inline-flex'; }
+    else { btnSl.style.display = 'none'; }
+  } else {
+    document.getElementById('modalVideo').innerHTML = `
+      <div class="modal-placeholder">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <div>Vídeo próximamente en YouTube<br>
+        <span class="embed-hint">Sustituye youtubeId en el array videos[] con tu ID real</span></div>
+      </div>`;
+    document.getElementById('btnYt').style.display = 'none';
+    const btnSl2 = document.getElementById('btnSlides');
+    if (v.slidesUrl) { btnSl2.href = v.slidesUrl; btnSl2.style.display = 'inline-flex'; }
+    else { btnSl2.style.display = 'none'; }
+  }
+
+  const embedCode = `<iframe width="560" height="315"\n  src="https://www.youtube.com/embed/${v.youtubeId}"\n  title="${v.titulo}"\n  frameborder="0"\n  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"\n  allowfullscreen>\n</iframe>`;
+  document.getElementById('modalEmbed').textContent = embedCode;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const mv = document.getElementById('modalVideo');
+  mv.innerHTML = ''; // stop video playback
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('btnCopy').textContent = '📋 Copiar embed';
+  document.getElementById('btnCopy').classList.remove('copied');
+}
+
+document.getElementById('btnClose').onclick = closeModal;
+document.getElementById('modal').onclick = e => { if (e.target === e.currentTarget) closeModal(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+document.getElementById('btnCopy').onclick = function() {
+  navigator.clipboard.writeText(document.getElementById('modalEmbed').textContent).then(() => {
+    this.textContent = '✅ ¡Copiado!';
+    this.classList.add('copied');
+    setTimeout(() => { this.textContent = '📋 Copiar embed'; this.classList.remove('copied'); }, 2500);
+  });
+};
+
+// ── FILTERS ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.vf').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.vf').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    currentCat = btn.dataset.cat;
+    renderCards();
+  });
+});
+
+// ── SCROLL / NAV ────────────────────────────────────────────────────────────
+const ro = new IntersectionObserver(e => e.forEach(v => {
+  if (v.isIntersecting) { v.target.classList.add('in'); ro.unobserve(v.target); }
+}), {threshold: .08, rootMargin: '0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el => ro.observe(el));
+
+const zo = new IntersectionObserver(e => e.forEach(v => {
+  if (v.isIntersecting) { v.target.classList.add('iz-in'); zo.unobserve(v.target); }
+}), {threshold: .06});
+document.querySelectorAll('.iz').forEach(el => zo.observe(el));
+
+window.addEventListener('scroll', () => document.querySelector('.hdr').classList.toggle('scrolled', window.scrollY > 20));
+document.getElementById('mbtn')?.addEventListener('click', () => document.getElementById('mnav').classList.toggle('open'));
+
+renderCards();
+</script>
+</body>
+</html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;
+  --t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;
+  --ac:#0f1f40;--ac2:#1a3a6b;--blue:#2563eb;
+  --bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);
+  --r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);
+  --fb:'Inter','Segoe UI',system-ui,sans-serif;
+  --fe:'Playfair Display',Georgia,serif;
+  --fd:'Syne','Arial Black',sans-serif
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);line-height:1.65}
+a{text-decoration:none;color:inherit}
+
+/* ── SECTION ── */
+.videos-section{padding:100px 0;background:var(--bg2)}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+.sec-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:.75rem}
+.sec-title{font-family:var(--fe);font-size:clamp(2rem,4vw,2.75rem);font-weight:700;color:var(--t);line-height:1.2}
+.sec-sub{font-size:.95rem;color:var(--t2);margin-top:.75rem;max-width:560px;line-height:1.7}
+.section-head{margin-bottom:56px}
+
+/* ── GRID ── */
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:900px){.video-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.video-grid{grid-template-columns:1fr}}
+
+/* ── CARD ── */
+.video-card{
+  background:#fff;
+  border:1px solid var(--bd);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--s);
+  transition:box-shadow .3s,transform .3s;
+  cursor:pointer;
+}
+.video-card:hover{box-shadow:var(--s2);transform:translateY(-4px)}
+
+/* ── THUMBNAIL ── */
+.thumb{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  overflow:hidden;
+}
+.thumb-bg{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+
+/* Diferentes gradientes por categoría */
+.cat-bi    .thumb-bg{background:linear-gradient(135deg,#0f1f40 0%,#1a3a6b 50%,#2563eb 100%)}
+.cat-sql   .thumb-bg{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+.cat-dbt   .thumb-bg{background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#21262d 100%)}
+.cat-etl   .thumb-bg{background:linear-gradient(135deg,#1e3a5f 0%,#2d6a4f 50%,#1b4332 100%)}
+.cat-cloud .thumb-bg{background:linear-gradient(135deg,#0f1f40 0%,#5b21b6 50%,#7c3aed 100%)}
+
+/* Grid animado de fondo */
+.thumb-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+
+/* Barras de gráfico animadas */
+.bars{
+  display:flex;align-items:flex-end;gap:5px;height:54px;
+  position:relative;z-index:2;
+}
+.bar{
+  width:10px;border-radius:2px 2px 0 0;
+  background:rgba(255,255,255,.35);
+  animation:barPulse 2s ease-in-out infinite;
+}
+.bar:nth-child(1){height:40%;animation-delay:0s}
+.bar:nth-child(2){height:75%;animation-delay:.15s}
+.bar:nth-child(3){height:55%;animation-delay:.3s}
+.bar:nth-child(4){height:90%;animation-delay:.45s;background:rgba(255,255,255,.7)}
+.bar:nth-child(5){height:65%;animation-delay:.6s}
+.bar:nth-child(6){height:45%;animation-delay:.75s}
+@keyframes barPulse{
+  0%,100%{opacity:.6}
+  50%{opacity:1}
+}
+
+/* SQL lines animadas */
+.sql-lines{
+  position:relative;z-index:2;
+  font-family:monospace;font-size:.62rem;
+  color:rgba(255,255,255,.55);
+  line-height:1.7;
+  text-align:left;
+  padding:0 4px;
+}
+.sql-lines .kw{color:#58a6ff}
+.sql-lines .fn{color:#d2a8ff}
+.sql-lines .num{color:#79c0ff}
+.sql-lines .hl{color:#fff;opacity:.9}
+
+/* Nodes animados para dbt/cloud */
+.nodes{
+  position:relative;z-index:2;
+  display:flex;gap:10px;align-items:center;
+}
+.node{
+  width:38px;height:38px;border-radius:8px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;font-weight:700;color:rgba(255,255,255,.7);
+  font-family:var(--fd);letter-spacing:.05em;
+  animation:nodePulse 3s ease-in-out infinite;
+}
+.node:nth-child(2){animation-delay:.5s}
+.node:nth-child(3){animation-delay:1s}
+.node-arrow{color:rgba(255,255,255,.3);font-size:.8rem}
+@keyframes nodePulse{
+  0%,100%{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+  50%{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5)}
+}
+
+/* Pipeline flow */
+.pipeline{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;gap:5px;
+  font-family:monospace;font-size:.58rem;
+}
+.pipe-step{
+  padding:3px 8px;border-radius:3px;
+  background:rgba(255,255,255,.1);
+  border-left:2px solid rgba(255,255,255,.4);
+  color:rgba(255,255,255,.7);
+  animation:pipeFlow 2.5s ease-in-out infinite;
+}
+.pipe-step:nth-child(2){animation-delay:.4s;border-left-color:#4ade80}
+.pipe-step:nth-child(3){animation-delay:.8s;border-left-color:#60a5fa}
+@keyframes pipeFlow{
+  0%,100%{opacity:.5;transform:translateX(0)}
+  50%{opacity:1;transform:translateX(3px)}
+}
+
+/* Play button */
+.play-btn{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  z-index:10;
+  transition:background .3s;
+}
+.play-btn:hover{background:rgba(0,0,0,.15)}
+.play-circle{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,.92);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  transition:transform .2s,background .2s;
+}
+.video-card:hover .play-circle{transform:scale(1.1);background:#fff}
+.play-icon{
+  width:0;height:0;
+  border-top:11px solid transparent;
+  border-bottom:11px solid transparent;
+  border-left:18px solid var(--ac);
+  margin-left:4px;
+}
+
+/* Duration badge */
+.duration{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(0,0,0,.7);
+  color:#fff;font-size:.7rem;font-weight:600;
+  padding:2px 7px;border-radius:3px;
+  font-family:var(--fd);letter-spacing:.05em;
+  z-index:5;
+}
+
+/* Category badge */
+.cat-badge{
+  position:absolute;top:10px;left:10px;
+  font-family:var(--fd);font-size:.6rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;
+  background:rgba(37,99,235,.85);color:#fff;
+  z-index:5;
+}
+.cat-sql .cat-badge{background:rgba(15,52,96,.85)}
+.cat-dbt .cat-badge{background:rgba(33,38,45,.85)}
+.cat-etl .cat-badge{background:rgba(29,78,52,.85)}
+.cat-cloud .cat-badge{background:rgba(91,33,182,.85)}
+
+/* ── CARD BODY ── */
+.card-body{padding:20px 22px 22px}
+.card-meta{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:10px;
+}
+.card-author{
+  display:flex;align-items:center;gap:6px;
+  font-size:.75rem;color:var(--t3);font-family:var(--fd);
+}
+.avatar{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--ac);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.55rem;font-weight:700;color:#fff;font-family:var(--fd);
+  flex-shrink:0;
+}
+.card-level{
+  margin-left:auto;
+  font-family:var(--fd);font-size:.6rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--t3);
+}
+.card-title{
+  font-family:var(--fe);font-size:1rem;font-weight:700;
+  color:var(--t);line-height:1.3;margin-bottom:8px;
+}
+.card-desc{
+  font-size:.82rem;color:var(--t2);line-height:1.6;
+  margin-bottom:14px;
+}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+.tag{
+  font-family:var(--fd);font-size:.6rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;
+  background:var(--bg3);color:var(--t2);
+}
+.card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:14px;border-top:1px solid var(--bd);
+}
+.card-views{
+  font-size:.75rem;color:var(--t3);font-family:var(--fd);
+  display:flex;align-items:center;gap:5px;
+}
+.watch-btn{
+  font-family:var(--fd);font-size:.72rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:7px 16px;border-radius:var(--r);
+  background:var(--ac);color:#fff;
+  transition:background .2s;border:none;cursor:pointer;
+}
+.watch-btn:hover{background:var(--ac2)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.82);z-index:1000;
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:#fff;border-radius:6px;
+  width:90%;max-width:720px;
+  overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);
+  animation:modalIn .3s cubic-bezier(.22,1,.36,1);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal-video{
+  width:100%;aspect-ratio:16/9;
+  background:#0a0a0a;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.modal-placeholder{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  color:rgba(255,255,255,.5);
+  font-family:var(--fd);font-size:.75rem;
+  letter-spacing:.1em;text-transform:uppercase;
+  text-align:center;padding:2rem;
+}
+.modal-placeholder svg{opacity:.3}
+.embed-hint{
+  font-size:.65rem;color:rgba(255,255,255,.35);
+  font-family:monospace;letter-spacing:.05em;margin-top:4px;
+}
+.modal-info{padding:22px 26px 24px}
+.modal-title{font-family:var(--fe);font-size:1.25rem;font-weight:700;color:var(--t);margin-bottom:6px}
+.modal-desc{font-size:.88rem;color:var(--t2);line-height:1.65;margin-bottom:16px}
+.modal-embed-code{
+  background:var(--bg3);border:1px solid var(--bd);
+  border-radius:4px;padding:12px 14px;
+  font-family:monospace;font-size:.72rem;color:var(--t2);
+  word-break:break-all;margin-bottom:14px;
+  line-height:1.6;
+}
+.modal-actions{display:flex;gap:10px;align-items:center}
+.btn-copy{
+  font-family:var(--fd);font-size:.7rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 18px;border-radius:var(--r);
+  background:var(--ac);color:#fff;border:none;cursor:pointer;
+  transition:background .2s;
+}
+.btn-copy:hover{background:var(--ac2)}
+.btn-copy.copied{background:#16a34a}
+.btn-close{
+  font-family:var(--fd);font-size:.7rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 18px;border-radius:var(--r);
+  background:none;color:var(--t2);border:1px solid var(--bd);
+  cursor:pointer;transition:border-color .2s;
+  margin-left:auto;
+}
+.btn-close:hover{border-color:var(--t2)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SECCIÓN PRINCIPAL — lista para pegar en cualquier página
+     ═══════════════════════════════════════════ -->
+<section class="videos-section">
+  <div class="cnt">
+
+    <div class="section-head">
+      <span class="sec-label">Free Content</span>
+      <h2 class="sec-title">Tutoriales en vídeo<br>para Data Engineers &amp; BI Pros</h2>
+      <p class="sec-sub">Formación técnica gratuita. Cada tutorial cubre casos reales que he resuelto en proyectos de Fortune 500. Sin relleno, directo al grano.</p>
+    </div>
+
+    <div class="video-grid" id="videoGrid"></div>
+
+  </div>
+</section>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-video" id="modalVideo"></div>
+    <div class="modal-info">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Código embed para tu web:</div>
+      <div class="modal-embed-code" id="modalEmbed"></div>
+      <div class="modal-actions">
+        <button class="btn-copy" id="btnCopy">📋 Copiar embed</button>
+        <button class="btn-close" id="btnClose">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const videos = [
+  {
+    id: "v001",
+    cat: "bi",
+    catLabel: "Power BI",
+    titulo: "Dashboard Financiero en Power BI desde cero",
+    desc: "Construyo un P&L completo con DAX avanzado, Row Level Security por departamento y conexión DirectQuery a SQL Server. El mismo modelo que entrego a mis clientes enterprise.",
+    duracion: "42 min",
+    nivel: "Intermedio",
+    tags: ["Power BI", "DAX", "DirectQuery", "RLS"],
+    vistas: "12.4K",
+    embedSrc: "https://www.youtube.com/embed/VIDEO_ID_001",
+    thumb: "bi",
+    tutorialUrl: "videos/tutorial-01-powerbi-completo.html",
+    slidesUrl: "slides/powerbi-finanzas.html",
+    thumbContent: `
+      <div class="bars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      </div>`
+  },
+  {
+    id: "v002",
+    cat: "sql",
+    catLabel: "SQL",
+    titulo: "Window Functions que todo Data Analyst debe dominar",
+    desc: "ROW_NUMBER, RANK, LAG, LEAD, NTILE y PERCENT_RANK con 15 casos de uso reales: cohortes, running totals, churn detection y ranking de ventas. Compatible BigQuery, Snowflake y Postgres.",
+    duracion: "28 min",
+    nivel: "Avanzado",
+    tags: ["SQL", "BigQuery", "Snowflake", "Analytics"],
+    vistas: "8.9K",
+    embedSrc: "https://www.youtube.com/embed/VIDEO_ID_002",
+    thumb: "sql",
+    thumbContent: `
+      <div class="sql-lines">
+        <span class="kw">SELECT</span> <span class="hl">revenue</span>,<br>
+        &nbsp;&nbsp;<span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span>(<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">PARTITION BY</span> dept<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span><br>
+        &nbsp;&nbsp;) <span class="kw">AS</span> rnk<br>
+        <span class="kw">FROM</span> sales_fact
+      </div>`
+  },
+  {
+    id: "v003",
+    cat: "dbt",
+    catLabel: "dbt",
+    titulo: "Arquitectura Medallion con dbt + BigQuery",
+    desc: "Monta un proyecto dbt completo con capas Bronze → Silver → Gold. Incluye macros reutilizables, tests genéricos y custom, seeds para lookup tables y documentación automática.",
+    duracion: "55 min",
+    nivel: "Avanzado",
+    tags: ["dbt", "BigQuery", "Medallion", "GCP"],
+    vistas: "6.2K",
+    embedSrc: "https://www.youtube.com/embed/VIDEO_ID_003",
+    thumb: "dbt",
+    thumbContent: `
+      <div class="nodes">
+        <div class="node">RAW</div>
+        <span class="node-arrow">→</span>
+        <div class="node">STG</div>
+        <span class="node-arrow">→</span>
+        <div class="node">MART</div>
+      </div>`
+  },
+  {
+    id: "v004",
+    cat: "etl",
+    catLabel: "ETL / ELT",
+    titulo: "Pipelines ELT con Apache Airflow paso a paso",
+    desc: "DAGs de producción con Airflow 2.x: sensores, XComs, retries con backoff, alertas por email y Slack. Ejemplo real migrando datos de Salesforce → BigQuery con CDC incremental.",
+    duracion: "38 min",
+    nivel: "Intermedio",
+    tags: ["Airflow", "ELT", "Salesforce", "CDC"],
+    vistas: "5.7K",
+    embedSrc: "https://www.youtube.com/embed/VIDEO_ID_004",
+    thumb: "etl",
+    thumbContent: `
+      <div class="pipeline">
+        <div class="pipe-step">① Extract — Salesforce API</div>
+        <div class="pipe-step">② Transform — dbt models</div>
+        <div class="pipe-step">③ Load — BigQuery MERGE</div>
+      </div>`
+  },
+  {
+    id: "v005",
+    cat: "cloud",
+    catLabel: "Cloud",
+    titulo: "Snowflake vs BigQuery: ¿cuál elegir en 2026?",
+    desc: "Comparativa técnica sin filtros basada en proyectos reales: coste por query, concurrencia, clustering automático, Time Travel, y cuándo cada plataforma gana claramente a la otra.",
+    duracion: "22 min",
+    nivel: "Todos los niveles",
+    tags: ["Snowflake", "BigQuery", "Cloud DWH", "Costes"],
+    vistas: "18.1K",
+    embedSrc: "https://www.youtube.com/embed/VIDEO_ID_005",
+    localVideoSrc: "slides/La_Guerra_de_Datos_se_Deshiela.mp4",
+    slidesUrl: "slides/elt_airflow_autopresentation.html",
+    thumb: "cloud",
+    thumbContent: `
+      <div class="nodes">
+        <div class="node" style="background:rgba(37,99,235,.3);border-color:rgba(37,99,235,.6);">BQ</div>
+        <span class="node-arrow" style="font-size:1.2rem;color:rgba(255,255,255,.5);">vs</span>
+        <div class="node" style="background:rgba(139,92,246,.3);border-color:rgba(139,92,246,.6);">SF</div>
+      </div>`
+  }
+];
+
+// ── RENDER CARDS ──────────────────────────────────────────────────
+function isRealVideo(id){ return id && !id.startsWith('VIDEO_ID_'); }
+
+function renderCards(){
+  const grid = document.getElementById('videoGrid');
+  const active = document.querySelector('.vf.active')?.dataset.cat || 'all';
+  const filtered = active === 'all' ? videos : videos.filter(v => v.cat === active);
+  grid.innerHTML = filtered.map((v,i) => {
+    const real = isRealVideo(v.youtubeId);
+    const vistasTxt = v.vistas
+      ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${v.vistas} vistas`
+      : '🎬 Próximamente';
+    const hasTutorial = !!v.tutorialUrl;
+    const slidesBtnHtml = v.slidesUrl
+      ? `<a href="${v.slidesUrl}" target="_blank" class="slides-btn" onclick="event.stopPropagation()" title="Ver presentación">📊 Slides</a>`
+      : '';
+    const watchLabel = hasTutorial ? '▶ Ver presentación' : (real ? 'Ver tutorial →' : 'En breve');
+    const watchClass = hasTutorial ? 'watch-btn' : `watch-btn${!real?' soon-btn':''}`;
+    const cardClick  = hasTutorial ? `window.open('${v.tutorialUrl}','_blank')` : `openModal(${i})`;
+    return `
+    <div class="video-card cat-${v.cat}" data-idx="${i}" onclick="${cardClick}" style="${hasTutorial?'cursor:pointer':''}">
+      <div class="thumb">
+        <div class="thumb-bg">
+          <div class="thumb-grid"></div>
+          ${v.thumbContent}
+        </div>
+        <span class="cat-badge">${v.catLabel}</span>
+        <span class="duration">${v.duracion}</span>
+        ${hasTutorial ? '<span style="position:absolute;top:.6rem;left:.6rem;background:linear-gradient(90deg,#2563eb,#06b6d4);color:#fff;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border-radius:2px">🎙️ Con narración</span>' : (!real ? '<span style="position:absolute;top:.6rem;left:.6rem;background:var(--ac);color:#fff;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .55rem;border-radius:2px">Próximamente</span>' : '')}
+        <div class="play-btn">
+          <div class="play-circle"><div class="play-icon"></div></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <div class="card-author">
+            <div class="avatar">AM</div>
+            Antonio Moro
+          </div>
+          <span class="card-level">${v.nivel}</span>
+        </div>
+        <div class="card-title">${v.titulo}</div>
+        <div class="card-desc">${v.desc}</div>
+        <div class="card-tags">${v.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <span class="card-views">${vistasTxt}</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${slidesBtnHtml}
+            <button class="${watchClass}" onclick="event.stopPropagation();${cardClick}">${watchLabel}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+const thumbnailInModal = (v) => `
+  <div class="modal-placeholder">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+      <polygon points="5 3 19 12 5 21 5 3"/>
+    </svg>
+    <div>Aquí irá tu vídeo de YouTube / Vimeo<br>
+    <span class="embed-hint">Sustituye VIDEO_ID en el código embed por tu ID real</span></div>
+  </div>`;
+
+function openModal(idx){
+  const v = videos[idx];
+  if (!v) return;
+  const real = isRealVideo(v.youtubeId);
+  document.getElementById('modalTitle').textContent = v.titulo;
+  document.getElementById('modalDesc').textContent = v.desc;
+
+  if (real) {
+    document.getElementById('modalVideo').innerHTML =
+      `<iframe src="https://www.youtube.com/embed/${v.youtubeId}?autoplay=1" title="${v.titulo}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    document.getElementById('btnYt').href = `https://www.youtube.com/watch?v=${v.youtubeId}`;
+    document.getElementById('btnYt').style.display = 'inline-flex';
+  } else {
+    document.getElementById('modalVideo').innerHTML = thumbnailInModal(v);
+    document.getElementById('btnYt').style.display = 'none';
+  }
+
+  const btnSl = document.getElementById('btnSlides');
+  if (v.slidesUrl) { btnSl.href = v.slidesUrl; btnSl.style.display = 'inline-flex'; }
+  else { btnSl.style.display = 'none'; }
+
+  const embedCode = `<iframe width="560" height="315"\n  src="https://www.youtube.com/embed/${v.youtubeId}"\n  title="${v.titulo}"\n  frameborder="0"\n  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"\n  allowfullscreen>\n</iframe>`;
+  document.getElementById('modalEmbed').textContent = embedCode;
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('btnCopy').textContent = '📋 Copiar embed';
+  document.getElementById('btnCopy').classList.remove('copied');
+}
+
+document.getElementById('btnClose').onclick = closeModal;
+document.getElementById('modal').onclick = (e)=>{ if(e.target===e.currentTarget) closeModal(); };
+
+document.getElementById('btnCopy').onclick = function(){
+  const code = document.getElementById('modalEmbed').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    this.textContent = '✅ ¡Copiado!';
+    this.classList.add('copied');
+    setTimeout(()=>{ this.textContent='📋 Copiar embed'; this.classList.remove('copied'); }, 2500);
+  });
+};
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+renderCards();
+</script>
+</body>
+</html>

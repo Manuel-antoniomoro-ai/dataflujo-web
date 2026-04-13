@@ -1,0 +1,516 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Blog técnico DataFlujo: artículos de Data Engineering, BI, SQL, dbt y Cloud por Antonio Moro.">
+<title>Blog — DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* ANIMATIONS */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* IMAGE ZOOM */
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}
+.iz.iz-in img{transform:scale(1);opacity:1}
+
+/* BUTTONS */
+.btn-p{display:inline-block;background:var(--ac);color:#fff;padding:.75rem 1.6rem;border-radius:var(--r);font-size:.88rem;font-weight:600;font-family:var(--fd);letter-spacing:.02em;transition:background .2s}.btn-p:hover{background:var(--ac2)}
+
+/* SECTIONS */
+.sec-white{padding:100px 0;background:var(--bg)}.sec-gray{padding:100px 0;background:var(--bg2)}
+.sec-head{margin-bottom:3rem}
+.sec-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.75rem}
+.sec-title{font-family:var(--fe);font-size:clamp(2rem,4vw,2.75rem);font-weight:700;color:var(--t);line-height:1.2}
+.sec-sub{font-size:.95rem;color:var(--t2);margin-top:.75rem;max-width:560px;line-height:1.7}
+
+/* PAGE HERO */
+.page-hero{position:relative;height:420px;margin-top:64px}
+.ph-bg{position:absolute;inset:0;height:100%}
+.ph-bg img{width:100%;height:100%;object-fit:cover}
+.ph-overlay{position:absolute;inset:0;background:rgba(8,14,28,.76);display:flex;align-items:flex-end;padding-bottom:4rem}
+.ph-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.75rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.ph-sub{font-size:1rem;color:rgba(255,255,255,.7);max-width:540px;line-height:1.7}
+
+/* BLOG FILTERS */
+.blog-filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:3rem}
+.bf{background:none;border:1px solid var(--bd);padding:.4rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all .2s}
+.bf:hover,.bf.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* BLOG GRID */
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.blog-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;transition:border-color .25s,box-shadow .25s;display:flex;flex-direction:column}
+.blog-card:hover{border-color:var(--bd2);box-shadow:var(--s2)}
+.bc-img{height:200px}.bc-img img{height:100%;width:100%;object-fit:cover}
+.bc-body{padding:1.5rem;flex:1;display:flex;flex-direction:column}
+.bc-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
+.bc-cat{font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}
+.bc-date{font-size:.75rem;color:var(--t3)}
+.bc-time{font-size:.75rem;color:var(--t3)}
+.bc-time::before{content:"· "}
+.blog-card h3{font-family:var(--fe);font-size:1.08rem;font-weight:700;color:var(--t);line-height:1.35;margin-bottom:.65rem}
+.blog-card p{font-size:.84rem;color:var(--t2);line-height:1.68;flex:1;margin-bottom:1.25rem}
+.bc-read{font-family:var(--fd);font-size:.75rem;font-weight:700;color:var(--ac);letter-spacing:.04em;margin-top:auto;transition:color .2s}
+.bc-read:hover{color:var(--ac2)}
+@media(max-width:900px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.blog-grid{grid-template-columns:1fr}}
+
+/* NEWSLETTER INLINE — dentro del grid de artículos */
+.nl-inline{background:var(--ac);border-radius:var(--r);padding:2rem;display:flex;flex-direction:column;gap:1rem;grid-column:span 1}
+.nl-inline-label{font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.nl-inline-title{font-family:var(--fe);font-size:1.1rem;font-weight:700;color:#fff;line-height:1.3}
+.nl-inline-sub{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6}
+.nl-inline-form{display:flex;flex-direction:column;gap:.6rem}
+.nl-inline-input{padding:.6rem .9rem;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:var(--r);font-family:var(--fb);font-size:.86rem}
+.nl-inline-input::placeholder{color:rgba(255,255,255,.4)}
+.nl-inline-input:focus{outline:none;border-color:rgba(255,255,255,.5)}
+.nl-inline-btn{background:#fff;color:var(--ac);padding:.6rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.78rem;font-weight:700;border:none;cursor:pointer;letter-spacing:.04em;transition:opacity .2s}
+.nl-inline-btn:hover{opacity:.88}
+.nl-inline-ok{font-size:.85rem;color:rgba(255,255,255,.85);text-align:center;padding:.75rem 0}
+
+/* AFILIADOS */
+.afil-sec{padding:80px 0;background:var(--bg2)}
+.afil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.afil-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;display:flex;flex-direction:column;gap:.85rem;transition:border-color .25s,box-shadow .25s;text-decoration:none;color:inherit}
+.afil-card:hover{border-color:var(--bd2);box-shadow:var(--s2)}
+.afil-icon{font-size:1.6rem;line-height:1}
+.afil-cat{font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}
+.afil-name{font-family:var(--fe);font-size:1rem;font-weight:700;color:var(--t)}
+.afil-desc{font-size:.83rem;color:var(--t2);line-height:1.65;flex:1}
+.afil-cta{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--ac);letter-spacing:.04em;display:inline-flex;align-items:center;gap:.3rem}
+.afil-disclaimer{font-size:.75rem;color:var(--t3);margin-top:1.5rem;line-height:1.6}
+@media(max-width:900px){.afil-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.afil-grid{grid-template-columns:1fr}}
+
+/* NEWSLETTER */
+.newsletter{background:var(--ac);padding:80px 0}
+.nl-inner{max-width:600px;margin:0 auto;text-align:center;padding:0 2rem}
+.nl-label{display:block;font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.75rem}
+.nl-title{font-family:var(--fe);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:.75rem}
+.nl-sub{font-size:.9rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:2rem}
+.nl-form{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.nl-input{flex:1;min-width:240px;padding:.75rem 1rem;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:var(--r);font-family:var(--fb);font-size:.9rem}
+.nl-input::placeholder{color:rgba(255,255,255,.4)}
+.nl-input:focus{outline:none;border-color:rgba(255,255,255,.5)}
+.nl-btn{background:#fff;color:var(--ac);padding:.75rem 1.6rem;border-radius:var(--r);font-family:var(--fd);font-size:.82rem;font-weight:700;border:none;cursor:pointer;letter-spacing:.04em;transition:opacity .2s}
+.nl-btn:hover{opacity:.88}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}
+.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}
+.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}
+.ft-col ul li{margin-bottom:.5rem}
+.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr}}
+/* ── Newsletter inline (blog grid) ──────────────────────────────────────── */
+.newsletter-inputs{display:flex;gap:.5rem;margin-bottom:.75rem}
+.newsletter-inputs input[type="email"]{flex:1;padding:.65rem 1rem;border:1.5px solid var(--bd);border-radius:var(--r);font-family:var(--fb);font-size:.88rem;color:var(--t);outline:none;transition:border-color .2s}
+.newsletter-inputs input[type="email"]:focus{border-color:var(--ac)}
+.btn-newsletter{background:var(--ac);color:#fff;border:none;cursor:pointer;padding:.65rem 1.25rem;border-radius:var(--r);font-family:var(--fd);font-size:.8rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;transition:background .2s}
+.btn-newsletter:hover{background:var(--ac2)}
+.newsletter-rgpd{display:flex;gap:.5rem;align-items:flex-start;cursor:pointer}
+.newsletter-rgpd input[type="checkbox"]{margin-top:3px;flex-shrink:0;accent-color:var(--ac)}
+.newsletter-rgpd span{font-size:.75rem;color:var(--t3);line-height:1.5}
+.newsletter-msg{font-size:.82rem;margin-top:.75rem;padding:.6rem 1rem;border-radius:var(--r);font-family:var(--fd)}
+.newsletter-msg.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.newsletter-msg.ko{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+@media(max-width:540px){.newsletter-inputs{flex-direction:column}.btn-newsletter{width:100%;text-align:center}}
+/* ── Waitlist Modal ──────────────────────────────────────────────────────── */
+.wl-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.wl-box{background:#fff;border-radius:8px;padding:2.5rem 2rem;max-width:420px;width:100%;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.wl-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--t3);line-height:1;padding:.25rem .5rem}
+.wl-close:hover{color:var(--t)}
+.wl-label{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.5rem}
+.wl-title{font-family:var(--fe);font-size:1.4rem;font-weight:700;color:var(--t);margin-bottom:.75rem;line-height:1.2}
+.wl-desc{font-size:.88rem;color:var(--t2);line-height:1.65;margin-bottom:1.25rem}
+.wl-field{margin-bottom:.75rem}
+.wl-field input[type="email"]{width:100%;padding:.7rem 1rem;border:1.5px solid var(--bd);border-radius:var(--r);font-family:var(--fb);font-size:.9rem;color:var(--t);outline:none;transition:border-color .2s}
+.wl-field input[type="email"]:focus{border-color:var(--ac)}
+.btn-solicitar{display:inline-block;border:1.5px solid var(--ac);color:var(--ac);background:transparent;padding:.42rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s}
+.btn-solicitar:hover{background:var(--ac);color:#fff}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="blog.html" class="active">Blog</a>
+      <a href="video-tutoriales.html">V&iacute;deos</a>
+      <a href="ia-tools.html">IA Tools</a>
+      <a href="sobre-mi.html">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="ia-tools.html">IA Tools</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="ph-bg iz">
+    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1400&auto=format&fit=crop&q=80" alt="Escribiendo artículos técnicos">
+  </div>
+  <div class="ph-overlay">
+    <div class="cnt">
+      <span class="ph-label rv">Blog técnico</span>
+      <h1 class="ph-title rv d1">Blog</h1>
+      <p class="ph-sub rv d2">Artículos de fondo sobre Data Engineering, BI, SQL y Cloud. Sin humo, con código real.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ARTÍCULOS -->
+<section class="sec-white">
+  <div class="cnt">
+    <div class="blog-filters rv">
+      <button class="bf on" data-f="all">Todos</button>
+      <button class="bf" data-f="ETL">ETL</button>
+      <button class="bf" data-f="BI">BI</button>
+      <button class="bf" data-f="SQL">SQL</button>
+      <button class="bf" data-f="Cloud">Cloud</button>
+      <button class="bf" data-f="Tools">Tools</button>
+    </div>
+    <div class="blog-grid" id="blogGrid">
+
+      <article class="blog-card rv" data-cat="ETL">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&auto=format&fit=crop&q=80" alt="ETL vs ELT" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">ETL</span>
+            <span class="bc-date">12 Mar 2025</span>
+            <span class="bc-time">8 min</span>
+          </div>
+          <h3>ETL vs ELT en 2025: ¿cuál domina el mercado cloud?</h3>
+          <p>La migración al cloud ha cambiado las reglas del juego. Analizo si ELT ha sustituido realmente al ETL clásico y qué herramienta elegir según el caso.</p>
+          <a href="blog/etl-vs-elt-2025.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <article class="blog-card rv d1" data-cat="BI">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop&q=80" alt="DAX Power BI" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">BI</span>
+            <span class="bc-date">28 Feb 2025</span>
+            <span class="bc-time">6 min</span>
+          </div>
+          <h3>TOP 10 funciones DAX que todo analista BI debe dominar</h3>
+          <p>Después de revisar más de 200 proyectos Power BI, estas son las funciones que marcan la diferencia entre un modelo mediocre y uno de producción.</p>
+          <a href="blog/dax-funciones-top10.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <article class="blog-card rv d2" data-cat="SQL">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&auto=format&fit=crop&q=80" alt="SQL Window Functions" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">SQL</span>
+            <span class="bc-date">15 Feb 2025</span>
+            <span class="bc-time">10 min</span>
+          </div>
+          <h3>SQL Window Functions: la guía definitiva con 20 ejemplos</h3>
+          <p>ROW_NUMBER, RANK, LAG, LEAD... Las window functions que muchos data analysts aún no dominan pero que todo Data Engineer debe conocer.</p>
+          <a href="blog/sql-window-functions.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <article class="blog-card rv" data-cat="Cloud">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=600&auto=format&fit=crop&q=80" alt="dbt BigQuery" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">Cloud</span>
+            <span class="bc-date">1 Feb 2025</span>
+            <span class="bc-time">9 min</span>
+          </div>
+          <h3>dbt en 2025: el estándar del Data Warehouse moderno</h3>
+          <p>dbt ha revolucionado las transformaciones en el DWH. Explico cómo empezar con dbt Core, por qué es el futuro y cómo desplegarlo en GCP y Azure.</p>
+          <a href="blog/dbt-data-warehouse-2025.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <article class="blog-card rv d1" data-cat="Cloud">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80" alt="Data Warehouse arquitectura" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">Cloud</span>
+            <span class="bc-date">15 Ene 2025</span>
+            <span class="bc-time">9 min</span>
+          </div>
+          <h3>Kimball vs Data Vault 2.0: ¿qué modelo DWH elegir?</h3>
+          <p>Comparativa honesta después de implementar ambas metodologías en proyectos reales de Fortune 500. Pros, contras y cuándo usar cada una.</p>
+          <a href="blog/kimball-vs-data-vault.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <article class="blog-card rv d2" data-cat="Tools">
+        <div class="bc-img iz">
+          <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80" alt="Herramientas ETL" loading="lazy">
+        </div>
+        <div class="bc-body">
+          <div class="bc-meta">
+            <span class="bc-cat">Tools</span>
+            <span class="bc-date">5 Ene 2025</span>
+            <span class="bc-time">7 min</span>
+          </div>
+          <h3>Informatica vs Talend: comparativa honesta 2025</h3>
+          <p>Dos décadas usando ambas herramientas en entornos enterprise. Todo comparado sin filtros: rendimiento, curva de aprendizaje, coste y soporte.</p>
+          <a href="blog/informatica-vs-talend-2025.html" class="bc-read">Leer &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Newsletter inline — suscripción sin salir del listado -->
+      <div class="nl-inline rv d1" aria-label="Suscríbete al newsletter">
+        <span class="nl-inline-label">Newsletter</span>
+        <p class="nl-inline-title">Un artículo técnico cada dos semanas</p>
+        <p class="nl-inline-sub">Sin spam. Sin relleno. Solo datos, código y experiencia real.</p>
+        <form id="formNewsletter">
+          <div class="newsletter-inputs" style="margin-bottom:.75rem">
+            <input type="email" id="emailNewsletter" class="nl-inline-input" placeholder="tu@email.com" required autocomplete="email">
+            <button type="submit" class="btn-newsletter" style="font-size:.8rem">Suscribirme &rarr;</button>
+          </div>
+          <label class="newsletter-rgpd">
+            <input type="checkbox" id="rgpdNewsletter" required>
+            <span>Acepto recibir el newsletter de DataFlujo.</span>
+          </label>
+          <p class="newsletter-msg" id="msgNewsletter" style="display:none"></p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HERRAMIENTAS RECOMENDADAS (afiliados) -->
+<section class="afil-sec">
+  <div class="cnt">
+    <div>
+      <span class="sec-label rv">Herramientas recomendadas</span>
+      <h2 class="sec-title rv d1">Lo que uso en mis proyectos</h2>
+      <p class="sec-sub rv d2">Recursos y plataformas que recomiendo tras años usándolos en producción. Algunos son enlaces de afiliado — sin coste adicional para ti.</p>
+    </div>
+    <div class="afil-grid">
+
+      <a class="afil-card rv" href="https://www.datacamp.com/" target="_blank" rel="noopener sponsored">
+        <span class="afil-icon">🎓</span>
+        <span class="afil-cat">Formación online</span>
+        <div class="afil-name">DataCamp</div>
+        <p class="afil-desc">La plataforma que más recomiendo para dominar SQL, Python y Power BI desde cero. Cursos guiados, proyectos reales y certificaciones reconocidas.</p>
+        <span class="afil-cta">Ver cursos &rarr;</span>
+      </a>
+
+      <a class="afil-card rv d1" href="https://dbtlabs.com/" target="_blank" rel="noopener sponsored">
+        <span class="afil-icon">🔧</span>
+        <span class="afil-cat">Transformación de datos</span>
+        <div class="afil-name">dbt Core</div>
+        <p class="afil-desc">El estándar del Data Warehouse moderno. Gratis, open-source y listo para producción en BigQuery, Snowflake y Redshift. Indispensable en 2025.</p>
+        <span class="afil-cta">Documentación &rarr;</span>
+      </a>
+
+      <a class="afil-card rv d2" href="https://cloud.google.com/bigquery" target="_blank" rel="noopener sponsored">
+        <span class="afil-icon">☁️</span>
+        <span class="afil-cat">Cloud Data Warehouse</span>
+        <div class="afil-name">Google BigQuery</div>
+        <p class="afil-desc">El DWH serverless que uso en la mayoría de mis proyectos. Escalado automático, SQL estándar y free tier generoso para empezar a aprender.</p>
+        <span class="afil-cta">Probar gratis &rarr;</span>
+      </a>
+
+      <a class="afil-card rv" href="https://www.notion.so/" target="_blank" rel="noopener sponsored">
+        <span class="afil-icon">📝</span>
+        <span class="afil-cat">Documentación y wikis</span>
+        <div class="afil-name">Notion</div>
+        <p class="afil-desc">Donde documento arquitecturas, diccionarios de datos y runbooks de proyectos. La herramienta de colaboración que ha sustituido a Confluence en mi flujo de trabajo.</p>
+        <span class="afil-cta">Empezar gratis &rarr;</span>
+      </a>
+
+      <a class="afil-card rv d1" href="https://www.udemy.com/" target="_blank" rel="noopener sponsored">
+        <span class="afil-icon">🎯</span>
+        <span class="afil-cat">Cursos bajo demanda</span>
+        <div class="afil-name">Udemy</div>
+        <p class="afil-desc">Cursos especializados de Airflow, Kafka, Databricks y más a precios accesibles. Ideal para profundizar en herramientas específicas con casos de uso reales.</p>
+        <span class="afil-cta">Explorar cursos &rarr;</span>
+      </a>
+
+      <a class="afil-card rv d2" href="https://github.com/" target="_blank" rel="noopener">
+        <span class="afil-icon">🐙</span>
+        <span class="afil-cat">Control de versiones</span>
+        <div class="afil-name">GitHub</div>
+        <p class="afil-desc">Donde vivo como Data Engineer. Pipelines versionados, CI/CD con Actions y colaboración sin fricciones. Free tier más que suficiente para proyectos personales.</p>
+        <span class="afil-cta">Ver mi perfil &rarr;</span>
+      </a>
+
+    </div>
+    <p class="afil-disclaimer rv">* Los enlaces marcados como "sponsored" son enlaces de afiliado. Si compras o contratas a través de ellos, puedo recibir una comisión sin coste adicional para ti. Solo recomiendo herramientas que uso y en las que confío.</p>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter">
+  <div class="nl-inner">
+    <span class="nl-label rv">Newsletter</span>
+    <h2 class="nl-title rv d1">Recibe artículos directamente<br>en tu email</h2>
+    <p class="nl-sub rv d2">Sin spam. Un artículo técnico cada dos semanas. Cancela cuando quieras.</p>
+    <p class="nl-sub rv d3" style="font-size:.8rem;color:rgba(255,255,255,.45);margin-top:.25rem">
+      ↑ Usa el formulario del listado para suscribirte con RGPD.
+    </p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+          <a href="https://github.com/antonio-moro" target="_blank" class="ft-link">GitHub</a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h4>Especialización</h4>
+        <ul>
+          <li><a href="productos.html#recursos">Power BI &amp; BI</a></li>
+          <li><a href="productos.html#recursos">Data Engineering</a></li>
+          <li><a href="productos.html#recursos">SQL &amp; dbt</a></li>
+          <li><a href="productos.html#recursos">Auditoría de datos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="productos.html">Power BI Templates</a></li>
+          <li><a href="productos.html">SQL Pack</a></li>
+          <li><a href="productos.html">dbt Starter</a></li>
+          <li><a href="productos.html">Cursos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Páginas</h4>
+        <ul>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="sobre-mi.html">Sobre mí</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+
+// Filtro de categorías del blog
+document.querySelectorAll('.bf').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.bf').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const f=btn.dataset.f;
+    document.querySelectorAll('.blog-card').forEach(c=>{
+      c.style.display=(f==='all'||c.dataset.cat===f)?'':'none';
+    });
+  });
+});
+</script>
+
+<!-- MODAL WAITLIST -->
+<div id="modalWaitlist" class="wl-overlay" style="display:none" onclick="cerrarWaitlist(event)">
+  <div class="wl-box">
+    <button class="wl-close" onclick="cerrarWaitlist()">&times;</button>
+    <p class="wl-label">Acceso anticipado</p>
+    <h3 class="wl-title">Sé el primero en acceder</h3>
+    <p class="wl-desc">Te avisaré en cuanto <strong id="wlRecursoNombre"></strong> esté disponible. Sin spam, solo el aviso cuando esté listo.</p>
+    <form id="formWaitlist">
+      <input type="hidden" id="wlRecurso" name="recurso">
+      <div class="wl-field">
+        <input type="email" id="wlEmail" placeholder="tu@email.com" required autocomplete="email">
+      </div>
+      <label class="newsletter-rgpd" style="margin-bottom:.75rem">
+        <input type="checkbox" id="wlRgpd" required>
+        <span>Acepto que DataFlujo me contacte cuando este recurso esté disponible.</span>
+      </label>
+      <button type="submit" class="btn-newsletter" style="width:100%">Apuntarme a la lista &rarr;</button>
+      <p class="newsletter-msg" id="msgWaitlist" style="display:none"></p>
+    </form>
+  </div>
+</div>
+
+<script src="newsletter.js"></script>
+<script src="waitlist.js"></script>
+</body>
+</html>

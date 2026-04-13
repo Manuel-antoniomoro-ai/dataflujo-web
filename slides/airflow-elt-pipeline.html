@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 04 — ELT con Apache Airflow · Antonio Moro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#1a3060;--blue:#2563eb;--blue2:#3b82f6;
+  --sky:#93c5fd;--green:#86efac;--gold:#f0c040;--pink:#f9a8d4;--purple:#c084fc;
+  --t-dim:rgba(255,255,255,.55);--t-faint:rgba(255,255,255,.22);
+  --fe:'Playfair Display',Georgia,serif;
+  --fd:'Syne',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  --fc:'Crimson Pro',Georgia,serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--fd)}
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s cubic-bezier(.22,1,.36,1)}
+.slide.active{opacity:1;pointer-events:all}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--sky);z-index:100;transition:width .4s cubic-bezier(.22,1,.36,1)}
+.nav{position:fixed;bottom:0;left:0;right:0;height:54px;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;border-top:1px solid rgba(255,255,255,.07)}
+.nav-left{display:flex;align-items:center;gap:.9rem}
+.nav-counter{font-family:var(--fm);font-size:.63rem;color:var(--t-dim);letter-spacing:.1em;white-space:nowrap}
+.nav-title{font-family:var(--fd);font-size:.63rem;font-weight:600;color:rgba(255,255,255,.32);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.nav-dots{display:flex;gap:4px;flex-wrap:wrap;max-width:420px}
+.ndot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .25s;border:none;flex-shrink:0}
+.ndot.on{background:var(--sky);transform:scale(1.5)}
+.nav-btns{display:flex;gap:7px}
+.nbtn{font-family:var(--fd);font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 15px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
+.nbtn-p{background:rgba(255,255,255,.07);color:var(--t-dim)}.nbtn-p:hover{background:rgba(255,255,255,.14);color:#fff}
+.nbtn-n{background:var(--blue);color:#fff}.nbtn-n:hover{background:var(--blue2)}
+.sp-toggle{position:fixed;right:1.2rem;top:.65rem;z-index:200;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);color:rgba(255,255,255,.52);cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
+.sp-toggle:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.sp-panel{position:fixed;right:0;top:0;bottom:54px;width:340px;background:rgba(6,10,22,.98);border-left:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:50px 20px 20px;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:150}
+.sp-panel.open{transform:none}
+.sp-label{font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sky);margin-bottom:8px;display:block}
+.sp-title{font-family:var(--fe);font-size:.93rem;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.3}
+.sp-text{font-family:var(--fc);font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.92}
+.sp-copy{margin-top:14px;width:100%;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px;border-radius:3px;border:none;cursor:pointer;background:var(--navy2);color:#fff;transition:background .2s}
+.sp-copy:hover{background:var(--blue)}.sp-copy.ok{background:#16a34a}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.chip{font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(147,197,253,.14);color:var(--sky);border:1px solid rgba(147,197,253,.25)}
+.slide-h{font-family:var(--fe);font-size:clamp(1.4rem,2.2vw,2rem);font-weight:800;color:#fff;line-height:1.1}
+.slide-sub{font-family:var(--fc);font-size:.86rem;color:var(--t-dim);line-height:1.75;margin-top:.45rem}
+.sh-row{display:flex;align-items:center;gap:.7rem;margin-bottom:2.5vh}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100% - 54px)}
+.col-l{padding:3.5vh 2.5vw 3.5vh 4vw;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.05)}
+.col-r{padding:3.5vh 4vw 3.5vh 2.5vw;display:flex;flex-direction:column;justify-content:center}
+.full-inner{padding:2.5vh 4vw;height:calc(100% - 54px);display:flex;flex-direction:column}
+.tip-box{background:rgba(147,197,253,.07);border:1px solid rgba(147,197,253,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.tip-box b{color:var(--sky)}
+.warn-box{background:rgba(249,168,212,.07);border:1px solid rgba(249,168,212,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.warn-box b{color:var(--pink)}
+.green-box{background:rgba(134,239,172,.07);border:1px solid rgba(134,239,172,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.green-box b{color:var(--green)}
+.step-list{display:flex;flex-direction:column;gap:9px}
+.step{display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-left:3px solid var(--blue)}
+.step-n{font-family:var(--fm);font-size:.58rem;color:var(--sky);min-width:20px;margin-top:2px}
+.step-body{flex:1}
+.step-title{font-family:var(--fd);font-size:.74rem;font-weight:700;color:#fff}
+.step-desc{font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:2px;line-height:1.5}
+.code{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px 15px;font-family:var(--fm);font-size:.65rem;line-height:1.9;color:rgba(255,255,255,.58)}
+.code-bar{background:#1a2a44;padding:5px 10px;display:flex;align-items:center;gap:5px;border-radius:4px 4px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:none}
+.code-bar+.code{border-radius:0 0 4px 4px}
+.dot-r{width:8px;height:8px;border-radius:50%;background:#ff5f57}
+.dot-y{width:8px;height:8px;border-radius:50%;background:#febc2e}
+.dot-g{width:8px;height:8px;border-radius:50%;background:#28c840}
+.cb-lang{margin-left:auto;font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sky)}
+.ck{color:#c084fc}.cf{color:#93c5fd}.cs{color:#86efac}.cn{color:#fde68a}.cc{color:rgba(255,255,255,.28);font-style:italic}.ch{color:#fff;font-weight:600}.cop{color:#f9a8d4}
+.hl{background:rgba(37,99,235,.2);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--blue)}
+.hl2{background:rgba(134,239,172,.1);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--green)}
+.hl3{background:rgba(240,192,64,.08);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--gold)}
+.rtable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:.6rem;margin-top:8px}
+.rtable th{background:rgba(147,197,253,.12);color:var(--sky);padding:4px 8px;text-align:left;font-weight:700;letter-spacing:.06em;border:1px solid rgba(255,255,255,.06)}
+.rtable td{padding:4px 8px;border:1px solid rgba(255,255,255,.05);color:rgba(255,255,255,.65)}
+.rtable tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.rtable .hl-row td{background:rgba(37,99,235,.15);color:#fff}
+.rtable .hl-g td{background:rgba(134,239,172,.08);color:var(--green)}
+.fn-grid{display:grid;gap:8px;width:100%}
+.fn-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+.fn-badge{font-family:var(--fm);font-size:.62rem;font-weight:700;color:var(--sky);background:rgba(147,197,253,.12);border:1px solid rgba(147,197,253,.2);padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.fn-body{flex:1}
+.fn-name{font-family:var(--fd);font-size:.72rem;font-weight:700;color:#fff;margin-bottom:2px}
+.fn-desc{font-family:var(--fc);font-size:.74rem;color:var(--t-dim);line-height:1.5}
+.fn-use{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-top:4px}
+.bg-navy{background:linear-gradient(135deg,#060e1e 0%,#0d1f3c 100%)}
+.bg-dark{background:#070d1a}
+.bg-darker{background:#040810}
+.bg-mid{background:#091422}
+.bg-close{background:linear-gradient(135deg,#0a1628 0%,#1a3060 100%)}
+.accent-blob{position:absolute;border-radius:50%;pointer-events:none}
+.db-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.6rem}
+.db-badge{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.07em;padding:3px 9px;border-radius:3px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+.db-badge.bq{border-color:rgba(66,133,244,.4);color:#4285f4}
+.db-badge.sf{border-color:rgba(41,182,246,.4);color:#29b6f6}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<button class="sp-toggle" id="spToggle">📄 Guión</button>
+<div class="sp-panel" id="spPanel">
+  <span class="sp-label">🎙️ Guión — pegar en ElevenLabs</span>
+  <div class="sp-title" id="spTitle"></div>
+  <div class="sp-text" id="spText"></div>
+  <button class="sp-copy" id="spCopy">📋 Copiar guión</button>
+</div>
+
+<div class="deck" id="deck">
+<!-- SLIDES_PLACEHOLDER -->
+</div>
+
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-counter" id="counter">01 / 21</div>
+    <div class="nav-title" id="navTitle"></div>
+  </div>
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="nbtn nbtn-p" onclick="go(-1)">← Ant.</button>
+    <button class="nbtn nbtn-n" onclick="go(1)">Sig. →</button>
+  </div>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+function render(){
+  slides.forEach((s,i) => s.classList.toggle('active', i === cur));
+  document.getElementById('prog').style.width = ((cur+1)/total*100) + '%';
+  document.getElementById('counter').textContent = String(cur+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  document.getElementById('navTitle').textContent = slides[cur].dataset.title || '';
+  document.querySelectorAll('.ndot').forEach((d,i) => d.classList.toggle('on', i === cur));
+  document.getElementById('spTitle').textContent = slides[cur].dataset.title || '';
+  document.getElementById('spText').textContent = slides[cur].dataset.script || '';
+  const btn = document.getElementById('spCopy');
+  btn.textContent = '📋 Copiar guión de esta slide';
+  btn.classList.remove('ok');
+}
+function go(d){ cur = Math.max(0, Math.min(total-1, cur+d)); render(); }
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i) => {
+  const b = document.createElement('button');
+  b.className = 'ndot';
+  b.title = slides[i].dataset.title || '';
+  b.onclick = () => { cur = i; render(); };
+  dotsEl.appendChild(b);
+});
+document.getElementById('spToggle').onclick = () => { document.getElementById('spPanel').classList.toggle('open'); };
+document.getElementById('spCopy').onclick = function(){
+  navigator.clipboard.writeText(document.getElementById('spText').textContent).then(() => {
+    this.textContent = '✅ ¡Copiado! Pega en ElevenLabs';
+    this.classList.add('ok');
+    setTimeout(() => { this.textContent = '📋 Copiar guión de esta slide'; this.classList.remove('ok'); }, 3000);
+  });
+};
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+  if(e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if(e.key === 'Escape') document.getElementById('spPanel').classList.remove('open');
+});
+let tx = 0;
+document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+document.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - tx; if(Math.abs(d) > 50) go(d < 0 ? 1 : -1); });
+render();
+</script>
+</body>
+</html>

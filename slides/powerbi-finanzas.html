@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 01 — Dashboard Financiero Power BI · Antonio Moro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f1f40;--navy2:#1a3a6b;--blue:#2563eb;--blue2:#3b82f6;
+  --gold:#f0c040;--white:#ffffff;--off:#f0f0ec;
+  --t-dim:rgba(255,255,255,.55);--t-faint:rgba(255,255,255,.25);
+  --fe:'Playfair Display',Georgia,serif;
+  --fd:'Syne',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  --fc:'Crimson Pro',Georgia,serif;
+  /* Power BI UI colors */
+  --pbi-bg:#1e1e1e;--pbi-panel:#252526;--pbi-border:#3e3e42;
+  --pbi-accent:#f2c811;--pbi-blue:#0078d4;--pbi-canvas:#f3f2f1;
+  --pbi-sidebar:#2d2d30;--pbi-text:#cccccc;--pbi-white:#ffffff;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--fd)}
+
+/* ── DECK ── */
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s cubic-bezier(.22,1,.36,1)}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ── PROGRESS ── */
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--gold);z-index:100;transition:width .4s cubic-bezier(.22,1,.36,1)}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(0,0,0,.9);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;border-top:1px solid rgba(255,255,255,.07)}
+.nav-left{display:flex;align-items:center;gap:1rem}
+.nav-counter{font-family:var(--fm);font-size:.65rem;color:var(--t-dim);letter-spacing:.1em;white-space:nowrap}
+.nav-title{font-family:var(--fd);font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.nav-dots{display:flex;gap:4px;flex-wrap:wrap;max-width:400px}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .25s;border:none;flex-shrink:0}
+.dot.on{background:var(--gold);transform:scale(1.4)}
+.nav-btns{display:flex;gap:8px}
+.nbtn{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
+.nbtn-prev{background:rgba(255,255,255,.07);color:var(--t-dim)}.nbtn-prev:hover{background:rgba(255,255,255,.14);color:#fff}
+.nbtn-next{background:var(--blue);color:#fff}.nbtn-next:hover{background:var(--blue2)}
+
+/* ── SCRIPT PANEL ── */
+.script-toggle{position:fixed;right:1.2rem;top:.7rem;z-index:200;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.7);color:rgba(255,255,255,.55);cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
+.script-toggle:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.script-panel{position:fixed;right:0;top:0;bottom:56px;width:340px;background:rgba(8,12,24,.98);border-left:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:52px 20px 20px;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:150}
+.script-panel.open{transform:none}
+.sp-label{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:block}
+.sp-title{font-family:var(--fe);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.3}
+.sp-text{font-family:var(--fc);font-size:.9rem;color:rgba(255,255,255,.72);line-height:1.9}
+.sp-copy{margin-top:14px;width:100%;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px;border-radius:3px;border:none;cursor:pointer;background:var(--navy2);color:#fff;transition:background .2s}
+.sp-copy:hover{background:var(--blue)}.sp-copy.ok{background:#16a34a}
+
+/* ── SHARED UTILS ── */
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.chip{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(37,99,235,.22);color:var(--blue2);border:1px solid rgba(37,99,235,.28)}
+.slide-h{font-family:var(--fe);font-size:clamp(1.4rem,2.2vw,2rem);font-weight:800;color:#fff;line-height:1.1}
+.slide-sub{font-family:var(--fc);font-size:.88rem;color:var(--t-dim);line-height:1.75;margin-top:.5rem}
+.sh-row{display:flex;align-items:center;gap:.75rem;margin-bottom:2.5vh}
+.code{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:14px 16px;font-family:var(--fm);font-size:.68rem;line-height:1.9;color:rgba(255,255,255,.6)}
+.c-fn{color:#93c5fd}.c-kw{color:#c084fc}.c-str{color:#86efac}.c-num{color:#fde68a}.c-cm{color:rgba(255,255,255,.28);font-style:italic}.c-hl{color:#fff;font-weight:600}.c-op{color:#f9a8d4}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100% - 56px)}
+.col-l{padding:4vh 2.5vw 4vh 4vw;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.05)}
+.col-r{padding:4vh 4vw 4vh 2.5vw;display:flex;flex-direction:column;justify-content:center}
+.full-inner{padding:3vh 4vw;height:calc(100% - 56px);display:flex;flex-direction:column}
+.tip-box{background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.2);border-radius:4px;padding:10px 14px;font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.6}
+.tip-box b{color:var(--gold)}
+.warn-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:10px 14px;font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.6}
+.warn-box b{color:#fca5a5}
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-left:3px solid var(--blue)}
+.step-n{font-family:var(--fm);font-size:.6rem;color:var(--blue2);min-width:22px;margin-top:2px}
+.step-body{flex:1}
+.step-title{font-family:var(--fd);font-size:.76rem;font-weight:700;color:#fff}
+.step-desc{font-family:var(--fc);font-size:.76rem;color:var(--t-dim);margin-top:2px;line-height:1.5}
+
+/* ══════════════════════════════════
+   POWER BI UI MOCKUPS
+══════════════════════════════════ */
+
+/* Generic PBI Window */
+.pbi-window{background:var(--pbi-bg);border:1px solid var(--pbi-border);border-radius:5px;overflow:hidden;font-family:var(--fm);box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.pbi-titlebar{background:#323232;padding:6px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--pbi-border)}
+.pbi-tb-dot{width:10px;height:10px;border-radius:50%}
+.pbi-tb-title{font-family:var(--fd);font-size:.6rem;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;margin-left:4px}
+.pbi-ribbon{background:#2b2b2b;padding:0 8px;display:flex;align-items:center;gap:2px;border-bottom:1px solid var(--pbi-border);height:36px}
+.pbi-rib-tab{font-family:var(--fd);font-size:.58rem;font-weight:600;letter-spacing:.06em;padding:0 10px;height:100%;display:flex;align-items:center;color:rgba(255,255,255,.45);cursor:default;border-bottom:2px solid transparent}
+.pbi-rib-tab.act{color:#fff;border-bottom-color:var(--pbi-accent)}
+.pbi-rib-btn{font-family:var(--fd);font-size:.55rem;font-weight:600;padding:4px 8px;border-radius:2px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);margin-left:6px;letter-spacing:.04em;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pbi-rib-icon{font-size:.9rem}
+
+/* PBI Main layout */
+.pbi-main{display:flex;height:100%}
+.pbi-sidebar-l{width:44px;background:#1f1f1f;border-right:1px solid var(--pbi-border);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px}
+.pbi-icon-btn{width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:default;color:rgba(255,255,255,.45)}
+.pbi-icon-btn.act{background:rgba(242,200,17,.15);color:var(--pbi-accent)}
+.pbi-canvas-area{flex:1;background:var(--pbi-canvas);position:relative;overflow:hidden}
+.pbi-panel-r{width:220px;background:var(--pbi-panel);border-left:1px solid var(--pbi-border);display:flex;flex-direction:column;overflow:hidden}
+.pbi-panel-tab{display:flex;border-bottom:1px solid var(--pbi-border)}
+.pbi-ptab{flex:1;padding:6px 4px;text-align:center;font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.07em;color:rgba(255,255,255,.4);border-bottom:2px solid transparent;cursor:default}
+.pbi-ptab.act{color:#fff;border-bottom-color:var(--pbi-accent)}
+.pbi-panel-search{padding:5px 8px;border-bottom:1px solid var(--pbi-border)}
+.pbi-search-box{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--pbi-border);border-radius:2px;padding:3px 6px;font-family:var(--fm);font-size:.55rem;color:rgba(255,255,255,.5)}
+.pbi-field-group{padding:4px 0}
+.pbi-fg-header{display:flex;align-items:center;gap:5px;padding:4px 8px;cursor:default}
+.pbi-fg-icon{font-size:.75rem}
+.pbi-fg-name{font-family:var(--fd);font-size:.58rem;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.04em}
+.pbi-fg-arrow{font-size:.55rem;color:rgba(255,255,255,.3);margin-left:auto}
+.pbi-field{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 20px;cursor:default}
+.pbi-field:hover{background:rgba(255,255,255,.04)}
+.pbi-field-icon{font-size:.65rem;color:rgba(255,255,255,.35)}
+.pbi-field-name{font-family:var(--fm);font-size:.55rem;color:var(--pbi-text)}
+.pbi-field.sel .pbi-field-name{color:var(--pbi-accent)}
+.pbi-field.sel .pbi-field-icon{color:var(--pbi-accent)}
+
+/* Canvas elements */
+.pbi-visual{position:absolute;background:#fff;border:1px solid #d0d0d0;border-radius:2px;box-shadow:0 1px 4px rgba(0,0,0,.12);overflow:hidden}
+.pbi-visual.selected{border-color:#0078d4;box-shadow:0 0 0 2px rgba(0,120,212,.3)}
+.pbi-visual-header{padding:6px 8px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between}
+.pbi-visual-title{font-family:var(--fd);font-size:.55rem;font-weight:700;color:#201f1e;letter-spacing:.05em}
+.pbi-visual-actions{display:flex;gap:3px}
+.pbi-va{width:14px;height:14px;border-radius:2px;background:#f3f2f1;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#605e5c}
+.canvas-bars{display:flex;align-items:flex-end;gap:3px;padding:4px 8px 6px;height:60px}
+.cb{border-radius:1px 1px 0 0;flex:1}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.kpi-cell{padding:6px 8px;border-right:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8}
+.kpi-cell:nth-child(2n){border-right:none}
+.kpi-cell:nth-child(3),.kpi-cell:nth-child(4){border-bottom:none}
+.kpi-label{font-family:var(--fd);font-size:.48rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#605e5c}
+.kpi-value{font-family:var(--fd);font-size:.9rem;font-weight:800;color:#201f1e;margin:1px 0}
+.kpi-delta{font-family:var(--fd);font-size:.5rem;font-weight:600}
+
+/* Tooltip / selection highlight */
+.pbi-tooltip{position:absolute;background:#323232;border-radius:3px;padding:6px 10px;font-family:var(--fm);font-size:.55rem;color:#fff;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.4);white-space:nowrap}
+
+/* ── QUERY EDITOR ── */
+.qe-window{background:#1e1e1e;border-radius:4px;overflow:hidden;border:1px solid #3e3e42}
+.qe-topbar{background:#2d2d30;padding:5px 10px;border-bottom:1px solid #3e3e42;display:flex;gap:12px;align-items:center}
+.qe-tabs{display:flex;gap:1px;background:#252526;border-bottom:1px solid #3e3e42}
+.qe-tab{padding:5px 14px;font-family:var(--fd);font-size:.56rem;font-weight:600;color:rgba(255,255,255,.4);border-right:1px solid #3e3e42;cursor:default}
+.qe-tab.act{background:#1e1e1e;color:#fff;border-bottom:none}
+.qe-body{display:flex;height:100%}
+.qe-queries{width:130px;background:#252526;border-right:1px solid #3e3e42;padding:6px 0}
+.qe-q-item{padding:5px 10px;font-family:var(--fd);font-size:.56rem;color:rgba(255,255,255,.5);cursor:default;display:flex;align-items:center;gap:5px}
+.qe-q-item.act{background:rgba(255,255,255,.07);color:#fff}
+.qe-q-icon{font-size:.7rem}
+.qe-main{flex:1;display:flex;flex-direction:column}
+.qe-formula{background:#1e1e1e;padding:5px 10px;border-bottom:1px solid #3e3e42;font-family:var(--fm);font-size:.6rem;color:#9cdcfe;display:flex;align-items:center;gap:6px}
+.qe-fx{color:#dcdcaa;font-weight:600;margin-right:4px}
+.qe-data{flex:1;overflow:hidden}
+.qe-data-header{display:flex;background:#2d2d30;border-bottom:1px solid #3e3e42}
+.qe-col{flex:1;padding:4px 8px;font-family:var(--fd);font-size:.54rem;font-weight:700;letter-spacing:.05em;color:rgba(255,255,255,.6);border-right:1px solid #3e3e42;white-space:nowrap;overflow:hidden}
+.qe-col-icon{font-size:.6rem;margin-right:3px}
+.qe-rows{display:flex;flex-direction:column}
+.qe-row{display:flex;border-bottom:1px solid rgba(255,255,255,.04)}
+.qe-row:nth-child(even){background:rgba(255,255,255,.02)}
+.qe-cell{flex:1;padding:3px 8px;font-family:var(--fm);font-size:.56rem;color:var(--pbi-text);border-right:1px solid rgba(255,255,255,.04);white-space:nowrap;overflow:hidden}
+.qe-cell.num{color:#b5cea8;text-align:right}
+.qe-cell.date{color:#ce9178}
+.qe-steps{width:140px;background:#252526;border-left:1px solid #3e3e42;padding:6px 0}
+.qe-step-title{font-family:var(--fd);font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:4px 8px 6px;border-bottom:1px solid #3e3e42;margin-bottom:4px}
+.qe-step-item{padding:4px 10px;font-family:var(--fd);font-size:.56rem;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px;cursor:default}
+.qe-step-item.act{color:#fff;background:rgba(255,255,255,.05)}
+.qe-step-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0}
+.qe-step-item.act .qe-step-dot{background:var(--pbi-accent)}
+
+/* ── DAX EDITOR ── */
+.dax-editor{background:#1e1e1e;border:1px solid #3e3e42;border-radius:4px;overflow:hidden}
+.dax-header{background:#2d2d30;padding:5px 10px;border-bottom:1px solid #3e3e42;display:flex;align-items:center;gap:8px}
+.dax-header-title{font-family:var(--fd);font-size:.58rem;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.06em}
+.dax-ok{background:#0078d4;color:#fff;font-family:var(--fd);font-size:.52rem;font-weight:700;padding:3px 10px;border-radius:2px;border:none;cursor:default;letter-spacing:.06em}
+.dax-body{padding:12px 14px;font-family:var(--fm);font-size:.66rem;line-height:1.9;color:rgba(255,255,255,.55)}
+.dax-line-num{color:rgba(255,255,255,.18);margin-right:12px;user-select:none;min-width:16px;display:inline-block;text-align:right}
+.dax-autocomplete{position:relative;background:#252526;border:1px solid #0078d4;border-radius:3px;overflow:hidden;margin-top:4px}
+.dax-ac-item{padding:4px 10px;font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:6px}
+.dax-ac-item.sel{background:#0078d4;color:#fff}
+.dax-ac-icon{font-size:.7rem;opacity:.6}
+.dax-ac-type{font-size:.5rem;margin-left:auto;opacity:.5;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── MODEL VIEW ── */
+.model-view{background:#f3f2f1;border:1px solid #d0d0d0;border-radius:4px;overflow:hidden;position:relative}
+.mv-toolbar{background:#fff;border-bottom:1px solid #e8e8e8;padding:5px 10px;display:flex;gap:8px;align-items:center}
+.mv-btn{font-family:var(--fd);font-size:.54rem;font-weight:600;padding:3px 8px;border-radius:2px;border:1px solid #d0d0d0;background:#fff;color:#323130;cursor:default;letter-spacing:.04em}
+.mv-btn.primary{background:#0078d4;color:#fff;border-color:#0078d4}
+.mv-table{position:absolute;background:#fff;border:1px solid #d0d0d0;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,.12);overflow:hidden;font-family:var(--fm)}
+.mv-table.fact{border-color:#0078d4;box-shadow:0 0 0 2px rgba(0,120,212,.2),0 2px 8px rgba(0,0,0,.12)}
+.mv-table-header{padding:5px 8px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;gap:5px}
+.mv-th-icon{font-size:.75rem}
+.mv-th-name{font-family:var(--fd);font-size:.6rem;font-weight:700;color:#201f1e;letter-spacing:.04em}
+.mv-field-row{display:flex;align-items:center;gap:5px;padding:3px 8px;border-bottom:1px solid #f3f2f1;font-size:.55rem;color:#323130}
+.mv-field-row:last-child{border-bottom:none}
+.mv-fi{font-size:.6rem;color:#605e5c}
+.mv-fi.pk{color:#f2c811}
+.mv-fi.fk{color:#0078d4}
+.mv-relation{position:absolute;pointer-events:none}
+
+/* ── RLS EDITOR ── */
+.rls-editor{background:#1e1e1e;border:1px solid #3e3e42;border-radius:4px;overflow:hidden}
+.rls-toolbar{background:#2d2d30;padding:5px 10px;border-bottom:1px solid #3e3e42;display:flex;align-items:center;gap:8px}
+.rls-role-list{width:160px;border-right:1px solid #3e3e42;background:#252526;padding:6px 0}
+.rls-role-item{padding:5px 10px;font-family:var(--fd);font-size:.56rem;color:rgba(255,255,255,.5);cursor:default}
+.rls-role-item.act{background:rgba(255,255,255,.06);color:#fff}
+.rls-role-item .plus{color:rgba(255,255,255,.25);margin-left:4px}
+.rls-main{flex:1;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.rls-table-selector{font-family:var(--fd);font-size:.58rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:4px}
+.rls-body{display:flex}
+
+/* ── SERVICE MOCKUP ── */
+.service-window{background:#fff;border:1px solid #e8e8e8;border-radius:5px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.svc-header{background:#0f1f40;padding:8px 14px;display:flex;align-items:center;gap:10px}
+.svc-logo{font-family:var(--fd);font-size:.7rem;font-weight:800;color:#fff;letter-spacing:.04em}
+.svc-logo span{color:var(--pbi-accent)}
+.svc-nav{display:flex;gap:1px;margin-left:auto}
+.svc-nav-item{font-family:var(--fd);font-size:.56rem;font-weight:600;padding:4px 10px;border-radius:2px;color:rgba(255,255,255,.55);cursor:default;letter-spacing:.04em}
+.svc-nav-item.act{background:rgba(255,255,255,.12);color:#fff}
+.svc-body{display:flex;height:calc(100% - 36px)}
+.svc-sidebar{width:150px;background:#f3f2f1;border-right:1px solid #e8e8e8;padding:8px 0}
+.svc-sb-section{font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a19f9d;padding:6px 12px 3px}
+.svc-sb-item{display:flex;align-items:center;gap:6px;padding:5px 12px;font-family:var(--fd);font-size:.56rem;color:#323130;cursor:default}
+.svc-sb-item.act{background:#e8e8e8;font-weight:700}
+.svc-sb-icon{font-size:.7rem}
+.svc-content{flex:1;padding:12px;overflow:hidden;background:#faf9f8}
+.svc-ws-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.svc-ws-title{font-family:var(--fd);font-size:.7rem;font-weight:700;color:#201f1e;letter-spacing:.04em}
+.svc-btn{font-family:var(--fd);font-size:.54rem;font-weight:700;padding:4px 10px;border-radius:2px;border:none;cursor:default;letter-spacing:.06em}
+.svc-btn.primary{background:#0078d4;color:#fff}
+.svc-btn.ghost{background:transparent;border:1px solid #d0d0d0;color:#323130}
+.svc-item-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border:1px solid #e8e8e8;border-radius:3px;margin-bottom:5px}
+.svc-item-icon{font-size:.9rem}
+.svc-item-name{font-family:var(--fd);font-size:.6rem;font-weight:700;color:#201f1e;flex:1}
+.svc-item-meta{font-family:var(--fm);font-size:.52rem;color:#a19f9d}
+.svc-item-badge{font-family:var(--fd);font-size:.5rem;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.06em}
+.svc-item-badge.green{background:#dff6dd;color:#107c10}
+.svc-item-badge.blue{background:#eff6fc;color:#0078d4}
+
+/* ══ SLIDE BACKGROUNDS ══ */
+.bg-dark{background:#080e1c}
+.bg-navy{background:var(--navy)}
+.bg-darker{background:#040810}
+.bg-mid{background:#0a1220}
+.accent-blob{position:absolute;border-radius:50%;pointer-events:none}
+
+/* ═══════════ SLIDE 1 PORTADA ═══════════ */
+.s1-noise{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");opacity:.5}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:calc(100% - 56px);padding:0 8vw}
+.hero-eyebrow{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.8rem;display:flex;align-items:center;gap:12px}
+.hero-eyebrow::before{content:'';display:block;width:28px;height:2px;background:var(--gold)}
+.hero-title{font-family:var(--fe);font-size:clamp(2.8rem,5.5vw,5rem);font-weight:900;color:#fff;line-height:1.0;margin-bottom:1.2rem;max-width:760px}
+.hero-title em{color:var(--gold);font-style:normal}
+.hero-desc{font-family:var(--fc);font-size:1.05rem;font-weight:300;color:var(--t-dim);max-width:500px;line-height:1.85;margin-bottom:2rem}
+.hero-stats{display:flex;gap:2rem}
+.hs{display:flex;flex-direction:column;gap:2px}
+.hs-n{font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff}
+.hs-l{font-family:var(--fd);font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)}
+.hero-divider{width:100%;height:1px;background:rgba(255,255,255,.07);margin-top:1.5rem;margin-bottom:.8rem;max-width:580px}
+.hero-author{font-family:var(--fd);font-size:.68rem;font-weight:600;letter-spacing:.07em;color:var(--t-faint)}
+.hero-author span{color:rgba(255,255,255,.6)}
+.nbtn-tts{background:rgba(134,239,172,.12);color:#86efac;border:1px solid rgba(134,239,172,.28)}.nbtn-tts:hover{background:rgba(134,239,172,.25);color:#fff}
+.nbtn-tts.stop{background:#dc2626 !important;color:#fff !important;border-color:#dc2626 !important}
+.nbtn-auto{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}.nbtn-auto:hover{background:rgba(251,191,36,.25);color:#fff}
+.nbtn-auto.on{background:#f59e0b !important;color:#000 !important;border-color:#f59e0b !important}
+.tts-bar{position:fixed;bottom:56px;left:0;right:0;height:3px;background:rgba(134,239,172,.15);z-index:99;display:none}.tts-bar.active{display:block}.tts-prog{height:100%;background:#86efac;width:0%;transition:width .5s linear}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+<button class="script-toggle" id="scriptToggle">📄 Guión</button>
+
+<div class="script-panel" id="scriptPanel">
+  <span class="sp-label">🎙️ Guión — pegar en ElevenLabs</span>
+  <div class="sp-title" id="spTitle"></div>
+  <div class="sp-text" id="spText"></div>
+  <button class="sp-copy" id="spCopy">📋 Copiar guión de esta slide</button>
+  <button class="sp-copy" id="spExport" style="margin-top:6px;background:#1a3a6b">📤 Exportar TODOS los guiones</button>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 01 · PORTADA
+══════════════════════════════════════════════════════ -->
+<div class="slide bg-navy"
+  data-title="Portada"
+  data-script="Hola, me llamo Antonio Moro. Soy Ingeniero de Datos y llevo más de veinte años construyendo soluciones de datos en producción para empresas como Accenture, IBM, Sopra Steria. En este tutorial vas a aprender a construir un dashboard financiero completo en Power BI, desde la primera línea del modelo de datos hasta el despliegue en el Servicio de Power BI con Row Level Security activo. Vamos a cubrir veintiocho puntos clave. No hay atajos, no hay simplificaciones. Es exactamente lo que hago en proyectos reales de consultoría. Ponte cómodo, porque esto va a ser denso y valioso.">
+  <div class="s1-noise"></div>
+  <div class="accent-blob" style="right:-100px;top:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.16) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-80px;bottom:-80px;width:450px;height:450px;background:radial-gradient(circle,rgba(240,192,64,.07) 0%,transparent 70%)"></div>
+  <div class="grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Tutorial 01 · Power BI Avanzado · 28 Secciones</div>
+    <h1 class="hero-title">Dashboard<br><em>Financiero</em><br>en Power BI</h1>
+    <p class="hero-desc">P&L, Cashflow y KPIs ejecutivos con DAX avanzado, Row Level Security corporativo, DirectQuery y despliegue en el Servicio.</p>
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-n">42'</span><span class="hs-l">Duración</span></div>
+      <div class="hs"><span class="hs-n">28</span><span class="hs-l">Secciones</span></div>
+      <div class="hs"><span class="hs-n">Intermedio</span><span class="hs-l">Nivel</span></div>
+      <div class="hs"><span class="hs-n">.pbix</span><span class="hs-l">Descargable</span></div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-author">Por <span>Antonio Moro</span> · Senior Data Engineer · antonio-moro.es</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 02 · REQUISITOS PREVIOS ══ -->
+<div class="slide bg-dark"
+  data-title="Requisitos previos"
+  data-script="Antes de arrancar, necesitas tener instalado Power BI Desktop, que es gratuito. Descárgalo desde la Microsoft Store o desde powerbi.microsoft.com. Necesitas tener SQL Server Express también gratuito, o acceso a cualquier base de datos SQL Server. Y necesitas conocimientos básicos de SQL: saber hacer un SELECT, un JOIN y un GROUP BY. No necesitas saber DAX todavía, eso lo aprenderás aquí. También te recomiendo tener una cuenta en el Servicio de Power BI, la versión gratuita funciona para todo lo que veremos. Si tienes todo esto, estás listo.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">00 · Antes de empezar</span><h2 class="slide-h">Requisitos<br>del tutorial</h2></div>
+      <p class="slide-sub">Todo lo que necesitas instalar antes de seguir el tutorial. El coste total es cero euros.</p>
+      <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:10px">
+        <div class="tip-box"><b>✅ Power BI Desktop</b> — Gratuito. Descarga desde Microsoft Store o powerbi.microsoft.com. Versión mínima: Diciembre 2024.</div>
+        <div class="tip-box"><b>✅ SQL Server Express</b> — Gratuito. O acceso a cualquier instancia SQL Server 2016+.</div>
+        <div class="tip-box"><b>✅ Cuenta Power BI Service</b> — Versión gratuita suficiente. app.powerbi.com.</div>
+        <div class="tip-box"><b>✅ SQL básico</b> — SELECT, JOIN, GROUP BY. No hace falta más.</div>
+        <div class="warn-box"><b>⚠️ No recomendado</b> — Power BI Report Builder o versiones anteriores a 2023 pueden no soportar algunas funciones DAX del tutorial.</div>
+      </div>
+    </div>
+    <div class="col-r" style="align-items:center">
+      <div class="pbi-window" style="width:100%;max-width:340px">
+        <div class="pbi-titlebar">
+          <div class="pbi-tb-dot" style="background:#ff5f56"></div>
+          <div class="pbi-tb-dot" style="background:#ffbd2e"></div>
+          <div class="pbi-tb-dot" style="background:#27c93f"></div>
+          <span class="pbi-tb-title">Microsoft Power BI Desktop</span>
+        </div>
+        <div style="background:#1a1a2e;padding:24px;text-align:center">
+          <div style="font-size:2.5rem;margin-bottom:8px">⚡</div>
+          <div style="font-family:var(--fd);font-size:.75rem;font-weight:800;color:#f2c811;letter-spacing:.06em;margin-bottom:4px">POWER BI DESKTOP</div>
+          <div style="font-family:var(--fm);font-size:.55rem;color:rgba(255,255,255,.4);margin-bottom:16px">Versión: Enero 2025 · 64-bit</div>
+          <div style="background:#0078d4;color:#fff;font-family:var(--fd);font-size:.6rem;font-weight:700;padding:6px 18px;border-radius:2px;display:inline-block;letter-spacing:.06em">Abrir un informe existente</div>
+          <div style="margin-top:8px;font-family:var(--fd);font-size:.6rem;color:#0078d4;letter-spacing:.04em">+ Nuevo informe en blanco</div>
+          <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+            <div style="font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:6px">Recientes</div>
+            <div style="font-family:var(--fm);font-size:.54rem;color:rgba(255,255,255,.35);text-align:left;line-height:2">📄 Dashboard_Financiero_v3.pbix<br>📄 Ventas_Regional_Q4.pbix<br>📄 RRHH_Headcount.pbix</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 03 · ARQUITECTURA GENERAL ══ -->
+<div class="slide bg-darker"
+  data-title="Arquitectura de la solución"
+  data-script="Antes de tocar Power BI, necesitas entender la arquitectura completa de lo que vamos a construir. Los datos viven en SQL Server. Tenemos tablas de transacciones de ventas, una tabla de plan de cuentas, y tablas maestras de clientes, productos y departamentos. Power BI se conecta a SQL Server en modo DirectQuery, lo que significa que los datos no se importan: cada vez que un usuario interactúa con el dashboard, Power BI genera una consulta SQL en tiempo real. Dentro de Power BI tenemos el modelo de datos con el esquema en estrella, las medidas DAX y el Row Level Security. Finalmente, el informe se publica en el Servicio de Power BI, donde los usuarios acceden desde el navegador o la app móvil. Esta arquitectura es la que usaría en un proyecto de consultoría real de nivel enterprise.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">01 · Arquitectura</span><h2 class="slide-h">Arquitectura completa de la solución</h2></div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:0;position:relative">
+      <!-- Architecture diagram -->
+      <div style="display:flex;align-items:center;gap:0;width:100%">
+        <!-- SQL Server -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:14px 16px;width:100%;max-width:160px;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">🗄️</div>
+            <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#fff;letter-spacing:.05em">SQL Server</div>
+            <div style="font-family:var(--fm);font-size:.54rem;color:var(--t-dim);margin-top:4px;line-height:1.6">fact_ventas<br>dim_tiempo<br>dim_cliente<br>dim_producto<br>dim_departamento</div>
+          </div>
+          <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint)">Fuente de datos</div>
+        </div>
+        <!-- Arrow 1 -->
+        <div style="flex:0 0 80px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="font-size:1.2rem;color:var(--blue2)">→</div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint);text-align:center;line-height:1.4">DirectQuery<br>tiempo real</div>
+        </div>
+        <!-- Power BI Desktop -->
+        <div style="flex:1.4;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="background:rgba(242,200,17,.07);border:1px solid rgba(242,200,17,.25);border-radius:5px;padding:14px 16px;width:100%;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">⚡</div>
+            <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:var(--gold);letter-spacing:.05em">Power BI Desktop</div>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+              <span style="font-family:var(--fm);font-size:.52rem;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:2px;color:rgba(255,255,255,.6)">Modelo Kimball</span>
+              <span style="font-family:var(--fm);font-size:.52rem;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:2px;color:rgba(255,255,255,.6)">DAX avanzado</span>
+              <span style="font-family:var(--fm);font-size:.52rem;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:2px;color:rgba(255,255,255,.6)">RLS</span>
+              <span style="font-family:var(--fm);font-size:.52rem;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:2px;color:rgba(255,255,255,.6)">Visuales</span>
+            </div>
+          </div>
+          <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint)">Desarrollo</div>
+        </div>
+        <!-- Arrow 2 -->
+        <div style="flex:0 0 80px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="font-size:1.2rem;color:var(--blue2)">→</div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint);text-align:center;line-height:1.4">Publicar<br>.pbix</div>
+        </div>
+        <!-- Power BI Service -->
+        <div style="flex:1.3;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="background:rgba(0,120,212,.1);border:1px solid rgba(0,120,212,.3);border-radius:5px;padding:14px 16px;width:100%;text-align:center">
+            <div style="font-size:1.6rem;margin-bottom:6px">☁️</div>
+            <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#93c5fd;letter-spacing:.05em">Power BI Service</div>
+            <div style="font-family:var(--fm);font-size:.54rem;color:var(--t-dim);margin-top:4px;line-height:1.6">Workspace<br>Roles RLS asignados<br>Actualización programada<br>app.powerbi.com</div>
+          </div>
+          <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint)">Producción</div>
+        </div>
+        <!-- Arrow 3 -->
+        <div style="flex:0 0 60px;text-align:center">
+          <div style="font-size:1.2rem;color:var(--blue2)">→</div>
+        </div>
+        <!-- Usuarios -->
+        <div style="flex:0.8;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="background:rgba(134,239,172,.06);border:1px solid rgba(134,239,172,.2);border-radius:5px;padding:14px 10px;width:100%;text-align:center">
+            <div style="font-size:1.4rem;margin-bottom:4px">👥</div>
+            <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;color:#86efac;letter-spacing:.04em">Usuarios</div>
+            <div style="font-family:var(--fm);font-size:.5rem;color:var(--t-dim);margin-top:4px;line-height:1.6">Navegador<br>App móvil<br>Teams embed</div>
+          </div>
+          <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint)">Consumo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 04 · MODELO DE DATOS - TABLAS ══ -->
+<div class="slide bg-dark"
+  data-title="Modelo de datos — Tablas"
+  data-script="Empezamos con el modelo de datos. Vamos a crear cinco tablas. La tabla central, o tabla de hechos, es fact_ventas. Tiene las métricas que queremos analizar: importe, coste, cantidad. Y tiene las claves foráneas que la conectan con las cuatro tablas de dimensión. Las dimensiones son: dim_tiempo para todas las fechas, dim_cliente para los datos de cada cliente, dim_producto para el catálogo, y dim_departamento que además usaremos para el Row Level Security. La regla de oro del modelo Kimball es que las tablas de hechos tienen números y las tablas de dimensiones tienen descriptores. Si te confundes en esto, el modelo va a dar problemas. Nunca pongas texto descriptivo en la tabla de hechos y nunca pongas métricas en las dimensiones.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">02 · Modelo</span><h2 class="slide-h">Diseño de tablas<br>— Kimball Star Schema</h2></div>
+      <p class="slide-sub">Regla de oro: <b style="color:#fff">hechos tienen números, dimensiones tienen descriptores.</b></p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">FACT</span><div class="step-body"><div class="step-title">fact_ventas</div><div class="step-desc">importe, coste, cantidad + 4 claves foráneas. Granularidad: 1 fila = 1 línea de venta.</div></div></div>
+        <div class="step" style="border-left-color:#86efac"><span class="step-n" style="color:#86efac">DIM</span><div class="step-body"><div class="step-title">dim_tiempo</div><div class="step-desc">fecha, año, trimestre, mes, semana. Tabla generada con DAX o SQL.</div></div></div>
+        <div class="step" style="border-left-color:#86efac"><span class="step-n" style="color:#86efac">DIM</span><div class="step-body"><div class="step-title">dim_cliente</div><div class="step-desc">cliente_id, nombre, segmento, país, ciudad.</div></div></div>
+        <div class="step" style="border-left-color:#86efac"><span class="step-n" style="color:#86efac">DIM</span><div class="step-body"><div class="step-title">dim_producto</div><div class="step-desc">producto_id, nombre, categoría, subcategoría, precio_lista.</div></div></div>
+        <div class="step" style="border-left-color:var(--gold)"><span class="step-n" style="color:var(--gold)">RLS</span><div class="step-body"><div class="step-title">dim_departamento</div><div class="step-desc">dept_id, nombre, director_email. Clave para el Row Level Security.</div></div></div>
+      </div>
+    </div>
+    <div class="col-r">
+      <!-- SQL CREATE TABLE code -->
+      <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint);margin-bottom:8px">SQL — Crear las tablas en SQL Server</div>
+      <div class="code" style="font-size:.62rem">
+<span class="c-cm">-- Tabla de hechos</span><br>
+<span class="c-kw">CREATE TABLE</span> <span class="c-hl">fact_ventas</span> (<br>
+&nbsp;&nbsp;venta_id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;fecha_id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;cliente_id &nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;producto_id &nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;dept_id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;importe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">DECIMAL</span>(<span class="c-num">14,2</span>),<br>
+&nbsp;&nbsp;coste &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">DECIMAL</span>(<span class="c-num">14,2</span>),<br>
+&nbsp;&nbsp;cantidad &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span><br>
+);<br>
+<br>
+<span class="c-cm">-- Dimensión tiempo</span><br>
+<span class="c-kw">CREATE TABLE</span> <span class="c-hl">dim_tiempo</span> (<br>
+&nbsp;&nbsp;fecha_id &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">INT</span> <span class="c-kw">PRIMARY KEY</span>, <span class="c-cm">-- YYYYMMDD</span><br>
+&nbsp;&nbsp;fecha &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">DATE</span> <span class="c-kw">NOT NULL</span>,<br>
+&nbsp;&nbsp;año &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">SMALLINT</span>,<br>
+&nbsp;&nbsp;trimestre &nbsp;&nbsp;&nbsp;<span class="c-fn">TINYINT</span>,<br>
+&nbsp;&nbsp;mes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">TINYINT</span>,<br>
+&nbsp;&nbsp;mes_nombre &nbsp;&nbsp;<span class="c-fn">VARCHAR</span>(<span class="c-num">20</span>),<br>
+&nbsp;&nbsp;semana &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">TINYINT</span>,<br>
+&nbsp;&nbsp;dia_semana &nbsp;&nbsp;<span class="c-fn">VARCHAR</span>(<span class="c-num">15</span>)<br>
+);
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 05 · QUERY EDITOR — CONEXIÓN ══ -->
+<div class="slide bg-darker"
+  data-title="Query Editor — Conectar a SQL Server"
+  data-script="Abrimos Power BI Desktop. Vamos a Obtener datos, seleccionamos SQL Server, y ponemos el nombre del servidor y la base de datos. Importante: seleccionamos el modo DirectQuery, no Importar. Una vez conectados, se abre el Editor de Power Query. Aquí vemos cada tabla en el panel izquierdo. En el panel central vemos los datos en formato tabla. En el panel derecho tenemos los Pasos Aplicados, que es el historial de transformaciones. En la barra de fórmulas vemos el código M generado automáticamente. Para DirectQuery, las transformaciones en Power Query son muy limitadas, así que lo ideal es hacer la mayor parte de la limpieza en SQL Server antes, en vistas o stored procedures. Lo que sí haremos aquí es verificar los tipos de datos de cada columna y renombrar las columnas para que sean legibles en el dashboard.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">03 · Query Editor</span><h2 class="slide-h">Conectar a SQL Server — Editor de Power Query</h2></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="qe-window" style="height:100%;display:flex;flex-direction:column">
+        <div class="qe-topbar">
+          <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;color:rgba(255,255,255,.5)">Power Query Editor</div>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <div style="font-family:var(--fd);font-size:.55rem;padding:3px 10px;background:#0078d4;color:#fff;border-radius:2px;cursor:default">Cerrar y aplicar</div>
+            <div style="font-family:var(--fd);font-size:.55rem;padding:3px 10px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border-radius:2px;cursor:default">Actualizar vista previa</div>
+          </div>
+        </div>
+        <div class="qe-tabs">
+          <div class="qe-tab act">Inicio</div><div class="qe-tab">Transformar</div><div class="qe-tab">Agregar columna</div><div class="qe-tab">Vista</div>
+        </div>
+        <div style="flex:1;display:flex;overflow:hidden">
+          <!-- Queries panel -->
+          <div class="qe-queries">
+            <div style="font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:5px 8px 3px;border-bottom:1px solid #3e3e42">CONSULTAS (5)</div>
+            <div class="qe-q-item act"><span class="qe-q-icon">📊</span>fact_ventas</div>
+            <div class="qe-q-item"><span class="qe-q-icon">📅</span>dim_tiempo</div>
+            <div class="qe-q-item"><span class="qe-q-icon">👥</span>dim_cliente</div>
+            <div class="qe-q-item"><span class="qe-q-icon">📦</span>dim_producto</div>
+            <div class="qe-q-item"><span class="qe-q-icon">🏢</span>dim_departamento</div>
+          </div>
+          <!-- Main area -->
+          <div class="qe-main">
+            <div class="qe-formula"><span class="qe-fx">fx</span> = Sql.Database("srv-dwh", "DWH_Finanzas", [Query="SELECT * FROM dbo.fact_ventas", CreateNavigationProperties=false])</div>
+            <div class="qe-data" style="display:flex;flex-direction:column">
+              <div class="qe-data-header">
+                <div class="qe-col"><span class="qe-col-icon">1️⃣</span>venta_id</div>
+                <div class="qe-col"><span class="qe-col-icon">📅</span>fecha_id</div>
+                <div class="qe-col"><span class="qe-col-icon">1️⃣</span>cliente_id</div>
+                <div class="qe-col"><span class="qe-col-icon">1️⃣</span>dept_id</div>
+                <div class="qe-col"><span class="qe-col-icon">💲</span>importe</div>
+                <div class="qe-col"><span class="qe-col-icon">💲</span>coste</div>
+              </div>
+              <div class="qe-rows">
+                <div class="qe-row"><div class="qe-cell num">100001</div><div class="qe-cell date">20250103</div><div class="qe-cell num">2451</div><div class="qe-cell num">3</div><div class="qe-cell num">12.450,00</div><div class="qe-cell num">8.102,00</div></div>
+                <div class="qe-row"><div class="qe-cell num">100002</div><div class="qe-cell date">20250103</div><div class="qe-cell num">1089</div><div class="qe-cell num">1</div><div class="qe-cell num">3.200,00</div><div class="qe-cell num">1.980,00</div></div>
+                <div class="qe-row"><div class="qe-cell num">100003</div><div class="qe-cell date">20250104</div><div class="qe-cell num">3302</div><div class="qe-cell num">2</div><div class="qe-cell num">8.750,00</div><div class="qe-cell num">5.620,00</div></div>
+                <div class="qe-row"><div class="qe-cell num">100004</div><div class="qe-cell date">20250106</div><div class="qe-cell num">2451</div><div class="qe-cell num">1</div><div class="qe-cell num">4.100,00</div><div class="qe-cell num">2.870,00</div></div>
+                <div class="qe-row"><div class="qe-cell num">100005</div><div class="qe-cell date">20250107</div><div class="qe-cell num">890</div><div class="qe-cell num">4</div><div class="qe-cell num">22.000,00</div><div class="qe-cell num">14.300,00</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Steps panel -->
+          <div class="qe-steps">
+            <div class="qe-step-title">Pasos aplicados</div>
+            <div class="qe-step-item act"><div class="qe-step-dot"></div>Origen</div>
+            <div class="qe-step-item"><div class="qe-step-dot"></div>Tipo cambiado</div>
+            <div class="qe-step-item"><div class="qe-step-dot"></div>Cols. renombradas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 06 · MODEL VIEW — RELACIONES ══ -->
+<div class="slide bg-dark"
+  data-title="Vista de modelo — Relaciones"
+  data-script="Después de cerrar el Editor de Power Query, vamos a la Vista de modelo. Es el icono de diagrama en la barra izquierda. Aquí arrastramos las tablas para organizarlas en el esquema en estrella: fact_ventas en el centro, las dimensiones alrededor. Para crear una relación, arrastramos la clave foránea de fact_ventas hasta la clave primaria de la dimensión correspondiente. Power BI generará automáticamente una relación con cardinalidad varios a uno, que es la correcta. Verifica que la dirección del filtro cruzado es de la dimensión hacia la tabla de hechos. Nunca al revés y nunca bidireccional, excepto en casos muy específicos. Una relación bidireccional mal puesta es una de las causas más comunes de cálculos incorrectos en Power BI.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">04 · Modelo</span><h2 class="slide-h">Vista de modelo — Crear relaciones</h2></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="model-view" style="height:100%;position:relative">
+        <div class="mv-toolbar">
+          <span style="font-family:var(--fd);font-size:.58rem;font-weight:700;color:#323130">Vista de modelo</span>
+          <div class="mv-btn primary">Administrar relaciones</div>
+          <div class="mv-btn">Crear tabla</div>
+          <div style="margin-left:auto;font-family:var(--fm);font-size:.54rem;color:#a19f9d">5 tablas · 4 relaciones activas</div>
+        </div>
+        <!-- Tables positioned -->
+        <!-- dim_tiempo top-left -->
+        <div class="mv-table" style="top:30px;left:20px;width:148px">
+          <div class="mv-table-header"><span class="mv-th-icon">📅</span><span class="mv-th-name">dim_tiempo</span></div>
+          <div class="mv-field-row"><span class="mv-fi pk">🔑</span>fecha_id</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>fecha</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>año</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>mes_nombre</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>trimestre</div>
+        </div>
+        <!-- dim_cliente top-right -->
+        <div class="mv-table" style="top:30px;right:20px;width:148px">
+          <div class="mv-table-header"><span class="mv-th-icon">👥</span><span class="mv-th-name">dim_cliente</span></div>
+          <div class="mv-field-row"><span class="mv-fi pk">🔑</span>cliente_id</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>nombre</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>segmento</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>país</div>
+        </div>
+        <!-- fact_ventas center -->
+        <div class="mv-table fact" style="top:50%;left:50%;transform:translate(-50%,-50%);width:160px">
+          <div class="mv-table-header" style="background:#eff6fc"><span class="mv-th-icon">📊</span><span class="mv-th-name" style="color:#0078d4">fact_ventas</span></div>
+          <div class="mv-field-row"><span class="mv-fi pk">🔑</span>venta_id</div>
+          <div class="mv-field-row"><span class="mv-fi fk">🔗</span><span style="color:#0078d4">fecha_id</span></div>
+          <div class="mv-field-row"><span class="mv-fi fk">🔗</span><span style="color:#0078d4">cliente_id</span></div>
+          <div class="mv-field-row"><span class="mv-fi fk">🔗</span><span style="color:#0078d4">producto_id</span></div>
+          <div class="mv-field-row"><span class="mv-fi fk">🔗</span><span style="color:#0078d4">dept_id</span></div>
+          <div class="mv-field-row"><span class="mv-fi" style="color:#2d7d46">💲</span><span style="color:#2d7d46">importe</span></div>
+          <div class="mv-field-row"><span class="mv-fi" style="color:#2d7d46">💲</span><span style="color:#2d7d46">coste</span></div>
+        </div>
+        <!-- dim_producto bottom-left -->
+        <div class="mv-table" style="bottom:30px;left:20px;width:148px">
+          <div class="mv-table-header"><span class="mv-th-icon">📦</span><span class="mv-th-name">dim_producto</span></div>
+          <div class="mv-field-row"><span class="mv-fi pk">🔑</span>producto_id</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>nombre</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>categoría</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>precio_lista</div>
+        </div>
+        <!-- dim_departamento bottom-right -->
+        <div class="mv-table" style="bottom:30px;right:20px;width:148px;border-color:rgba(240,192,64,.4)">
+          <div class="mv-table-header" style="background:#fffbeb"><span class="mv-th-icon">🏢</span><span class="mv-th-name" style="color:#92400e">dim_departamento</span></div>
+          <div class="mv-field-row"><span class="mv-fi pk">🔑</span>dept_id</div>
+          <div class="mv-field-row"><span class="mv-fi">📋</span>nombre</div>
+          <div class="mv-field-row"><span class="mv-fi" style="color:#92400e">🔒</span><span style="color:#b45309">director_email</span></div>
+          <div style="background:#fffbeb;padding:3px 8px;font-family:var(--fd);font-size:.48rem;color:#b45309;font-weight:700">← Usado en RLS</div>
+        </div>
+        <!-- Relation lines (SVG overlay) -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="168" y1="90" x2="310" y2="47%" stroke="#0078d4" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="80%" y1="90" x2="62%" y2="47%" stroke="#0078d4" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="168" y1="75%" x2="310" y2="55%" stroke="#0078d4" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="80%" y1="75%" x2="62%" y2="55%" stroke="#f2c811" stroke-width="1.5" stroke-dasharray="4,3" opacity=".7"/>
+          <text x="50%" y="96%" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(0,120,212,.6)">N:1 en todas las relaciones · Filtro unidireccional Dim → Fact</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 07 · TABLA DE FECHAS ══ -->
+<div class="slide bg-mid"
+  data-title="Tabla de fechas con DAX"
+  data-script="Power BI necesita una tabla de fechas dedicada para que las funciones de inteligencia de tiempo como SAMEPERIODLASTYEAR o TOTALYTD funcionen correctamente. Si intentas usar estas funciones sin una tabla de fechas marcada, obtendrás errores o resultados incorrectos. Creamos la tabla con DAX usando la función CALENDAR. Ponemos como fecha de inicio el primero de enero del año más antiguo de los datos, y como fecha de fin el treinta y uno de diciembre del año más reciente. Luego añadimos columnas calculadas para año, trimestre, mes en número, mes en texto, semana, día de la semana, y una columna de período para el eje del gráfico. Después de crear la tabla, hay un paso crítico que mucha gente olvida: ir a la Vista de tabla, hacer clic derecho sobre dim_tiempo, y seleccionar Marcar como tabla de fechas. Sin este paso, las funciones de inteligencia temporal no funcionarán.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">05 · DAX</span><h2 class="slide-h">Tabla de fechas<br>con DAX CALENDAR</h2></div>
+      <p class="slide-sub">Obligatoria para las funciones de inteligencia temporal. Sin ella, SAMEPERIODLASTYEAR devolverá error.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="tip-box"><b>⚠️ Paso crítico:</b> Tras crear la tabla, haz clic derecho → "Marcar como tabla de fechas" y selecciona la columna <code style="color:#fde68a">fecha</code>.</div>
+        <div class="tip-box"><b>📅 Rango:</b> La tabla debe cubrir todas las fechas de tus datos, sin huecos. CALENDAR genera una fila por cada día del rango.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="dax-editor">
+        <div class="dax-header">
+          <span class="dax-header-title">Nueva tabla — dim_tiempo (DAX)</span>
+          <button class="dax-ok" style="margin-left:auto">✓ Aceptar</button>
+        </div>
+        <div class="dax-body">
+<span class="dax-line-num">1</span><span class="c-hl">dim_tiempo</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">2</span><span class="c-fn">ADDCOLUMNS</span>(<br>
+<span class="dax-line-num">3</span>&nbsp;&nbsp;<span class="c-fn">CALENDAR</span>(<span class="c-fn">DATE</span>(<span class="c-num">2020</span>,<span class="c-num">1</span>,<span class="c-num">1</span>), <span class="c-fn">DATE</span>(<span class="c-num">2025</span>,<span class="c-num">12</span>,<span class="c-num">31</span>)),<br>
+<span class="dax-line-num">4</span>&nbsp;&nbsp;<span class="c-str">"fecha_id"</span>, <span class="c-fn">FORMAT</span>([Date],<span class="c-str">"YYYYMMDD"</span>)<span class="c-op">*</span><span class="c-num">1</span>,<br>
+<span class="dax-line-num">5</span>&nbsp;&nbsp;<span class="c-str">"año"</span>, <span class="c-fn">YEAR</span>([Date]),<br>
+<span class="dax-line-num">6</span>&nbsp;&nbsp;<span class="c-str">"trimestre"</span>, <span class="c-str">"Q"</span> <span class="c-op">&</span> <span class="c-fn">QUARTER</span>([Date]),<br>
+<span class="dax-line-num">7</span>&nbsp;&nbsp;<span class="c-str">"mes"</span>, <span class="c-fn">MONTH</span>([Date]),<br>
+<span class="dax-line-num">8</span>&nbsp;&nbsp;<span class="c-str">"mes_nombre"</span>, <span class="c-fn">FORMAT</span>([Date],<span class="c-str">"MMMM"</span>),<br>
+<span class="dax-line-num">9</span>&nbsp;&nbsp;<span class="c-str">"mes_año"</span>, <span class="c-fn">FORMAT</span>([Date],<span class="c-str">"MMM YYYY"</span>),<br>
+<span class="dax-line-num">10</span>&nbsp;&nbsp;<span class="c-str">"semana"</span>, <span class="c-fn">WEEKNUM</span>([Date]),<br>
+<span class="dax-line-num">11</span>&nbsp;&nbsp;<span class="c-str">"dia_semana"</span>, <span class="c-fn">FORMAT</span>([Date],<span class="c-str">"DDDD"</span>),<br>
+<span class="dax-line-num">12</span>&nbsp;&nbsp;<span class="c-str">"es_fin_semana"</span>, <span class="c-fn">IF</span>(<span class="c-fn">WEEKDAY</span>([Date],<span class="c-num">2</span>)<span class="c-op">>=</span><span class="c-num">6</span>,<span class="c-num">1</span>,<span class="c-num">0</span>)<br>
+<span class="dax-line-num">13</span>)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 08 · DAX — MEDIDAS BASE ══ -->
+<div class="slide bg-dark"
+  data-title="DAX — Medidas base"
+  data-script="Ahora creamos las medidas DAX. Lo primero es crear una tabla vacía llamada Medidas para organizarlas. Haz clic en Modelado, Nueva tabla, y escribe Medidas igual a ROW de string vacío. Luego oculta esa tabla en el modelo. Esto es una buena práctica: todas las medidas en un solo sitio, ninguna columna calculada mezclada. Las medidas base son las más simples: Ingresos es la suma del importe. Coste Total es la suma del coste. Margen Bruto es Ingresos menos Coste Total. Cantidad Total es la suma de cantidad. Estas medidas base son la cimentación. Todo lo demás se construye encima de ellas. Nunca pongas lógica compleja en una medida base. Hazla simple, y luego combínala en medidas de nivel superior.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">06 · DAX</span><h2 class="slide-h">Medidas base<br>del P&L</h2></div>
+      <p class="slide-sub">Construye primero las medidas simples. La complejidad va en las medidas de nivel superior que las usan.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="tip-box"><b>🗂️ Buena práctica:</b> Crea una tabla "Medidas" vacía y pon todas las medidas ahí. Nunca mezcles medidas con columnas calculadas.</div>
+        <div class="tip-box"><b>📐 Formato:</b> Formatea cada medida al crear. Ingresos → Moneda. Margen % → Porcentaje. Ahorra problemas después.</div>
+        <div class="warn-box"><b>❌ Error común:</b> Usar SUM directamente en un visual sin encapsularlo en una medida. Pierde el contexto de filtro del RLS.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="dax-editor">
+        <div class="dax-header">
+          <span class="dax-header-title">Medidas — Nueva medida (DAX)</span>
+          <button class="dax-ok" style="margin-left:auto">✓ Aceptar</button>
+        </div>
+        <div class="dax-body">
+<span class="dax-line-num">1</span><span class="c-cm">-- ① Medida base: Ingresos</span><br>
+<span class="dax-line-num">2</span><span class="c-hl">Ingresos</span> <span class="c-op">=</span> <span class="c-fn">SUM</span>(fact_ventas[importe])<br>
+<br>
+<span class="dax-line-num">5</span><span class="c-cm">-- ② Coste Total</span><br>
+<span class="dax-line-num">6</span><span class="c-hl">Coste Total</span> <span class="c-op">=</span> <span class="c-fn">SUM</span>(fact_ventas[coste])<br>
+<br>
+<span class="dax-line-num">9</span><span class="c-cm">-- ③ Margen Bruto (medida compuesta)</span><br>
+<span class="dax-line-num">10</span><span class="c-hl">Margen Bruto</span> <span class="c-op">=</span> [Ingresos] <span class="c-op">-</span> [Coste Total]<br>
+<br>
+<span class="dax-line-num">13</span><span class="c-cm">-- ④ Margen % con DIVIDE seguro</span><br>
+<span class="dax-line-num">14</span><span class="c-hl">Margen %</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">15</span>&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>([Margen Bruto], [Ingresos], <span class="c-num">0</span>)<br>
+<br>
+<span class="dax-line-num">18</span><span class="c-cm">-- ⑤ Cantidad</span><br>
+<span class="dax-line-num">19</span><span class="c-hl">Cantidad Total</span> <span class="c-op">=</span> <span class="c-fn">SUM</span>(fact_ventas[cantidad])<br>
+<br>
+<span class="dax-line-num">22</span><span class="c-cm">-- ⑥ Ticket medio</span><br>
+<span class="dax-line-num">23</span><span class="c-hl">Ticket Medio</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">24</span>&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>([Ingresos], [Cantidad Total], <span class="c-num">0</span>)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 09 · DAX — INTELIGENCIA TEMPORAL ══ -->
+<div class="slide bg-darker"
+  data-title="DAX — Inteligencia temporal"
+  data-script="Las medidas de inteligencia temporal son las más valoradas en un dashboard financiero. Son las que permiten comparar el período actual con el mismo período del año pasado, calcular acumulados año hasta la fecha, o hacer un mes a mes. La primera es Ingresos Last Year: usamos CALCULATE con SAMEPERIODLASTYEAR para obtener los ingresos del mismo período del año anterior. La segunda es la variación Year over Year en porcentaje: Ingresos menos Ingresos Last Year, dividido entre Ingresos Last Year, con DIVIDE para evitar el error de división por cero. La tercera es el acumulado Year to Date: CALCULATE de Ingresos con DATESYTD. Y la cuarta, muy útil en finanzas, es el acumulado del año anterior Year to Date para comparar dónde estábamos el año pasado en la misma fecha. Con estas cuatro medidas puedes responder el noventa por ciento de las preguntas financieras de cualquier comité de dirección.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">07 · DAX</span><h2 class="slide-h">Inteligencia temporal<br>YoY · MoM · YTD</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n" style="color:var(--gold)">LY</span><div class="step-body"><div class="step-title">Ingresos Last Year</div><div class="step-desc">SAMEPERIODLASTYEAR desplaza el contexto de fecha exactamente un año hacia atrás.</div></div></div>
+        <div class="step"><span class="step-n" style="color:var(--gold)">YoY</span><div class="step-body"><div class="step-title">Variación Year over Year %</div><div class="step-desc">Diferencia entre año actual y año anterior, expresada en porcentaje. La favorita de los CEOs.</div></div></div>
+        <div class="step"><span class="step-n" style="color:var(--gold)">YTD</span><div class="step-body"><div class="step-title">Ingresos Year to Date</div><div class="step-desc">Acumulado desde el 1 de enero hasta la fecha seleccionada en el filtro.</div></div></div>
+        <div class="step"><span class="step-n" style="color:var(--gold)">LY<br>YTD</span><div class="step-body"><div class="step-title">Ingresos LY YTD</div><div class="step-desc">Acumulado del año anterior hasta la misma fecha. Para comparar dónde estabas.</div></div></div>
+        <div class="warn-box" style="margin-top:6px"><b>⚠️ Recuerda:</b> Estas funciones requieren que dim_tiempo esté marcada como tabla de fechas. Si no, devolverán BLANK.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="dax-editor">
+        <div class="dax-header"><span class="dax-header-title">Medidas de inteligencia temporal</span></div>
+        <div class="dax-body">
+<span class="dax-line-num">1</span><span class="c-cm">-- Year over Year</span><br>
+<span class="dax-line-num">2</span><span class="c-hl">Ingresos LY</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">3</span>&nbsp;&nbsp;<span class="c-fn">CALCULATE</span>(<br>
+<span class="dax-line-num">4</span>&nbsp;&nbsp;&nbsp;&nbsp;[Ingresos],<br>
+<span class="dax-line-num">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">SAMEPERIODLASTYEAR</span>(dim_tiempo[fecha])<br>
+<span class="dax-line-num">6</span>&nbsp;&nbsp;)<br>
+<br>
+<span class="dax-line-num">8</span><span class="c-hl">YoY %</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">9</span>&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>([Ingresos] <span class="c-op">-</span> [Ingresos LY], [Ingresos LY], <span class="c-num">0</span>)<br>
+<br>
+<span class="dax-line-num">12</span><span class="c-cm">-- Year to Date</span><br>
+<span class="dax-line-num">13</span><span class="c-hl">Ingresos YTD</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">14</span>&nbsp;&nbsp;<span class="c-fn">CALCULATE</span>([Ingresos], <span class="c-fn">DATESYTD</span>(dim_tiempo[fecha]))<br>
+<br>
+<span class="dax-line-num">17</span><span class="c-cm">-- LY YTD para comparativa</span><br>
+<span class="dax-line-num">18</span><span class="c-hl">Ingresos LY YTD</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">19</span>&nbsp;&nbsp;<span class="c-fn">CALCULATE</span>(<br>
+<span class="dax-line-num">20</span>&nbsp;&nbsp;&nbsp;&nbsp;[Ingresos],<br>
+<span class="dax-line-num">21</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">DATESYTD</span>(<span class="c-fn">SAMEPERIODLASTYEAR</span>(dim_tiempo[fecha]))<br>
+<span class="dax-line-num">22</span>&nbsp;&nbsp;)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 · DAX — EBITDA y P&L ══ -->
+<div class="slide bg-dark"
+  data-title="DAX — EBITDA y P&L completo"
+  data-script="Para el P&L completo necesitamos las métricas de rentabilidad: EBITDA, EBIT y margen neto. En un modelo simplificado, el EBITDA es el margen bruto menos los gastos operativos. Los gastos operativos pueden estar en una tabla separada o calcularse como un porcentaje fijo según el tipo de negocio. El EBIT es el EBITDA menos la amortización. Y el margen neto es el EBIT menos los intereses e impuestos. En Power BI lo importante es no mezclar lógica de P&L con lógica de ventas en la misma medida. Mantén una medida por cada línea del P&L. Así el modelo es auditable: cualquier analista puede seguir el hilo desde el ingreso hasta el beneficio neto sin perderse.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">08 · DAX</span><h2 class="slide-h">EBITDA y P&L<br>completo</h2></div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:.5rem">
+        <div style="background:rgba(255,255,255,.03);border-left:3px solid #86efac;padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#86efac">Ingresos</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--t-dim);margin-top:2px">SUM(fact_ventas[importe])</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);border-left:3px solid #fca5a5;padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#fca5a5">— Coste de ventas</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--t-dim);margin-top:2px">SUM(fact_ventas[coste])</div>
+        </div>
+        <div style="background:rgba(37,99,235,.1);border-left:3px solid var(--blue2);padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:var(--blue2)">= Margen Bruto</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--t-dim);margin-top:2px">[Ingresos] - [Coste Total]</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);border-left:3px solid #fca5a5;padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#fca5a5">— Gastos Operativos</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--t-dim);margin-top:2px">SUM(fact_gastos[importe])</div>
+        </div>
+        <div style="background:rgba(240,192,64,.1);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:var(--gold)">= EBITDA</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--t-dim);margin-top:2px">[Margen Bruto] - [Gastos Op.]</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);border-left:3px solid #fca5a5;padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#fca5a5">— Amortización</div>
+        </div>
+        <div style="background:rgba(134,239,172,.08);border-left:3px solid #86efac;padding:8px 12px;border-radius:0 4px 4px 0">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#86efac">= Beneficio Neto</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="dax-editor">
+        <div class="dax-header"><span class="dax-header-title">Medidas P&L</span></div>
+        <div class="dax-body">
+<span class="dax-line-num">1</span><span class="c-cm">-- Gastos operativos (tabla separada)</span><br>
+<span class="dax-line-num">2</span><span class="c-hl">Gastos Op</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">3</span>&nbsp;&nbsp;<span class="c-fn">SUM</span>(fact_gastos[importe])<br>
+<br>
+<span class="dax-line-num">6</span><span class="c-cm">-- EBITDA</span><br>
+<span class="dax-line-num">7</span><span class="c-hl">EBITDA</span> <span class="c-op">=</span> [Margen Bruto] <span class="c-op">-</span> [Gastos Op]<br>
+<br>
+<span class="dax-line-num">10</span><span class="c-cm">-- EBITDA Margin %</span><br>
+<span class="dax-line-num">11</span><span class="c-hl">EBITDA %</span> <span class="c-op">=</span> <span class="c-fn">DIVIDE</span>([EBITDA], [Ingresos], <span class="c-num">0</span>)<br>
+<br>
+<span class="dax-line-num">14</span><span class="c-cm">-- Vs Budget (si tienes tabla presupuesto)</span><br>
+<span class="dax-line-num">15</span><span class="c-hl">Vs Budget %</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">16</span>&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>(<br>
+<span class="dax-line-num">17</span>&nbsp;&nbsp;&nbsp;&nbsp;[Ingresos] <span class="c-op">-</span> [Budget Ingresos],<br>
+<span class="dax-line-num">18</span>&nbsp;&nbsp;&nbsp;&nbsp;[Budget Ingresos],<br>
+<span class="dax-line-num">19</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-num">0</span><br>
+<span class="dax-line-num">20</span>&nbsp;&nbsp;)<br>
+<br>
+<span class="dax-line-num">23</span><span class="c-cm">-- Semáforo de KPI</span><br>
+<span class="dax-line-num">24</span><span class="c-hl">Estado KPI</span> <span class="c-op">=</span><br>
+<span class="dax-line-num">25</span>&nbsp;&nbsp;<span class="c-fn">IF</span>([YoY %] <span class="c-op">>=</span> <span class="c-num">0.05</span>, <span class="c-str">"🟢"</span>,<br>
+<span class="dax-line-num">26</span>&nbsp;&nbsp;<span class="c-fn">IF</span>([YoY %] <span class="c-op">>=</span> <span class="c-num">0</span>, <span class="c-str">"🟡"</span>, <span class="c-str">"🔴"</span>))
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11 · RLS — CONFIGURACIÓN ══ -->
+<div class="slide bg-darker"
+  data-title="Row Level Security — Configuración"
+  data-script="Ahora implementamos el Row Level Security. Vamos a Modelado, Administrar roles. Aquí creamos un nuevo rol llamado Director. Seleccionamos la tabla dim_departamento y en el campo de filtro DAX escribimos la expresión: corchete director guión email corchete igual igual USERNAME abre paréntesis cierra paréntesis. Esta expresión hace que Power BI compare automáticamente el email del usuario autenticado en el Servicio con el valor de la columna director_email en cada fila de dim_departamento. Como fact_ventas está conectada a dim_departamento mediante una relación, el filtro se propaga automáticamente. El director de ventas solo verá las filas de fact_ventas correspondientes a su departamento, sin que nosotros tengamos que hacer nada más. Para probar el RLS en Desktop, vamos a Modelado, Ver como, y simulamos un usuario específico. Este paso de prueba es fundamental antes de publicar. Un error en el RLS en producción puede exponer datos confidenciales.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">09 · Seguridad</span><h2 class="slide-h">Row Level Security — Administrar roles</h2></div>
+    <div style="flex:1;overflow:hidden;display:flex;gap:16px">
+      <!-- RLS Editor mockup -->
+      <div class="rls-editor" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div class="rls-toolbar">
+          <span style="font-family:var(--fd);font-size:.6rem;font-weight:700;color:rgba(255,255,255,.6)">Administrar roles de seguridad</span>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <div style="font-family:var(--fd);font-size:.55rem;padding:3px 10px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border-radius:2px;cursor:default">+ Nuevo rol</div>
+            <div style="font-family:var(--fd);font-size:.55rem;padding:3px 10px;background:#0078d4;color:#fff;border-radius:2px;cursor:default">Guardar</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;overflow:hidden">
+          <div class="rls-role-list">
+            <div style="font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:5px 10px;border-bottom:1px solid #3e3e42">ROLES</div>
+            <div class="rls-role-item act">Director <span style="color:#f2c811">●</span></div>
+            <div class="rls-role-item">CFO_View</div>
+            <div class="rls-role-item">CEO_View</div>
+            <div class="rls-role-item" style="color:rgba(255,255,255,.25)">+ Nuevo rol</div>
+          </div>
+          <div class="rls-main">
+            <div class="rls-table-selector">Tabla: dim_departamento</div>
+            <div class="dax-editor">
+              <div class="dax-header"><span class="dax-header-title">Filtro DAX — Rol: Director</span></div>
+              <div class="dax-body" style="padding:10px 14px">
+<span class="dax-line-num">1</span><span class="c-cm">-- El usuario solo ve filas donde su email coincide</span><br>
+<span class="dax-line-num">2</span>[director_email] <span class="c-op">==</span> <span class="c-fn">USERNAME</span>()<br>
+<br>
+<span class="dax-line-num">4</span><span class="c-cm">-- Para entorno con Azure AD (recomendado):</span><br>
+<span class="dax-line-num">5</span><span class="c-cm">-- [director_email] == USERPRINCIPALNAME()</span>
+              </div>
+            </div>
+            <div style="margin-top:8px" class="tip-box"><b>✅ USERNAME()</b> devuelve el email en Power BI Service. <b>USERPRINCIPALNAME()</b> es la alternativa recomendada para entornos con Azure Active Directory, ya que es más robusta con SSO.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: test panel -->
+      <div style="width:220px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint)">Probar el RLS en Desktop</div>
+        <div class="pbi-window">
+          <div class="pbi-titlebar"><span class="pbi-tb-title">Ver como → Rol</span></div>
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-family:var(--fd);font-size:.58rem;color:rgba(255,255,255,.5)">Seleccionar rol:</div>
+            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);padding:5px 8px;border-radius:2px;font-family:var(--fm);font-size:.58rem;color:#fff">✓ Director</div>
+            <div style="font-family:var(--fd);font-size:.58rem;color:rgba(255,255,255,.5);margin-top:4px">Usuario de prueba:</div>
+            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);padding:5px 8px;border-radius:2px;font-family:var(--fm);font-size:.58rem;color:var(--gold)">dir.ventas@empresa.es</div>
+            <div style="background:#0078d4;color:#fff;font-family:var(--fd);font-size:.55rem;font-weight:700;padding:6px;border-radius:2px;text-align:center;cursor:default;letter-spacing:.06em">VER COMO ESTE ROL</div>
+            <div class="tip-box" style="margin-top:4px;font-size:.7rem"><b>⚠️</b> Verifica que el filtro funciona antes de publicar.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12 · DIRECTQUERY — CONFIGURACIÓN ══ -->
+<div class="slide bg-dark"
+  data-title="DirectQuery — Configuración"
+  data-script="Vamos con DirectQuery. Cuando conectamos en modo DirectQuery, cada interacción del usuario con el dashboard genera una consulta SQL en tiempo real contra SQL Server. El gran beneficio es que los datos siempre están actualizados sin necesidad de programar actualizaciones. El coste es el rendimiento: si el modelo no está bien optimizado, los tiempos de respuesta pueden ser malos. Para configurarlo, al conectar a SQL Server seleccionamos DirectQuery en el cuadro de diálogo de conexión. Luego en Archivo, Opciones, DirectQuery, activamos la opción de límite de tiempo de consulta, que yo pongo en treinta segundos. También activamos el Log de consultas para poder ver exactamente qué SQL está generando Power BI. Esto es oro para diagnosticar problemas de rendimiento. En la siguiente slide vemos las reglas de optimización de SQL Server que tienes que aplicar antes de usar DirectQuery en producción.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">10 · DirectQuery</span><h2 class="slide-h">Configurar<br>DirectQuery</h2></div>
+      <p class="slide-sub">DirectQuery = datos siempre frescos. El precio: rendimiento dependiente de SQL Server.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">01</span><div class="step-body"><div class="step-title">Seleccionar modo al conectar</div><div class="step-desc">En el diálogo de conexión a SQL Server, elige "DirectQuery" (no Importar).</div></div></div>
+        <div class="step"><span class="step-n">02</span><div class="step-body"><div class="step-title">Límite de tiempo de consulta</div><div class="step-desc">Opciones → DirectQuery → timeout 30s. Evita que queries lentas bloqueen el dashboard.</div></div></div>
+        <div class="step"><span class="step-n">03</span><div class="step-body"><div class="step-title">Activar log de consultas</div><div class="step-desc">Opciones → Diagnóstico → Activar registro. Esencial para depurar rendimiento.</div></div></div>
+        <div class="step"><span class="step-n">04</span><div class="step-body"><div class="step-title">Query Reduction</div><div class="step-desc">Opciones → DirectQuery → "Reducir número de consultas". Agrupa peticiones.</div></div></div>
+        <div class="warn-box"><b>❌ No puedes:</b> Usar columnas calculadas en DirectQuery. Todo cálculo en columna debe hacerse en SQL Server (vistas o columnas calculadas de SQL).</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint);margin-bottom:8px">SQL generado por Power BI (log)</div>
+      <div class="code">
+<span class="c-cm">-- Query generada automáticamente por PBI</span><br>
+<span class="c-cm">-- al filtrar por Q1 2025, Dept = Ventas</span><br>
+<span class="c-kw">SELECT</span><br>
+&nbsp;&nbsp;d.[mes_nombre],<br>
+&nbsp;&nbsp;<span class="c-fn">SUM</span>(f.[importe]) <span class="c-kw">AS</span> [Ingresos],<br>
+&nbsp;&nbsp;<span class="c-fn">SUM</span>(f.[coste]) <span class="c-kw">AS</span> [Coste Total]<br>
+<span class="c-kw">FROM</span> [dbo].[fact_ventas] f<br>
+<span class="c-kw">JOIN</span> [dbo].[dim_tiempo] d<br>
+&nbsp;&nbsp;<span class="c-kw">ON</span> f.[fecha_id] = d.[fecha_id]<br>
+<span class="c-kw">JOIN</span> [dbo].[dim_departamento] dp<br>
+&nbsp;&nbsp;<span class="c-kw">ON</span> f.[dept_id] = dp.[dept_id]<br>
+<span class="c-kw">WHERE</span><br>
+&nbsp;&nbsp;d.[año] = <span class="c-num">2025</span><br>
+&nbsp;&nbsp;<span class="c-kw">AND</span> d.[trimestre] = <span class="c-num">1</span><br>
+&nbsp;&nbsp;<span class="c-kw">AND</span> dp.[director_email] = <span class="c-str">'dir.ventas@empresa.es'</span><br>
+<span class="c-kw">GROUP BY</span> d.[mes_nombre]<br>
+<span class="c-kw">ORDER BY</span> d.[mes]
+      </div>
+      <div class="tip-box" style="margin-top:8px"><b>👁️ Observa:</b> Power BI inyecta automáticamente el filtro del RLS (<code style="color:#fde68a">director_email = '...'</code>) en cada query. El usuario nunca puede ver datos de otro departamento.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13 · SQL SERVER — OPTIMIZACIÓN ══ -->
+<div class="slide bg-darker"
+  data-title="SQL Server — Optimización para DirectQuery"
+  data-script="Antes de conectar Power BI en producción, tienes que preparar SQL Server para DirectQuery. Las tres reglas de oro son: índices, vistas y estadísticas. Primero, crea índices en todas las columnas que usas como filtro en Power BI. Para la tabla de hechos, el índice más importante es un índice compuesto en fecha_id, dept_id y cliente_id, que son las columnas por las que más vas a filtrar. Para las dimensiones, los índices en las claves primarias ya los tienes, pero también crea índices en las columnas de texto por las que filtras, como mes_nombre o segmento. Segundo, usa vistas en vez de tablas directamente. Crea vistas que ya hagan los JOINs básicos y filtren columnas innecesarias. Así Power BI lanza queries más simples contra la vista. Tercero, actualiza las estadísticas regularmente. En SQL Server las estadísticas desactualizadas son la causa número uno de planes de ejecución malos.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">11 · SQL Server</span><h2 class="slide-h">Optimización<br>para DirectQuery</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n">IDX</span><div class="step-body"><div class="step-title">Índices en columnas de filtro</div><div class="step-desc">Índice compuesto en (fecha_id, dept_id, cliente_id) en fact_ventas. Reduce tiempo de query 10x.</div></div></div>
+        <div class="step"><span class="step-n">VIEW</span><div class="step-body"><div class="step-title">Conectar a vistas, no a tablas</div><div class="step-desc">Las vistas encapsulan lógica y permiten que el DBA optimice sin tocar Power BI.</div></div></div>
+        <div class="step"><span class="step-n">STAT</span><div class="step-body"><div class="step-title">Estadísticas actualizadas</div><div class="step-desc">UPDATE STATISTICS semanalmente. Las estadísticas obsoletas generan planes de ejecución malos.</div></div></div>
+        <div class="step"><span class="step-n">PART</span><div class="step-body"><div class="step-title">Particionado por fecha</div><div class="step-desc">Si la tabla supera 10M de filas, particiona por fecha_id. Reduce scans a la partición del período.</div></div></div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code">
+<span class="c-cm">-- Índice compuesto fact_ventas</span><br>
+<span class="c-kw">CREATE NONCLUSTERED INDEX</span><br>
+&nbsp;&nbsp;[IX_fact_ventas_filtros]<br>
+<span class="c-kw">ON</span> [dbo].[fact_ventas] (<br>
+&nbsp;&nbsp;[fecha_id] <span class="c-kw">ASC</span>,<br>
+&nbsp;&nbsp;[dept_id] <span class="c-kw">ASC</span>,<br>
+&nbsp;&nbsp;[cliente_id] <span class="c-kw">ASC</span><br>
+)<br>
+<span class="c-kw">INCLUDE</span> ([importe], [coste], [cantidad]);<br>
+<br>
+<span class="c-cm">-- Vista para Power BI (encapsula lógica)</span><br>
+<span class="c-kw">CREATE VIEW</span> [dbo].[vw_ventas_bi] <span class="c-kw">AS</span><br>
+<span class="c-kw">SELECT</span><br>
+&nbsp;&nbsp;f.venta_id, f.importe, f.coste,<br>
+&nbsp;&nbsp;t.año, t.trimestre, t.mes_nombre,<br>
+&nbsp;&nbsp;c.nombre <span class="c-kw">AS</span> cliente,<br>
+&nbsp;&nbsp;c.segmento,<br>
+&nbsp;&nbsp;d.nombre <span class="c-kw">AS</span> departamento,<br>
+&nbsp;&nbsp;d.director_email<br>
+<span class="c-kw">FROM</span> fact_ventas f<br>
+<span class="c-kw">JOIN</span> dim_tiempo t <span class="c-kw">ON</span> f.fecha_id = t.fecha_id<br>
+<span class="c-kw">JOIN</span> dim_cliente c <span class="c-kw">ON</span> f.cliente_id = c.cliente_id<br>
+<span class="c-kw">JOIN</span> dim_departamento d <span class="c-kw">ON</span> f.dept_id = d.dept_id;<br>
+<br>
+<span class="c-cm">-- Actualizar estadísticas</span><br>
+<span class="c-kw">UPDATE STATISTICS</span> [dbo].[fact_ventas]<br>
+&nbsp;&nbsp;<span class="c-kw">WITH</span> FULLSCAN;
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 14 · CANVAS — CONSTRUIR VISUALES ══ -->
+<div class="slide bg-dark"
+  data-title="Canvas — Construir los visuales"
+  data-script="Ahora volvemos a Power BI Desktop y construimos los visuales en el canvas. La estructura del dashboard tiene tres zonas. En la parte superior, cuatro tarjetas de KPI: Ingresos, Margen Bruto, EBITDA y Variación YoY. En el centro, un gráfico de barras de Ingresos por mes con la línea de tendencia de Margen Bruto. A la derecha, un gráfico de anillo con la distribución por departamento. Y en la parte inferior, una tabla detallada con los top clientes. Para crear la tarjeta de KPI de Ingresos, arrastra la medida Ingresos al canvas, selecciona el visual Tarjeta, y en formato personaliza el tamaño de fuente del valor a 28 puntos, activa la etiqueta de categoría, y en el título del visual escribe Ingresos Totales. Para añadir el indicador de variación YoY, usa el visual Tarjeta de KPI que tiene el valor objetivo: el valor actual es Ingresos, el valor objetivo es Ingresos LY, y Power BI calcula automáticamente la flecha de tendencia.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">12 · Canvas</span><h2 class="slide-h">Construir los visuales en el canvas</h2></div>
+    <div style="flex:1;overflow:hidden">
+      <!-- Power BI Desktop full mockup -->
+      <div class="pbi-window" style="height:100%;display:flex;flex-direction:column">
+        <div class="pbi-titlebar">
+          <div class="pbi-tb-dot" style="background:#ff5f56"></div>
+          <div class="pbi-tb-dot" style="background:#ffbd2e"></div>
+          <div class="pbi-tb-dot" style="background:#27c93f"></div>
+          <span class="pbi-tb-title">Dashboard_Financiero_v1.pbix — Power BI Desktop</span>
+        </div>
+        <div class="pbi-ribbon">
+          <div class="pbi-rib-tab">Archivo</div>
+          <div class="pbi-rib-tab act">Inicio</div>
+          <div class="pbi-rib-tab">Insertar</div>
+          <div class="pbi-rib-tab">Modelado</div>
+          <div class="pbi-rib-tab">Ver</div>
+          <div class="pbi-rib-tab">Optimizar</div>
+          <div style="margin-left:auto;display:flex;gap:4px;align-items:center">
+            <div class="pbi-rib-btn"><span class="pbi-rib-icon">🔄</span><span>Actualizar</span></div>
+            <div class="pbi-rib-btn" style="background:#0078d4;color:#fff"><span class="pbi-rib-icon">☁️</span><span>Publicar</span></div>
+          </div>
+        </div>
+        <div class="pbi-main" style="flex:1;overflow:hidden">
+          <div class="pbi-sidebar-l">
+            <div class="pbi-icon-btn">📊</div>
+            <div class="pbi-icon-btn act">📋</div>
+            <div class="pbi-icon-btn">🔀</div>
+          </div>
+          <!-- Canvas -->
+          <div class="pbi-canvas-area">
+            <!-- KPI Cards row -->
+            <div class="pbi-visual selected" style="top:8px;left:8px;width:120px;height:60px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">INGRESOS TOTALES</span></div>
+              <div style="padding:4px 8px"><div style="font-family:var(--fd);font-size:1.1rem;font-weight:800;color:#201f1e">€4.2M</div><div style="font-family:var(--fd);font-size:.5rem;color:#107c10;font-weight:700">▲ +12.4% vs LY</div></div>
+            </div>
+            <div class="pbi-visual" style="top:8px;left:136px;width:120px;height:60px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">MARGEN BRUTO</span></div>
+              <div style="padding:4px 8px"><div style="font-family:var(--fd);font-size:1.1rem;font-weight:800;color:#201f1e">38.6%</div><div style="font-family:var(--fd);font-size:.5rem;color:#107c10;font-weight:700">▲ +2.1pp vs LY</div></div>
+            </div>
+            <div class="pbi-visual" style="top:8px;left:264px;width:120px;height:60px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">EBITDA</span></div>
+              <div style="padding:4px 8px"><div style="font-family:var(--fd);font-size:1.1rem;font-weight:800;color:#201f1e">€890K</div><div style="font-family:var(--fd);font-size:.5rem;color:#a80000;font-weight:700">▼ −3.2% vs LY</div></div>
+            </div>
+            <div class="pbi-visual" style="top:8px;left:392px;width:120px;height:60px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">INGRESOS YTD</span></div>
+              <div style="padding:4px 8px"><div style="font-family:var(--fd);font-size:1.1rem;font-weight:800;color:#201f1e">€3.1M</div><div style="font-family:var(--fd);font-size:.5rem;color:#107c10;font-weight:700">▲ +9.8% LY YTD</div></div>
+            </div>
+            <!-- Bar chart -->
+            <div class="pbi-visual" style="top:76px;left:8px;width:360px;height:130px">
+              <div class="pbi-visual-header">
+                <span class="pbi-visual-title">INGRESOS POR MES</span>
+                <div class="pbi-visual-actions"><div class="pbi-va">⋯</div><div class="pbi-va">⤢</div></div>
+              </div>
+              <div class="canvas-bars" style="gap:5px;padding:6px 10px;height:100px">
+                <div class="cb" style="height:50%;background:#0078d4;opacity:.7"></div>
+                <div class="cb" style="height:65%;background:#0078d4;opacity:.7"></div>
+                <div class="cb" style="height:55%;background:#0078d4;opacity:.7"></div>
+                <div class="cb" style="height:80%;background:#0078d4"></div>
+                <div class="cb" style="height:95%;background:#0078d4"></div>
+                <div class="cb" style="height:72%;background:#0078d4;opacity:.7"></div>
+                <div class="cb" style="height:78%;background:#0078d4;opacity:.7"></div>
+                <div class="cb" style="height:88%;background:#0078d4"></div>
+                <div class="cb" style="height:60%;background:#d0d0d0;opacity:.5"></div>
+                <div class="cb" style="height:60%;background:#d0d0d0;opacity:.5"></div>
+                <div class="cb" style="height:60%;background:#d0d0d0;opacity:.5"></div>
+                <div class="cb" style="height:60%;background:#d0d0d0;opacity:.5"></div>
+              </div>
+            </div>
+            <!-- Donut -->
+            <div class="pbi-visual" style="top:76px;right:8px;width:130px;height:130px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">POR DEPTO.</span></div>
+              <div style="display:flex;align-items:center;justify-content:center;height:90px">
+                <div style="width:64px;height:64px;border-radius:50%;background:conic-gradient(#0078d4 0% 42%,#f2c811 42% 65%,#107c10 65% 82%,#a80000 82% 100%);position:relative">
+                  <div style="position:absolute;inset:14px;border-radius:50%;background:#fff"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Table -->
+            <div class="pbi-visual" style="top:214px;left:8px;right:8px;height:60px">
+              <div class="pbi-visual-header"><span class="pbi-visual-title">TOP CLIENTES — INGRESOS · MARGEN</span></div>
+              <div style="padding:0 8px;font-family:var(--fm);font-size:.5rem">
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border-bottom:1px solid #e8e8e8;padding:3px 0;color:#605e5c;font-weight:700">
+                  <span>Cliente</span><span>Ingresos</span><span>Margen</span><span>YoY</span>
+                </div>
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #f3f2f1">
+                  <span>Acme Corp</span><span>€ 420K</span><span>41.2%</span><span style="color:#107c10">▲ 14%</span>
+                </div>
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:3px 0">
+                  <span>Globex S.L.</span><span>€ 310K</span><span>35.8%</span><span style="color:#a80000">▼ 3%</span>
+                </div>
+              </div>
+            </div>
+            <!-- Tooltip -->
+            <div class="pbi-tooltip" style="top:100px;left:200px">Ago 2025<br><b>Ingresos: €520K</b><br>Margen: 40.1%</div>
+          </div>
+          <!-- Field panel right -->
+          <div class="pbi-panel-r">
+            <div class="pbi-panel-tab">
+              <div class="pbi-ptab act">Visualizaciones</div>
+              <div class="pbi-ptab">Campos</div>
+              <div class="pbi-ptab">Formato</div>
+            </div>
+            <div style="padding:8px;border-bottom:1px solid var(--pbi-border)">
+              <div style="font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px">Tipo de visual</div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px">
+                <div style="background:rgba(0,120,212,.3);border:1px solid #0078d4;border-radius:2px;padding:4px;text-align:center;font-size:.8rem">📊</div>
+                <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:4px;text-align:center;font-size:.8rem">📈</div>
+                <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:4px;text-align:center;font-size:.8rem">🍩</div>
+                <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:4px;text-align:center;font-size:.8rem">🗃️</div>
+                <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:4px;text-align:center;font-size:.8rem">🎯</div>
+              </div>
+            </div>
+            <div style="padding:8px;font-family:var(--fd);font-size:.52rem">
+              <div style="font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px">Campos del visual</div>
+              <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:5px 7px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
+                <span style="color:rgba(255,255,255,.5)">Eje X</span><span style="color:var(--pbi-accent)">mes_nombre</span>
+              </div>
+              <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:5px 7px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
+                <span style="color:rgba(255,255,255,.5)">Valores</span><span style="color:var(--pbi-accent)">Ingresos</span>
+              </div>
+              <div style="background:rgba(255,255,255,.05);border-radius:2px;padding:5px 7px;display:flex;align-items:center;justify-content:space-between">
+                <span style="color:rgba(255,255,255,.5)">Línea</span><span style="color:var(--pbi-accent)">Margen %</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 15 · FORMATO Y DISEÑO ══ -->
+<div class="slide bg-darker"
+  data-title="Formato y diseño del dashboard"
+  data-script="El formato del dashboard importa tanto como los datos. Un dashboard con datos correctos pero mal presentado no lo usa nadie. Cuatro reglas de diseño que aplico en todos mis proyectos. Primera: paleta de colores corporativos. En el panel de formato, ve a Temas y crea un tema personalizado con los colores de la empresa. Guárdalo como JSON y reutilízalo en todos los dashboards. Segunda: tipografía consistente. Usa la misma familia de fuentes en todos los visuales. Yo recomiendo Segoe UI para el cuerpo y Segoe UI Bold para los títulos. Tercera: alineación perfecta. Usa la cuadrícula de ajuste y el panel de alineación para que todos los elementos estén perfectamente alineados. Un pixel mal alineado hace que el dashboard parezca descuidado. Cuarta: fondo oscuro para dashboards ejecutivos. El modo oscuro con texto blanco proyecta mejor en salas de reuniones y reduce la fatiga visual en sesiones largas.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">13 · Diseño</span><h2 class="slide-h">Formato y diseño<br>profesional</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n">🎨</span><div class="step-body"><div class="step-title">Tema corporativo personalizado</div><div class="step-desc">Exporta el tema como JSON y reutilízalo. Colores, fuentes y bordes en un solo fichero.</div></div></div>
+        <div class="step"><span class="step-n">📐</span><div class="step-body"><div class="step-title">Cuadrícula de ajuste</div><div class="step-desc">Ver → Cuadrícula → Ajustar a cuadrícula. Todos los elementos perfectamente alineados.</div></div></div>
+        <div class="step"><span class="step-n">🌙</span><div class="step-body"><div class="step-title">Modo oscuro ejecutivo</div><div class="step-desc">Fondo #1e1e2e, texto blanco. Mejor contraste en proyecciones y salas de reuniones.</div></div></div>
+        <div class="step"><span class="step-n">📱</span><div class="step-body"><div class="step-title">Vista móvil</div><div class="step-desc">Ver → Vista de teléfono. Reorganiza los visuales para móvil. Los directivos usan la app.</div></div></div>
+        <div class="tip-box"><b>💡 Truco:</b> El JSON del tema puede importarse desde un repositorio Git. Control de versiones del diseño corporativo.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint);margin-bottom:8px">Tema JSON — ejemplo mínimo</div>
+      <div class="code" style="font-size:.6rem">
+{<br>
+&nbsp;&nbsp;<span class="c-str">"name"</span>: <span class="c-str">"Empresa Dashboard v2"</span>,<br>
+&nbsp;&nbsp;<span class="c-str">"dataColors"</span>: [<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">"#0078D4"</span>, <span class="c-str">"#F2C811"</span>, <span class="c-str">"#107C10"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">"#A80000"</span>, <span class="c-str">"#8764B8"</span>, <span class="c-str">"#00B4D8"</span><br>
+&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;<span class="c-str">"background"</span>: <span class="c-str">"#1e1e2e"</span>,<br>
+&nbsp;&nbsp;<span class="c-str">"foreground"</span>: <span class="c-str">"#FFFFFF"</span>,<br>
+&nbsp;&nbsp;<span class="c-str">"tableAccent"</span>: <span class="c-str">"#0078D4"</span>,<br>
+&nbsp;&nbsp;<span class="c-str">"visualStyles"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">"*"</span>: { <span class="c-str">"*"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">"fontFamily"</span>: [{ <span class="c-str">"value"</span>: <span class="c-str">"Segoe UI"</span> }],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">"fontSize"</span>: [{ <span class="c-str">"value"</span>: <span class="c-num">11</span> }]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}}<br>
+&nbsp;&nbsp;}<br>
+}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 16 · SLICERS Y FILTROS ══ -->
+<div class="slide bg-dark"
+  data-title="Slicers y panel de filtros"
+  data-script="Los slicers son los filtros interactivos que el usuario ve en el dashboard. Bien configurados hacen el dashboard intuitivo. Mal configurados hacen que las queries a SQL Server sean lentas. Para el dashboard financiero necesitamos cuatro slicers: año, trimestre, departamento, y segmento de cliente. El slicer de año lo pongo en formato de lista horizontal, con selección única por defecto para forzar que el usuario siempre tenga un año seleccionado. El slicer de trimestre en botones horizontales. El de departamento en lista vertical con buscador habilitado para cuando hay muchos departamentos. Y el de segmento en una lista desplegable para ahorrar espacio. Hay dos opciones de filtro en Power BI: los Slicers visibles en el canvas, que el usuario controla, y el Panel de Filtros del lado derecho, que es para filtros del desarrollador. Yo uso el Panel de Filtros para filtros de nivel de informe que no quiero que el usuario modifique, como un filtro que excluye filas de prueba o registros nulos.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14 · UX</span><h2 class="slide-h">Slicers y panel<br>de filtros</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n">📅</span><div class="step-body"><div class="step-title">Slicer de Año — Lista horizontal</div><div class="step-desc">Selección única por defecto. Siempre hay un año activo. Evita queries sin filtro de fecha.</div></div></div>
+        <div class="step"><span class="step-n">Q</span><div class="step-body"><div class="step-title">Slicer de Trimestre — Botones</div><div class="step-desc">Formato "Botones". Permite multi-selección para ver semestres completos.</div></div></div>
+        <div class="step"><span class="step-n">🏢</span><div class="step-body"><div class="step-title">Slicer de Departamento — Lista + buscador</div><div class="step-desc">Habilita "Buscar" en el slicer. Imprescindible con más de 10 departamentos.</div></div></div>
+        <div class="step"><span class="step-n">🔒</span><div class="step-body"><div class="step-title">Panel de filtros — Filtros del desarrollador</div><div class="step-desc">Filtros que el usuario no debe modificar: excluir tests, excluir nulos, fijar empresa.</div></div></div>
+        <div class="warn-box"><b>⚡ Rendimiento:</b> Con DirectQuery, cada cambio en un slicer lanza una query. Activa "Aplicar filtros" para agrupar cambios en una sola query.</div>
+      </div>
+    </div>
+    <div class="col-r" style="align-items:center">
+      <div class="pbi-window" style="width:100%;max-width:320px">
+        <div class="pbi-titlebar"><span class="pbi-tb-title">Slicers — Dashboard Financiero</span></div>
+        <div style="background:var(--pbi-canvas);padding:10px;display:flex;flex-direction:column;gap:8px">
+          <!-- Slicer año -->
+          <div style="background:#fff;border:1px solid #d0d0d0;border-radius:2px;padding:6px 8px">
+            <div style="font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#605e5c;margin-bottom:4px">AÑO</div>
+            <div style="display:flex;gap:4px">
+              <div style="padding:3px 8px;border-radius:2px;background:#0078d4;color:#fff;font-family:var(--fd);font-size:.55rem;font-weight:700">2025</div>
+              <div style="padding:3px 8px;border-radius:2px;background:#f3f2f1;color:#323130;font-family:var(--fd);font-size:.55rem">2024</div>
+              <div style="padding:3px 8px;border-radius:2px;background:#f3f2f1;color:#323130;font-family:var(--fd);font-size:.55rem">2023</div>
+            </div>
+          </div>
+          <!-- Slicer trimestre -->
+          <div style="background:#fff;border:1px solid #d0d0d0;border-radius:2px;padding:6px 8px">
+            <div style="font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#605e5c;margin-bottom:4px">TRIMESTRE</div>
+            <div style="display:flex;gap:4px">
+              <div style="padding:3px 10px;border:1px solid #0078d4;border-radius:2px;color:#0078d4;font-family:var(--fd);font-size:.55rem;font-weight:700">Q1</div>
+              <div style="padding:3px 10px;border:1px solid #0078d4;border-radius:2px;background:#0078d4;color:#fff;font-family:var(--fd);font-size:.55rem;font-weight:700">Q2</div>
+              <div style="padding:3px 10px;border:1px solid #d0d0d0;border-radius:2px;color:#323130;font-family:var(--fd);font-size:.55rem">Q3</div>
+              <div style="padding:3px 10px;border:1px solid #d0d0d0;border-radius:2px;color:#323130;font-family:var(--fd);font-size:.55rem">Q4</div>
+            </div>
+          </div>
+          <!-- Slicer dept -->
+          <div style="background:#fff;border:1px solid #d0d0d0;border-radius:2px;padding:6px 8px">
+            <div style="font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#605e5c;margin-bottom:4px">DEPARTAMENTO</div>
+            <div style="background:#f3f2f1;border:1px solid #d0d0d0;border-radius:2px;padding:3px 6px;font-family:var(--fm);font-size:.54rem;color:#a19f9d;margin-bottom:4px">🔍 Buscar...</div>
+            <div style="font-family:var(--fm);font-size:.55rem;display:flex;flex-direction:column;gap:2px">
+              <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border:1.5px solid #0078d4;background:#0078d4;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:#fff">✓</div>Ventas</div>
+              <div style="display:flex;align-items:center;gap:5px;color:#a19f9d"><div style="width:10px;height:10px;border:1.5px solid #d0d0d0;border-radius:2px"></div>Operaciones</div>
+              <div style="display:flex;align-items:center;gap:5px;color:#a19f9d"><div style="width:10px;height:10px;border:1.5px solid #d0d0d0;border-radius:2px"></div>Marketing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 17 · PUBLICAR EN EL SERVICIO ══ -->
+<div class="slide bg-darker"
+  data-title="Publicar en Power BI Service"
+  data-script="El dashboard está listo en Desktop. Ahora lo publicamos en el Servicio de Power BI. Hacemos clic en Publicar en la barra de inicio. Si no has guardado el fichero, te pedirá que lo hagas. Seleccionamos el Workspace de destino. Yo recomiendo crear un Workspace específico para este dashboard, no usar Mi área de trabajo que es personal. El proceso de publicación sube el modelo de datos y el informe al Servicio. En unos segundos aparece el enlace para abrir el informe en el navegador. Una vez publicado, hay dos pasos más. Primero, configurar las credenciales de la fuente de datos: ve a Configuración del conjunto de datos y añade las credenciales de SQL Server. Para DirectQuery esto es obligatorio, el Servicio necesita autenticarse contra SQL Server en cada query. Segundo, asignar usuarios a los roles RLS. En el Workspace, ve al conjunto de datos, puntos suspensivos, Seguridad. Ahí añades el email de cada director al rol correspondiente.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">15 · Publicar</span><h2 class="slide-h">Publicar en Power BI Service</h2></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="service-window" style="height:100%;display:flex;flex-direction:column">
+        <div class="svc-header">
+          <div class="svc-logo">Power <span>BI</span></div>
+          <div style="font-family:var(--fd);font-size:.58rem;color:rgba(255,255,255,.4);margin-left:8px">Servicio · app.powerbi.com</div>
+          <div class="svc-nav">
+            <div class="svc-nav-item">Inicio</div>
+            <div class="svc-nav-item act">Áreas de trabajo</div>
+            <div class="svc-nav-item">Aplicaciones</div>
+          </div>
+          <div style="margin-left:1rem;width:24px;height:24px;border-radius:50%;background:#0078d4;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;font-weight:700">AM</div>
+        </div>
+        <div class="svc-body" style="flex:1;overflow:hidden">
+          <div class="svc-sidebar">
+            <div class="svc-sb-section">Mi espacio</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">🏠</span>Inicio</div>
+            <div class="svc-sb-item act"><span class="svc-sb-icon">📁</span>BI Finanzas Corp</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">📁</span>BI Operaciones</div>
+            <div class="svc-sb-section">Administrar</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">⚙️</span>Configuración</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">🔒</span>Seguridad</div>
+          </div>
+          <div class="svc-content" style="overflow:hidden">
+            <div class="svc-ws-header">
+              <div>
+                <div class="svc-ws-title">📁 BI Finanzas Corp</div>
+                <div style="font-family:var(--fm);font-size:.52rem;color:#a19f9d;margin-top:2px">3 elementos · Actualizado hace 2 min</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="svc-btn ghost">+ Nuevo</button>
+                <button class="svc-btn primary">Administrar acceso</button>
+              </div>
+            </div>
+            <!-- Items -->
+            <div class="svc-item-row">
+              <span class="svc-item-icon">📊</span>
+              <div style="flex:1">
+                <div class="svc-item-name">Dashboard Financiero Dirección</div>
+                <div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">Informe · Propietario: Antonio Moro</div>
+              </div>
+              <span class="svc-item-badge green">✓ DirectQuery activo</span>
+              <span class="svc-item-meta">hace 2 min</span>
+            </div>
+            <div class="svc-item-row">
+              <span class="svc-item-icon">🗄️</span>
+              <div style="flex:1">
+                <div class="svc-item-name">Dashboard Financiero Dirección</div>
+                <div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">Modelo semántico · SQL Server · DWH_Finanzas</div>
+              </div>
+              <span class="svc-item-badge blue">⚙️ Configurar</span>
+              <span class="svc-item-meta">hace 2 min</span>
+            </div>
+            <div class="svc-item-row" style="background:#fffbeb;border-color:#f2c811">
+              <span class="svc-item-icon">⚠️</span>
+              <div style="flex:1">
+                <div class="svc-item-name" style="color:#92400e">Pendiente: Configurar credenciales SQL Server</div>
+                <div style="font-family:var(--fm);font-size:.5rem;color:#b45309">Configuración del conjunto de datos → Credenciales de origen de datos</div>
+              </div>
+              <button class="svc-btn primary" style="font-size:.5rem;padding:3px 8px">Configurar ahora</button>
+            </div>
+            <!-- RLS assignment -->
+            <div style="margin-top:12px;background:#fff;border:1px solid #e8e8e8;border-radius:3px;padding:10px 12px">
+              <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;color:#201f1e;margin-bottom:8px">🔒 Asignación de roles RLS — Conjunto de datos</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div style="background:#f3f2f1;border-radius:3px;padding:6px 8px">
+                  <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;color:#323130;margin-bottom:3px">Rol: Director</div>
+                  <div style="font-family:var(--fm);font-size:.52rem;color:#605e5c;line-height:1.6">dir.ventas@empresa.es<br>dir.ops@empresa.es<br>dir.marketing@empresa.es</div>
+                  <div style="font-family:var(--fd);font-size:.52rem;color:#0078d4;margin-top:3px;cursor:default">+ Agregar miembros</div>
+                </div>
+                <div style="background:#f3f2f1;border-radius:3px;padding:6px 8px">
+                  <div style="font-family:var(--fd);font-size:.55rem;font-weight:700;color:#323130;margin-bottom:3px">Rol: CFO_View</div>
+                  <div style="font-family:var(--fm);font-size:.52rem;color:#605e5c;line-height:1.6">cfo@empresa.es</div>
+                  <div style="font-family:var(--fd);font-size:.52rem;color:#0078d4;margin-top:3px;cursor:default">+ Agregar miembros</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 18 · GATEWAY ══ -->
+<div class="slide bg-dark"
+  data-title="On-premises Data Gateway"
+  data-script="Hay un punto que mucha gente olvida al publicar con DirectQuery: el On-premises Data Gateway. El Servicio de Power BI está en la nube, pero tu SQL Server está en local en la red de la empresa. El Gateway es el puente que permite que el Servicio llegue a SQL Server sin exponer el servidor directamente a Internet. Hay dos versiones: el Gateway personal, que solo sirve para desarrollo, y el Gateway estándar, que es el que tienes que usar en producción porque permite múltiples usuarios y múltiples fuentes de datos. El Gateway se instala en un servidor Windows dentro de la red corporativa que tenga acceso a SQL Server. Luego en el Servicio de Power BI registras el Gateway y lo asocias al conjunto de datos. A partir de ese momento, cada query de un usuario en el Servicio viaja cifrada hasta el Gateway, el Gateway la ejecuta contra SQL Server, y devuelve el resultado. Sin Gateway en DirectQuery, el dashboard no funciona en el Servicio.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">16 · Gateway</span><h2 class="slide-h">On-premises<br>Data Gateway</h2></div>
+      <p class="slide-sub">El puente entre Power BI Service (nube) y SQL Server (local). Obligatorio para DirectQuery en producción.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">①</span><div class="step-body"><div class="step-title">Instalar Gateway estándar</div><div class="step-desc">En un servidor Windows dentro de la red corporativa. Mínimo: 8GB RAM, Windows Server 2019+.</div></div></div>
+        <div class="step"><span class="step-n">②</span><div class="step-body"><div class="step-title">Registrar en Power BI Service</div><div class="step-desc">Configuración → Administrar conexiones → Nuevo Gateway. Cuenta de servicio dedicada.</div></div></div>
+        <div class="step"><span class="step-n">③</span><div class="step-body"><div class="step-title">Asociar al conjunto de datos</div><div class="step-desc">Configuración del dataset → Conexión del Gateway → Seleccionar el Gateway registrado.</div></div></div>
+        <div class="warn-box"><b>⚠️ Gateway personal</b> NO sirve para producción. Solo para desarrollo local de un único usuario. En producción siempre Gateway estándar.</div>
+      </div>
+    </div>
+    <div class="col-r" style="align-items:center;justify-content:center">
+      <!-- Gateway flow diagram -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%">
+        <div style="background:rgba(0,120,212,.1);border:1px solid rgba(0,120,212,.3);border-radius:4px;padding:10px 16px;text-align:center;width:180px">
+          <div style="font-size:1.2rem">☁️</div>
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#93c5fd">Power BI Service</div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint)">app.powerbi.com</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0">
+          <div style="width:2px;height:20px;background:rgba(255,255,255,.15)"></div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint)">HTTPS cifrado</div>
+          <div style="width:2px;height:20px;background:rgba(255,255,255,.15)"></div>
+        </div>
+        <div style="background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);border-radius:4px;padding:10px 16px;text-align:center;width:180px">
+          <div style="font-size:1.2rem">🔀</div>
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:var(--gold)">Gateway estándar</div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint)">srv-gateway · Red corp.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0">
+          <div style="width:2px;height:20px;background:rgba(255,255,255,.15)"></div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint)">Red local</div>
+          <div style="width:2px;height:20px;background:rgba(255,255,255,.15)"></div>
+        </div>
+        <div style="background:rgba(134,239,172,.06);border:1px solid rgba(134,239,172,.2);border-radius:4px;padding:10px 16px;text-align:center;width:180px">
+          <div style="font-size:1.2rem">🗄️</div>
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#86efac">SQL Server</div>
+          <div style="font-family:var(--fm);font-size:.52rem;color:var(--t-faint)">srv-dwh · Puerto 1433</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 19 · SERVICIO — WORKSPACE ══ -->
+<div class="slide bg-darker"
+  data-title="Workspace y permisos en el Servicio"
+  data-script="En el Servicio de Power BI, el Workspace es el contenedor donde viven el informe y el conjunto de datos. La gestión de permisos tiene dos niveles que mucha gente confunde. El primer nivel son los permisos del Workspace: quién puede ver y editar los contenidos del Workspace. Hay cuatro roles: Administrador, que puede hacer de todo; Miembro, que puede publicar y compartir; Colaborador, que puede publicar pero no compartir; y Visor, que solo puede ver. El segundo nivel es el Row Level Security que ya configuramos: quién ve qué datos dentro del informe. Estos dos niveles son independientes. Un usuario puede tener rol Visor en el Workspace y aun así solo ver los datos de su departamento gracias al RLS. Para compartir el dashboard con usuarios finales sin darles acceso al Workspace, lo mejor es crear una Aplicación de Power BI. La Aplicación empaqueta el informe y lo publica en un portal dedicado para los usuarios, sin que puedan ver el Workspace interno.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">17 · Servicio</span><h2 class="slide-h">Workspace, permisos y Aplicación</h2></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="service-window" style="height:100%;display:flex;flex-direction:column">
+        <div class="svc-header">
+          <div class="svc-logo">Power <span>BI</span></div>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            <div class="svc-nav-item act">BI Finanzas Corp</div>
+            <div style="font-family:var(--fd);font-size:.56rem;padding:4px 10px;background:rgba(255,255,255,.12);color:#fff;border-radius:2px;cursor:default">Administrar acceso</div>
+          </div>
+        </div>
+        <div class="svc-body" style="flex:1;overflow:hidden">
+          <div class="svc-sidebar">
+            <div class="svc-sb-section">Workspace</div>
+            <div class="svc-sb-item act"><span class="svc-sb-icon">📋</span>Contenido</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">👥</span>Acceso</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">⚙️</span>Configuración</div>
+            <div class="svc-sb-section">Publicar</div>
+            <div class="svc-sb-item"><span class="svc-sb-icon">📱</span>Crear aplicación</div>
+          </div>
+          <div class="svc-content" style="overflow:hidden;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <!-- Roles panel -->
+            <div>
+              <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;color:#201f1e;margin-bottom:8px">👥 Roles del Workspace</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div class="svc-item-row" style="padding:5px 8px">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#0078d4;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;font-weight:700">AM</div>
+                  <div style="flex:1"><div style="font-family:var(--fd);font-size:.58rem;font-weight:700">Antonio Moro</div><div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">am@empresa.es</div></div>
+                  <span class="svc-item-badge blue">Admin</span>
+                </div>
+                <div class="svc-item-row" style="padding:5px 8px">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#107c10;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;font-weight:700">LG</div>
+                  <div style="flex:1"><div style="font-family:var(--fd);font-size:.58rem;font-weight:700">Laura García</div><div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">laura@empresa.es</div></div>
+                  <span class="svc-item-badge green">Miembro</span>
+                </div>
+                <div class="svc-item-row" style="padding:5px 8px">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#8764b8;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;font-weight:700">DIR</div>
+                  <div style="flex:1"><div style="font-family:var(--fd);font-size:.58rem;font-weight:700">Grupo Directivos</div><div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">directivos@empresa.es</div></div>
+                  <div style="font-family:var(--fd);font-size:.52rem;padding:2px 6px;border-radius:10px;background:#f3f2f1;color:#605e5c">Visor</div>
+                </div>
+              </div>
+            </div>
+            <!-- App panel -->
+            <div>
+              <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;color:#201f1e;margin-bottom:8px">📱 Aplicación Power BI — Para usuarios finales</div>
+              <div style="background:#f3f2f1;border:1px solid #e8e8e8;border-radius:4px;padding:10px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                  <div style="width:32px;height:32px;border-radius:6px;background:#0078d4;display:flex;align-items:center;justify-content:center;font-size:.9rem">📊</div>
+                  <div><div style="font-family:var(--fd);font-size:.62rem;font-weight:700">Dashboard Financiero Corp</div><div style="font-family:var(--fm);font-size:.5rem;color:#a19f9d">Publicado · 8 usuarios</div></div>
+                </div>
+                <div style="font-family:var(--fc);font-size:.75rem;color:#323130;line-height:1.6;margin-bottom:8px">Los usuarios finales acceden desde su portal sin ver el Workspace. Filtrado por RLS automáticamente.</div>
+                <div style="display:flex;gap:5px">
+                  <div class="svc-btn primary" style="font-size:.52rem">Actualizar app</div>
+                  <div class="svc-btn ghost" style="font-size:.52rem">Ver como usuario</div>
+                </div>
+              </div>
+              <div class="tip-box" style="margin-top:8px"><b>💡 Ventaja:</b> La App tiene URL propia que puedes embeber en SharePoint o Teams. Los directivos ni saben que existe Power BI Service.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 20 · ACTUALIZACIÓN PROGRAMADA ══ -->
+<div class="slide bg-dark"
+  data-title="Actualización programada"
+  data-script="Con DirectQuery los datos siempre están en tiempo real, así que no necesitas programar actualizaciones del modelo. Pero sí necesitas configurar la actualización de las dimensiones si alguna de ellas usa Import en vez de DirectQuery. En un modelo mixto, que es muy común, las tablas de dimensiones se importan por rendimiento, y solo la tabla de hechos usa DirectQuery. En ese caso, programa la actualización de las dimensiones en el Servicio. Ve al conjunto de datos, Programar actualización, y configura la frecuencia. Yo recomiendo actualizar las dimensiones una vez al día, a primera hora de la mañana, para que cuando los usuarios lleguen todo esté fresco. Si alguna dimensión cambia más frecuentemente, puedes programar actualizaciones cada hora con licencia Premium. También puedes configurar notificaciones por email cuando la actualización falla, que es algo que en producción siempre tienes que tener activado.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">18 · Servicio</span><h2 class="slide-h">Actualización<br>programada</h2></div>
+      <p class="slide-sub">DirectQuery = tiempo real para la fact. Las dimensiones en Import necesitan actualización programada.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">FACT</span><div class="step-body"><div class="step-title">fact_ventas — DirectQuery</div><div class="step-desc">Sin actualización programada. Cada query va en tiempo real contra SQL Server.</div></div></div>
+        <div class="step" style="border-left-color:#86efac"><span class="step-n" style="color:#86efac">DIM</span><div class="step-body"><div class="step-title">Dimensiones — Import + actualización</div><div class="step-desc">Actualización diaria a las 06:00h. Máximo 8 actualizaciones/día en versión gratuita.</div></div></div>
+        <div class="step"><span class="step-n">🔔</span><div class="step-body"><div class="step-title">Alertas de fallo</div><div class="step-desc">Configurar notificación por email al fallar. Imprescindible en producción.</div></div></div>
+        <div class="tip-box"><b>💡 Modelo mixto:</b> DirectQuery para hechos + Import para dimensiones es el patrón de rendimiento óptimo. Lo mejor de los dos mundos.</div>
+      </div>
+    </div>
+    <div class="col-r" style="align-items:center">
+      <div class="service-window" style="width:100%;max-width:320px">
+        <div class="svc-header" style="padding:6px 10px">
+          <div class="svc-logo" style="font-size:.62rem">Power <span>BI</span></div>
+          <div style="font-family:var(--fd);font-size:.54rem;color:rgba(255,255,255,.5);margin-left:6px">Programar actualización</div>
+        </div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px;background:#faf9f8">
+          <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;color:#201f1e">Actualización programada</div>
+          <div style="background:#fff;border:1px solid #e8e8e8;border-radius:3px;padding:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span style="font-family:var(--fd);font-size:.56rem;color:#323130">Mantener actualizado</span>
+              <div style="width:30px;height:16px;background:#0078d4;border-radius:8px;position:relative"><div style="position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff"></div></div>
+            </div>
+            <div style="font-family:var(--fd);font-size:.55rem;color:#605e5c;margin-bottom:3px">Frecuencia de actualización</div>
+            <div style="background:#f3f2f1;border:1px solid #d0d0d0;border-radius:2px;padding:4px 8px;font-family:var(--fm);font-size:.55rem;margin-bottom:6px">Diariamente ▼</div>
+            <div style="font-family:var(--fd);font-size:.55rem;color:#605e5c;margin-bottom:3px">Hora</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <div style="background:#0078d4;color:#fff;font-family:var(--fd);font-size:.5rem;font-weight:700;padding:2px 6px;border-radius:2px">06:00</div>
+              <div style="background:#f3f2f1;color:#323130;font-family:var(--fd);font-size:.5rem;padding:2px 6px;border-radius:2px">+ Añadir hora</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8e8e8;border-radius:3px;padding:8px">
+            <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;color:#323130;margin-bottom:5px">Historial de actualizaciones</div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.52rem;padding:3px 0;border-bottom:1px solid #f3f2f1"><span>Hoy 06:01</span><span style="color:#107c10">✓ Correcta (4.2s)</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.52rem;padding:3px 0;border-bottom:1px solid #f3f2f1"><span>Ayer 06:00</span><span style="color:#107c10">✓ Correcta (3.8s)</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.52rem;padding:3px 0"><span>Dom 06:02</span><span style="color:#a80000">✗ Error timeout</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 21 · ERRORES COMUNES ══ -->
+<div class="slide bg-darker"
+  data-title="Errores más comunes y cómo evitarlos"
+  data-script="Voy a repasar los seis errores más comunes que veo en proyectos Power BI y cómo evitarlos. Primero, relaciones bidireccionales innecesarias. Muchos desarrolladores las activan pensando que van a mejorar los filtros, pero generan resultados incorrectos en el noventa por ciento de los casos. Usa siempre unidireccional a menos que tengas un caso muy específico justificado. Segundo, no marcar la tabla de fechas. Ya lo hemos dicho, pero es tan común que lo repito. Sin marcarla, SAMEPERIODLASTYEAR no funciona. Tercero, CALCULATE sin modificador de contexto. Si escribes CALCULATE de Ingresos sin ninguna función de filtro, es equivalente a escribir Ingresos directamente. No tiene ningún efecto. CALCULATE solo tiene sentido con un modificador como FILTER, ALL, REMOVEFILTERS o las funciones de inteligencia temporal. Cuarto, usar columnas calculadas cuando debería ser una medida. Las columnas calculadas se calculan para cada fila en el modelo, consumen memoria, y en DirectQuery directamente no funcionan. Quinto, no gestionar los BLANK. Una medida que devuelve BLANK en vez de cero puede romper un gráfico. Usa IF de IS BLANK o COALESCE para controlarlo. Sexto, publicar sin probar el RLS. Ya lo mencionamos, pero es crítico.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">19 · Debugging</span><h2 class="slide-h">6 errores comunes — y cómo evitarlos</h2></div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-content:start">
+      <div class="warn-box"><b>❌ 1. Relaciones bidireccionales</b><br><br>Activan ambas direcciones de filtro y generan resultados incorrectos. Usa unidireccional siempre. Bidireccional solo en casos muy específicos documentados.</div>
+      <div class="warn-box"><b>❌ 2. No marcar tabla de fechas</b><br><br>Sin marcar dim_tiempo como tabla de fechas, todas las funciones de inteligencia temporal fallan silenciosamente devolviendo BLANK.</div>
+      <div class="warn-box"><b>❌ 3. CALCULATE sin modificador</b><br><br><code style="color:#fde68a">CALCULATE([Ingresos])</code> = <code style="color:#fde68a">[Ingresos]</code>. Sin función de contexto (FILTER, ALL, SAMEPERIODLASTYEAR...) CALCULATE no hace nada.</div>
+      <div class="warn-box"><b>❌ 4. Columnas calculadas en vez de medidas</b><br><br>Las columnas calculadas consumen RAM para cada fila. En DirectQuery no existen. Usa medidas siempre que sea posible.</div>
+      <div class="warn-box"><b>❌ 5. No gestionar BLANK</b><br><br>Una medida BLANK rompe totales y gráficos. Usa <code style="color:#fde68a">COALESCE([Medida], 0)</code> o <code style="color:#fde68a">IF(ISBLANK([M]), 0, [M])</code>.</div>
+      <div class="warn-box"><b>❌ 6. Publicar sin probar RLS</b><br><br>Prueba cada rol con "Ver como" antes de publicar. Un RLS incorrecto puede exponer datos confidenciales a usuarios no autorizados.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 22 · PERFORMANCE ANALYZER ══ -->
+<div class="slide bg-dark"
+  data-title="Performance Analyzer"
+  data-script="Power BI Desktop tiene una herramienta integrada llamada Performance Analyzer que te permite ver exactamente cuánto tarda cada visual en cargar y qué query SQL está lanzando. Para activarlo, ve a la pestaña Ver, y haz clic en Performance Analyzer. Luego haz clic en Iniciar registro y recarga la página del informe. Verás un árbol con cada visual y sus tiempos desglosados en tres partes: la consulta DAX, la consulta a la fuente de datos DirectQuery, y el tiempo de renderizado visual. Si el tiempo de consulta DAX es alto, tienes que optimizar las medidas. Si el tiempo de DirectQuery es alto, tienes que optimizar SQL Server. Y si el tiempo de renderizado es alto, el visual tiene demasiados datos y tienes que reducirlos o cambiar el tipo de visual. Puedes copiar la query DAX o SQL generada directamente desde el Performance Analyzer, lo que te permite analizarla y optimizarla en SQL Server Management Studio.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">20 · Performance</span><h2 class="slide-h">Performance<br>Analyzer</h2></div>
+      <p class="slide-sub">La herramienta integrada para diagnosticar qué visual es lento y por qué.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">①</span><div class="step-body"><div class="step-title">Ver → Performance Analyzer → Iniciar</div><div class="step-desc">Recarga la página. PBI registra todos los eventos de cada visual.</div></div></div>
+        <div class="step"><span class="step-n">🟡</span><div class="step-body"><div class="step-title">DAX alto → Optimiza medidas</div><div class="step-desc">Simplifica CALCULATE anidados. Usa variables VAR para cálculos intermedios.</div></div></div>
+        <div class="step"><span class="step-n">🔴</span><div class="step-body"><div class="step-title">DirectQuery alto → Optimiza SQL Server</div><div class="step-desc">Copia la SQL generada → analiza el plan de ejecución en SSMS → añade índices.</div></div></div>
+        <div class="step"><span class="step-n">🟠</span><div class="step-body"><div class="step-title">Render alto → Reduce datos del visual</div><div class="step-desc">Menos de 30K filas por visual. Agrega en DAX antes de mostrar.</div></div></div>
+      </div>
+    </div>
+    <div class="col-r">
+      <!-- Performance analyzer mockup -->
+      <div class="pbi-window" style="height:100%;display:flex;flex-direction:column;max-height:320px">
+        <div class="pbi-titlebar"><span class="pbi-tb-title">Performance Analyzer</span></div>
+        <div style="background:#2d2d30;padding:5px 8px;border-bottom:1px solid #3e3e42;display:flex;gap:6px;align-items:center">
+          <div style="background:#a80000;color:#fff;font-family:var(--fd);font-size:.52rem;font-weight:700;padding:3px 8px;border-radius:2px;cursor:default">⏹ Detener</div>
+          <div style="font-family:var(--fd);font-size:.52rem;color:rgba(255,255,255,.5);cursor:default">Actualizar elementos visuales</div>
+          <div style="margin-left:auto;font-family:var(--fd);font-size:.52rem;color:rgba(255,255,255,.4);cursor:default">Exportar</div>
+        </div>
+        <div style="flex:1;overflow:auto;background:#1e1e1e;padding:6px;font-family:var(--fm);font-size:.56rem">
+          <!-- Visual 1 - KPI cards fast -->
+          <div style="border-left:3px solid #107c10;padding:4px 8px;margin-bottom:4px;background:rgba(255,255,255,.02)">
+            <div style="display:flex;justify-content:space-between;color:#fff;margin-bottom:2px"><span>📊 KPI — Ingresos</span><span style="color:#107c10">38ms</span></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding-left:8px;color:rgba(255,255,255,.45)">
+              <div style="display:flex;justify-content:space-between"><span>Consulta DAX</span><span>12ms</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Consulta DirectQuery</span><span>20ms</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Otro</span><span>6ms</span></div>
+            </div>
+          </div>
+          <!-- Visual 2 - bar chart medium -->
+          <div style="border-left:3px solid #f2c811;padding:4px 8px;margin-bottom:4px;background:rgba(255,255,255,.02)">
+            <div style="display:flex;justify-content:space-between;color:#fff;margin-bottom:2px"><span>📊 Barras — Ingresos por mes</span><span style="color:#f2c811">1,240ms ⚠️</span></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding-left:8px;color:rgba(255,255,255,.45)">
+              <div style="display:flex;justify-content:space-between"><span>Consulta DAX</span><span>180ms</span></div>
+              <div style="display:flex;justify-content:space-between;color:#f2c811"><span>Consulta DirectQuery</span><span>1,020ms ← Optimizar SQL</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Otro</span><span>40ms</span></div>
+            </div>
+          </div>
+          <!-- Visual 3 - table slow -->
+          <div style="border-left:3px solid #a80000;padding:4px 8px;background:rgba(255,255,255,.02)">
+            <div style="display:flex;justify-content:space-between;color:#fff;margin-bottom:2px"><span>🗃️ Tabla — Top clientes</span><span style="color:#a80000">4,800ms 🔴</span></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding-left:8px;color:rgba(255,255,255,.45)">
+              <div style="display:flex;justify-content:space-between;color:#a80000"><span>Consulta DAX</span><span>3,200ms ← Simplificar medidas</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Consulta DirectQuery</span><span>1,400ms</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Otro</span><span>200ms</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 23 · OPTIMIZACIÓN DAX CON VAR ══ -->
+<div class="slide bg-darker"
+  data-title="Optimización DAX con VAR"
+  data-script="Una técnica de optimización DAX que cambia radicalmente el rendimiento es el uso de variables con VAR. Sin variables, si en una medida usas la misma expresión varias veces, Power BI la calcula cada vez. Con variables, la calculas una vez y la reutilizas. Por ejemplo, la medida YoY con variables: declaramos VAR ingresos_actuales igual a la medida Ingresos, VAR ingresos_año_pasado igual a CALCULATE de Ingresos con SAMEPERIODLASTYEAR, y VAR variacion igual a la resta. Luego el RETURN devuelve la variación dividida entre los ingresos del año pasado. Esta forma es más rápida porque Ingresos y sus variantes se calculan una sola vez. Además es mucho más legible: cualquier analista puede seguir el código sin perderse. Usa siempre VAR para medidas con más de dos referencias a la misma expresión.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">21 · Optimización</span><h2 class="slide-h">DAX con VAR:<br>más rápido y legible</h2></div>
+      <p class="slide-sub">VAR evalúa la expresión una sola vez y la reutiliza. Menor tiempo de evaluación y código más limpio.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:10px">
+        <div class="tip-box"><b>⚡ Rendimiento:</b> Sin VAR, cada referencia a [Ingresos LY] lanza una evaluación de CALCULATE. Con VAR, se evalúa una vez y se cachea.</div>
+        <div class="tip-box"><b>📖 Legibilidad:</b> VAR + RETURN hace el DAX auto-documentado. Cualquier analista puede auditarlo sin explicación.</div>
+        <div class="tip-box"><b>🐛 Debugging:</b> Puedes cambiar el RETURN para devolver cualquier VAR intermedia y ver su valor. Invaluable para depurar.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a80000;margin-bottom:6px">❌ Sin VAR (más lento)</div>
+      <div class="code" style="font-size:.6rem;margin-bottom:10px">
+<span class="c-hl">YoY %</span> =<br>
+&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[Ingresos] - <span class="c-fn">CALCULATE</span>([Ingresos],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">SAMEPERIODLASTYEAR</span>(dim_tiempo[fecha])),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">CALCULATE</span>([Ingresos], <span class="c-cm">-- ← evaluado 2 veces</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">SAMEPERIODLASTYEAR</span>(dim_tiempo[fecha])),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-num">0</span><br>
+&nbsp;&nbsp;)
+      </div>
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#107c10;margin-bottom:6px">✅ Con VAR (más rápido y legible)</div>
+      <div class="code" style="font-size:.6rem">
+<span class="c-hl">YoY %</span> =<br>
+<span class="c-kw">VAR</span> ing_actual =<br>
+&nbsp;&nbsp;[Ingresos]<br>
+<span class="c-kw">VAR</span> ing_ly =<br>
+&nbsp;&nbsp;<span class="c-fn">CALCULATE</span>([Ingresos],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">SAMEPERIODLASTYEAR</span>(dim_tiempo[fecha]))<br>
+<span class="c-kw">VAR</span> variacion =<br>
+&nbsp;&nbsp;ing_actual - ing_ly<br>
+<span class="c-kw">RETURN</span><br>
+&nbsp;&nbsp;<span class="c-fn">DIVIDE</span>(variacion, ing_ly, <span class="c-num">0</span>)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 24 · EMBED EN TEAMS Y SHAREPOINT ══ -->
+<div class="slide bg-dark"
+  data-title="Embeber en Teams y SharePoint"
+  data-script="Una vez el dashboard está en el Servicio, puedes embeber en Microsoft Teams o SharePoint con cero código. En Teams: abre el canal, haz clic en el símbolo más para añadir una pestaña, busca Power BI, selecciona el informe, y aparece como pestaña dedicada dentro del canal. El RLS funciona automáticamente: cada directivo ve sus datos cuando abre la pestaña en Teams. En SharePoint: en la página de SharePoint, añade un web part de tipo Power BI, pega la URL de incrustación del informe que encuentras en el Servicio bajo Archivo, Insertar informe, y el dashboard aparece integrado en la intranet corporativa. Para aplicaciones externas o dashboards públicos, puedes usar la API de embedding de Power BI con token de autenticación. Pero eso ya es para proyectos más avanzados que cubriremos en otro tutorial.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">22 · Distribución</span><h2 class="slide-h">Embeber en Teams<br>y SharePoint</h2></div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:.5rem">
+        <div style="background:rgba(72,70,227,.1);border:1px solid rgba(72,70,227,.3);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#a5b4fc;margin-bottom:6px">🟦 Microsoft Teams</div>
+          <div class="step-list">
+            <div style="font-family:var(--fc);font-size:.8rem;color:var(--t-dim);line-height:1.6">Canal → + Añadir pestaña → Power BI → Seleccionar informe. El RLS aplica automáticamente por usuario.</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,120,212,.1);border:1px solid rgba(0,120,212,.3);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#93c5fd;margin-bottom:6px">🌐 SharePoint Online</div>
+          <div style="font-family:var(--fc);font-size:.8rem;color:var(--t-dim);line-height:1.6">Editar página → Web part Power BI → Pegar URL de incrustación. Dashboard integrado en la intranet.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:6px">🔗 URL de incrustación</div>
+          <div class="code" style="font-size:.6rem;word-break:break-all">https://app.powerbi.com/reportEmbed<br>?reportId=xxxxxxxx-xxxx<br>&autoAuth=true&ctid=xxxxxxxx</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-r">
+      <!-- Teams mockup -->
+      <div style="background:#1b1a33;border-radius:5px;overflow:hidden;border:1px solid #3d3c5a;height:100%;display:flex;flex-direction:column;max-height:320px">
+        <div style="background:#6264a7;padding:6px 10px;display:flex;align-items:center;gap:8px">
+          <div style="font-family:var(--fd);font-size:.6rem;font-weight:800;color:#fff">Microsoft Teams</div>
+          <div style="margin-left:auto;display:flex;gap:4px">
+            <div style="font-family:var(--fd);font-size:.52rem;padding:3px 8px;background:rgba(255,255,255,.15);color:#fff;border-radius:2px">📢 General</div>
+          </div>
+        </div>
+        <div style="display:flex;flex:1;overflow:hidden">
+          <div style="width:120px;background:#1b1a33;border-right:1px solid #3d3c5a;padding:8px 0">
+            <div style="font-family:var(--fd);font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:4px 10px">Equipo Dirección</div>
+            <div style="padding:4px 10px;font-family:var(--fd);font-size:.54rem;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px"># General</div>
+            <div style="padding:4px 10px;font-family:var(--fd);font-size:.54rem;color:#fff;background:rgba(255,255,255,.1);display:flex;align-items:center;gap:4px"># Dashboard Fin</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column">
+            <div style="display:flex;background:#1b1a33;border-bottom:1px solid #3d3c5a">
+              <div style="padding:5px 10px;font-family:var(--fd);font-size:.54rem;color:rgba(255,255,255,.5)">Publicaciones</div>
+              <div style="padding:5px 10px;font-family:var(--fd);font-size:.54rem;color:#fff;border-bottom:2px solid #6264a7">📊 Dashboard Fin</div>
+              <div style="padding:5px 10px;font-family:var(--fd);font-size:.54rem;color:rgba(255,255,255,.5)">Archivos</div>
+            </div>
+            <div style="flex:1;background:#f3f2f1;padding:8px;overflow:hidden">
+              <div style="background:#fff;border:1px solid #e8e8e8;border-radius:3px;height:100%;display:flex;flex-direction:column;overflow:hidden">
+                <div style="background:#0f1f40;padding:5px 8px;display:flex;align-items:center;gap:6px">
+                  <div style="font-family:var(--fd);font-size:.55rem;font-weight:800;color:#f2c811">Power BI</div>
+                  <div style="font-family:var(--fd);font-size:.5rem;color:rgba(255,255,255,.5)">Dashboard Financiero Dirección</div>
+                </div>
+                <!-- Mini dashboard in teams -->
+                <div style="flex:1;padding:6px;background:#faf9f8;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                  <div style="background:#fff;border:1px solid #e8e8e8;border-radius:2px;padding:4px 6px"><div style="font-family:var(--fd);font-size:.46rem;color:#605e5c">INGRESOS</div><div style="font-family:var(--fd);font-size:.8rem;font-weight:800;color:#201f1e">€4.2M</div><div style="font-family:var(--fd);font-size:.44rem;color:#107c10;font-weight:700">▲ +12.4%</div></div>
+                  <div style="background:#fff;border:1px solid #e8e8e8;border-radius:2px;padding:4px 6px"><div style="font-family:var(--fd);font-size:.46rem;color:#605e5c">MARGEN</div><div style="font-family:var(--fd);font-size:.8rem;font-weight:800;color:#201f1e">38.6%</div><div style="font-family:var(--fd);font-size:.44rem;color:#107c10;font-weight:700">▲ +2.1pp</div></div>
+                  <div style="grid-column:1/-1;background:#fff;border:1px solid #e8e8e8;border-radius:2px;padding:4px 6px;height:40px;display:flex;align-items:flex-end;gap:2px;overflow:hidden">
+                    <div style="flex:1;height:50%;background:#0078d4;opacity:.7;border-radius:1px 1px 0 0"></div>
+                    <div style="flex:1;height:70%;background:#0078d4;opacity:.7;border-radius:1px 1px 0 0"></div>
+                    <div style="flex:1;height:90%;background:#0078d4;border-radius:1px 1px 0 0"></div>
+                    <div style="flex:1;height:75%;background:#0078d4;opacity:.7;border-radius:1px 1px 0 0"></div>
+                    <div style="flex:1;height:60%;background:#0078d4;opacity:.4;border-radius:1px 1px 0 0"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 25 · ALERTAS Y SUBSCRIPCIONES ══ -->
+<div class="slide bg-darker"
+  data-title="Alertas y suscripciones"
+  data-script="El Servicio de Power BI tiene dos funciones de notificación muy útiles que muchos no conocen. La primera son las Alertas de datos: puedes configurar una alerta en cualquier tarjeta de KPI para que el Servicio te mande un email o notificación de Teams cuando el valor supere o baje de un umbral. Por ejemplo, una alerta cuando el Margen Bruto caiga por debajo del treinta por ciento, o cuando los Ingresos superen el objetivo del trimestre. La segunda son las Suscripciones: puedes programar el envío automático de un snapshot del informe por email a una lista de usuarios. Cada mañana de lunes, el CEO recibe el dashboard financiero en el email, sin necesidad de entrar al Servicio. El snapshot respeta el RLS: cada usuario recibe un email con los datos de su contexto. Esto es especialmente útil para directivos que prefieren el email al dashboard interactivo.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">23 · Automatización</span><h2 class="slide-h">Alertas y<br>suscripciones</h2></div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:.5rem">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:var(--gold);margin-bottom:8px">🔔 Alertas de datos</div>
+          <div class="step-list">
+            <div style="font-family:var(--fc);font-size:.82rem;color:var(--t-dim);line-height:1.7">Tarjeta KPI → ··· → Administrar alertas → Nueva regla. Notificación por email o Teams cuando el KPI supera / baja del umbral definido.</div>
+          </div>
+          <div style="margin-top:8px;padding:8px;background:rgba(240,192,64,.08);border-radius:3px;border:1px solid rgba(240,192,64,.2)">
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--gold)">🔔 Alerta activa</div>
+            <div style="font-family:var(--fm);font-size:.55rem;color:var(--t-dim);margin-top:2px">Margen Bruto &lt; 30% → Email a CFO</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#93c5fd;margin-bottom:8px">📧 Suscripciones automáticas</div>
+          <div style="font-family:var(--fc);font-size:.82rem;color:var(--t-dim);line-height:1.7">Informe → Suscribirse → Añadir destinatarios. Snapshot semanal del dashboard enviado por email. El RLS aplica por destinatario.</div>
+          <div style="margin-top:8px;padding:8px;background:rgba(0,120,212,.08);border-radius:3px;border:1px solid rgba(0,120,212,.2)">
+            <div style="font-family:var(--fm);font-size:.58rem;color:#93c5fd">📧 Suscripción activa</div>
+            <div style="font-family:var(--fm);font-size:.55rem;color:var(--t-dim);margin-top:2px">Lunes 07:00 → CEO, CFO, Directores</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-r" style="align-items:center;justify-content:center">
+      <!-- Email mockup -->
+      <div style="background:#fff;border-radius:4px;overflow:hidden;border:1px solid #e8e8e8;width:100%;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+        <div style="background:#0078d4;padding:8px 12px">
+          <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;color:#fff">Power BI · Informe programado</div>
+          <div style="font-family:var(--fm);font-size:.5rem;color:rgba(255,255,255,.6);margin-top:2px">powerbi@notification.microsoft.com</div>
+        </div>
+        <div style="padding:10px 12px">
+          <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;color:#201f1e;margin-bottom:4px">Dashboard Financiero — Lunes 10 Feb</div>
+          <div style="font-family:var(--fc);font-size:.75rem;color:#323130;line-height:1.6;margin-bottom:8px">Estimado/a Director/a, adjunto el resumen semanal del dashboard financiero. Los datos corresponden a su departamento.</div>
+          <div style="background:#f3f2f1;border-radius:3px;padding:8px;margin-bottom:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div><div style="font-family:var(--fd);font-size:.5rem;color:#605e5c">INGRESOS DEPT.</div><div style="font-family:var(--fd);font-size:.8rem;font-weight:800;color:#201f1e">€850K</div><div style="font-family:var(--fd);font-size:.48rem;color:#107c10">▲ +8.2%</div></div>
+              <div><div style="font-family:var(--fd);font-size:.5rem;color:#605e5c">MARGEN</div><div style="font-family:var(--fd);font-size:.8rem;font-weight:800;color:#201f1e">41.2%</div><div style="font-family:var(--fd);font-size:.48rem;color:#107c10">▲ +1.8pp</div></div>
+            </div>
+          </div>
+          <div style="background:#0078d4;color:#fff;font-family:var(--fd);font-size:.58rem;font-weight:700;padding:6px;border-radius:2px;text-align:center;cursor:default">Ver informe completo →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 26 · CHECKLIST PRODUCCIÓN ══ -->
+<div class="slide bg-dark"
+  data-title="Checklist antes de entregar"
+  data-script="Antes de entregar el dashboard al cliente o al equipo directivo, repasa este checklist de doce puntos. Primero, el modelo de datos tiene todas las relaciones correctas y unidireccionales. Segundo, dim_tiempo está marcada como tabla de fechas. Tercero, todas las medidas base tienen formato de moneda o porcentaje aplicado. Cuarto, los nombres de medidas y columnas son legibles en español para el usuario final. Quinto, el RLS está probado con cada rol usando Ver como. Sexto, las credenciales de SQL Server están configuradas en el Servicio. Séptimo, el Gateway está activo y conectado. Octavo, los slicers tienen valores por defecto razonables. Noveno, todos los visuales tienen título descriptivo. Décimo, el Performance Analyzer no muestra ningún visual por encima de dos segundos. Undécimo, la vista móvil está configurada. Y duodécimo, las alertas y suscripciones están configuradas para los usuarios clave. Si pasas todos estos puntos, el dashboard está listo para producción.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">24 · Entrega</span><h2 class="slide-h">Checklist antes de entregar a producción</h2></div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px">🗂️ Modelo y datos</div>
+        <div class="tip-box">✅ Todas las relaciones correctas y unidireccionales</div>
+        <div class="tip-box">✅ dim_tiempo marcada como tabla de fechas</div>
+        <div class="tip-box">✅ Medidas con formato (€, %, número) aplicado</div>
+        <div class="tip-box">✅ Nombres de campos legibles para el usuario final</div>
+        <div class="tip-box">✅ Ninguna medida devuelve BLANK inesperado</div>
+        <div class="tip-box">✅ Índices SQL Server creados y verificados</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px">🔒 Seguridad y servicio</div>
+        <div class="tip-box">✅ RLS probado con cada rol ("Ver como")</div>
+        <div class="tip-box">✅ Credenciales SQL Server en el Servicio</div>
+        <div class="tip-box">✅ Gateway activo y conectado</div>
+        <div class="tip-box">✅ Performance Analyzer: todos los visuales &lt; 2s</div>
+        <div class="tip-box">✅ Vista móvil configurada</div>
+        <div class="tip-box">✅ Alertas y suscripciones activas para usuarios clave</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 27 · RECURSOS ADICIONALES ══ -->
+<div class="slide bg-darker"
+  data-title="Recursos y próximos pasos"
+  data-script="Aquí tienes los recursos que te recomiendo para seguir aprendiendo. Para DAX, el sitio de referencia es dax.guide, que tiene la documentación completa de todas las funciones con ejemplos. Para el modelo de datos, el libro de referencia sigue siendo The Microsoft Data Warehouse Toolkit de Kimball. Para aprender optimización de DirectQuery en profundidad, busca los libros blancos de Microsoft sobre Análisis de rendimiento de DirectQuery, que puedes encontrar en la documentación oficial de Power BI. Y si quieres seguir aprendiendo conmigo, en mi web antonio-moro.es tienes el Dashboard Kit Finanzas que incluye el fichero pbix completo de este tutorial con datos de muestra, listo para conectar a tu propio SQL Server. Y en mi canal publico un tutorial técnico de este nivel cada semana. Suscríbete para no perderte ninguno.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 56px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">25 · Recursos</span><h2 class="slide-h">Recursos para<br>seguir aprendiendo</h2></div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:.5rem">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:4px">📘 DAX Reference</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--blue2)">dax.guide</div>
+          <div style="font-family:var(--fc);font-size:.78rem;color:var(--t-dim);margin-top:3px">Documentación completa de todas las funciones DAX con ejemplos interactivos.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:4px">📗 Documentación oficial Microsoft</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--blue2)">learn.microsoft.com/power-bi</div>
+          <div style="font-family:var(--fc);font-size:.78rem;color:var(--t-dim);margin-top:3px">Whitepapers de DirectQuery performance, guías de modelado y DAX patterns.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:4px">📕 DAX Patterns</div>
+          <div style="font-family:var(--fm);font-size:.6rem;color:var(--blue2)">daxpatterns.com</div>
+          <div style="font-family:var(--fc);font-size:.78rem;color:var(--t-dim);margin-top:3px">Patrones DAX para P&L, inventario, cohortes, pareto y más. Por Alberto Ferrari y Marco Russo.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:5px;padding:20px;height:100%;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue2);margin-bottom:1rem">📦 Dashboard Kit Finanzas</div>
+        <div style="font-family:var(--fe);font-size:1.4rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.75rem">El .pbix completo<br>de este tutorial</div>
+        <div style="font-family:var(--fc);font-size:.88rem;color:var(--t-dim);line-height:1.7;margin-bottom:1.5rem">El mismo modelo que hemos construido paso a paso, con datos de muestra reales, medidas DAX completas, RLS configurado y tema corporativo. Listo para conectar a tu SQL Server.</div>
+        <div style="display:flex;gap:8px;flex-direction:column">
+          <div style="background:var(--blue);color:#fff;font-family:var(--fd);font-size:.7rem;font-weight:700;padding:10px;border-radius:3px;text-align:center;letter-spacing:.06em">antonio-moro.es/productos →</div>
+          <div style="background:rgba(255,255,255,.06);color:var(--t-dim);font-family:var(--fd);font-size:.68rem;font-weight:700;padding:8px;border-radius:3px;text-align:center;letter-spacing:.06em">a.morodiaz@hotmail.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 28 · CIERRE ══ -->
+<div class="slide bg-navy"
+  data-title="Cierre"
+  data-script="Y con esto cerramos el tutorial. Has construido desde cero un dashboard financiero de nivel enterprise en Power BI. Tienes el modelo Kimball completo, medidas DAX para el P&L con inteligencia temporal, Row Level Security para control de acceso por departamento, DirectQuery optimizado con índices y vistas en SQL Server, y el informe publicado en el Servicio con Gateway, aplicación, alertas y suscripciones. Esto es exactamente lo que entrego en mis proyectos de consultoría, sin simplificaciones. Si te ha resultado útil, deja un comentario o compártelo con alguien que lo necesite. En mi web antonio-moro.es tienes el fichero pbix descargable del Dashboard Kit Finanzas, y si necesitas implementar esto en tu empresa con soporte experto, escríbeme a hola arroba antonio guión moro punto es. Nos vemos en el siguiente tutorial.">
+  <div class="s1-noise"></div>
+  <div class="accent-blob" style="right:-100px;top:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.14) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-80px;bottom:-80px;width:450px;height:450px;background:radial-gradient(circle,rgba(240,192,64,.06) 0%,transparent 70%)"></div>
+  <div class="grid-bg"></div>
+  <div style="position:relative;z-index:2;height:calc(100% - 56px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4vh 10vw">
+    <div style="font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;display:flex;align-items:center;gap:12px"><span style="display:block;width:28px;height:2px;background:var(--gold)"></span>Fin del Tutorial 01<span style="display:block;width:28px;height:2px;background:var(--gold)"></span></div>
+    <h2 style="font-family:var(--fe);font-size:clamp(2.2rem,4.5vw,4rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:1.2rem">¿Listo para llevarlo<br>a <em style="color:var(--gold);font-style:normal">producción?</em></h2>
+    <p style="font-family:var(--fc);font-size:1rem;font-weight:300;color:var(--t-dim);max-width:500px;line-height:1.85;margin-bottom:2rem">Dashboard Kit Finanzas disponible en antonio-moro.es — el .pbix completo de este tutorial con datos de muestra y RLS configurado.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem">
+      <a href="https://antonio-moro.es/productos" style="font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;border-radius:3px;background:var(--blue);color:#fff;transition:all .2s;display:block">Ver Dashboard Kit →</a>
+      <a href="mailto:a.morodiaz@hotmail.com" style="font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;border-radius:3px;background:transparent;color:var(--t-dim);border:1px solid rgba(255,255,255,.2);display:block">Contratar consultoría</a>
+    </div>
+    <!-- Stats -->
+    <div style="display:flex;gap:3rem;justify-content:center">
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">28</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Secciones</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">42'</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">De tutorial</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">.pbix</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Descargable</span></div>
+    </div>
+    <div style="margin-top:2rem;font-family:var(--fd);font-size:.65rem;font-weight:600;letter-spacing:.07em;color:var(--t-faint)">antonio-moro.es · a.morodiaz@hotmail.com · Madrid, España · Remote OK</div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="tts-bar" id="ttsBar"><div class="tts-prog" id="ttsProg"></div></div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-counter" id="counter">01 / 28</div>
+    <div class="nav-title" id="navTitle"></div>
+  </div>
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="nbtn nbtn-tts" id="ttsBtn" onclick="toggleTTS()" title="Narrar con voz (Barra espaciadora)">🎙️ Narrar</button>
+    <button class="nbtn nbtn-auto" id="autoBtn" onclick="toggleAuto()" title="Auto-play: avanza slide al terminar de narrar">▶ Auto</button>
+    <button class="nbtn nbtn-prev" onclick="go(-1)">← Ant.</button>
+    <button class="nbtn nbtn-next" onclick="go(1)">Sig. →</button>
+  </div>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+let ttsOn = false;
+let autoOn = false;
+
+// ── RENDER ──
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+  const pct = (cur+1)/total*100;
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('counter').textContent = String(cur+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+  document.getElementById('navTitle').textContent = slides[cur].dataset.title || '';
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  document.getElementById('spTitle').textContent = slides[cur].dataset.title || '';
+  document.getElementById('spText').textContent = slides[cur].dataset.script || '';
+  const btn = document.getElementById('spCopy');
+  btn.textContent = '📋 Copiar guión de esta slide';
+  btn.classList.remove('ok');
+}
+
+// ── NAVIGATION ──
+function go(d){
+  stopTTS();
+  cur = Math.max(0, Math.min(total-1, cur+d));
+  render();
+  if(autoOn) setTimeout(()=>speakCurrent(autoNext), 700);
+}
+
+// ── TTS ENGINE ──
+function hasTTS(){ return 'speechSynthesis' in window; }
+
+function speakCurrent(onEnd){
+  if(!hasTTS()){ alert('TTS no disponible. Usa Chrome o Edge.'); return; }
+  const text = slides[cur].dataset.script || '';
+  if(!text){ if(onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.93;
+  // Pick Spanish voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const v = voices.find(v=>v.lang==='es-ES') || voices.find(v=>v.lang.startsWith('es'));
+  if(v) u.voice = v;
+  u.onstart = ()=>{ ttsOn=true; updateTTSBtn(); showTTSBar(); };
+  u.onend   = ()=>{ ttsOn=false; updateTTSBtn(); hideTTSBar(); if(onEnd) onEnd(); };
+  u.onerror = ()=>{ ttsOn=false; updateTTSBtn(); hideTTSBar(); };
+  window.speechSynthesis.speak(u);
+}
+
+function stopTTS(){
+  window.speechSynthesis.cancel();
+  ttsOn=false;
+  updateTTSBtn();
+  hideTTSBar();
+}
+
+function toggleTTS(){
+  if(ttsOn){ stopTTS(); return; }
+  speakCurrent(null);
+}
+
+function updateTTSBtn(){
+  const b=document.getElementById('ttsBtn');
+  if(!b) return;
+  if(ttsOn){ b.textContent='⏹ Parar'; b.classList.add('stop'); }
+  else     { b.textContent='🎙️ Narrar'; b.classList.remove('stop'); }
+}
+
+// TTS progress bar animation (visual cue — not real progress)
+let ttsInterval=null;
+function showTTSBar(){
+  const bar=document.getElementById('ttsBar');
+  const prog=document.getElementById('ttsProg');
+  if(!bar||!prog) return;
+  bar.classList.add('active');
+  prog.style.transition='none'; prog.style.width='0%';
+  // estimate duration roughly: ~130 words/min at rate 0.93
+  const words=(slides[cur].dataset.script||'').split(/\s+/).length;
+  const ms=Math.max(3000,(words/130)*60000/0.93);
+  setTimeout(()=>{ prog.style.transition=`width ${ms}ms linear`; prog.style.width='100%'; },50);
+}
+function hideTTSBar(){
+  const bar=document.getElementById('ttsBar');
+  const prog=document.getElementById('ttsProg');
+  if(!bar||!prog) return;
+  bar.classList.remove('active');
+  prog.style.transition='none'; prog.style.width='0%';
+}
+
+// ── AUTO-PLAY ──
+function autoNext(){
+  if(!autoOn) return;
+  if(cur < total-1){
+    cur++;
+    render();
+    setTimeout(()=>speakCurrent(autoNext), 700);
+  } else {
+    autoOn=false;
+    updateAutoBtn();
+  }
+}
+
+function toggleAuto(){
+  autoOn=!autoOn;
+  updateAutoBtn();
+  if(autoOn){ speakCurrent(autoNext); }
+  else      { stopTTS(); }
+}
+
+function updateAutoBtn(){
+  const b=document.getElementById('autoBtn');
+  if(!b) return;
+  if(autoOn){ b.textContent='⏹ Stop Auto'; b.classList.add('on'); }
+  else      { b.textContent='▶ Auto'; b.classList.remove('on'); }
+}
+
+// ── BUILD DOTS ──
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const b = document.createElement('button');
+  b.className='dot';
+  b.title = slides[i].dataset.title || '';
+  b.onclick=()=>{ stopTTS(); autoOn=false; updateAutoBtn(); cur=i; render(); };
+  dotsEl.appendChild(b);
+});
+
+// ── SCRIPT PANEL ──
+document.getElementById('scriptToggle').onclick=()=>{
+  document.getElementById('scriptPanel').classList.toggle('open');
+};
+
+document.getElementById('spCopy').onclick=function(){
+  navigator.clipboard.writeText(document.getElementById('spText').textContent).then(()=>{
+    this.textContent='✅ ¡Copiado! Pega en ElevenLabs';
+    this.classList.add('ok');
+    setTimeout(()=>{ this.textContent='📋 Copiar guión de esta slide'; this.classList.remove('ok'); },3000);
+  });
+};
+
+document.getElementById('spExport').onclick=function(){
+  const all = Array.from(slides).map((s,i)=>{
+    const t = s.dataset.title || `Slide ${i+1}`;
+    const sc = s.dataset.script || '';
+    return `[${String(i+1).padStart(2,'0')} — ${t}]\n${sc}`;
+  }).join('\n\n---\n\n');
+  navigator.clipboard.writeText(all).then(()=>{
+    this.textContent=`✅ ¡${total} guiones copiados! Pega en ElevenLabs`;
+    this.classList.add('ok');
+    setTimeout(()=>{ this.textContent='📤 Exportar TODOS los guiones'; this.classList.remove('ok'); },4000);
+  });
+};
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+  if(e.key==='Escape') document.getElementById('scriptPanel').classList.remove('open');
+  if(e.key===' '){ e.preventDefault(); toggleTTS(); }
+  if(e.key==='p'||e.key==='P') toggleAuto();
+});
+
+// Voices load async in some browsers
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged=()=>{};
+
+render();
+</script>
+</body>
+</html>

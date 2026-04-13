@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 02 — SQL Window Functions · Antonio Moro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#1a3060;--blue:#2563eb;--blue2:#3b82f6;
+  --sky:#93c5fd;--green:#86efac;--gold:#f0c040;--pink:#f9a8d4;--purple:#c084fc;
+  --t-dim:rgba(255,255,255,.55);--t-faint:rgba(255,255,255,.22);
+  --fe:'Playfair Display',Georgia,serif;
+  --fd:'Syne',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  --fc:'Crimson Pro',Georgia,serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--fd)}
+
+/* ── DECK ── */
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s cubic-bezier(.22,1,.36,1)}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ── PROGRESS ── */
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--sky);z-index:100;transition:width .4s cubic-bezier(.22,1,.36,1)}
+
+/* ── NAV BAR ── */
+.nav{position:fixed;bottom:0;left:0;right:0;height:54px;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;border-top:1px solid rgba(255,255,255,.07)}
+.nav-left{display:flex;align-items:center;gap:.9rem}
+.nav-counter{font-family:var(--fm);font-size:.63rem;color:var(--t-dim);letter-spacing:.1em;white-space:nowrap}
+.nav-title{font-family:var(--fd);font-size:.63rem;font-weight:600;color:rgba(255,255,255,.32);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.nav-dots{display:flex;gap:4px;flex-wrap:wrap;max-width:420px}
+.ndot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .25s;border:none;flex-shrink:0}
+.ndot.on{background:var(--sky);transform:scale(1.5)}
+.nav-btns{display:flex;gap:7px}
+.nbtn{font-family:var(--fd);font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 15px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
+.nbtn-p{background:rgba(255,255,255,.07);color:var(--t-dim)}.nbtn-p:hover{background:rgba(255,255,255,.14);color:#fff}
+.nbtn-n{background:var(--blue);color:#fff}.nbtn-n:hover{background:var(--blue2)}
+
+/* ── SCRIPT PANEL ── */
+.sp-toggle{position:fixed;right:1.2rem;top:.65rem;z-index:200;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);color:rgba(255,255,255,.52);cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
+.sp-toggle:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.sp-panel{position:fixed;right:0;top:0;bottom:54px;width:340px;background:rgba(6,10,22,.98);border-left:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:50px 20px 20px;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:150}
+.sp-panel.open{transform:none}
+.sp-label{font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sky);margin-bottom:8px;display:block}
+.sp-title{font-family:var(--fe);font-size:.93rem;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.3}
+.sp-text{font-family:var(--fc);font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.92}
+.sp-copy{margin-top:14px;width:100%;font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px;border-radius:3px;border:none;cursor:pointer;background:var(--navy2);color:#fff;transition:background .2s}
+.sp-copy:hover{background:var(--blue)}.sp-copy.ok{background:#16a34a}
+
+/* ── SHARED UTILS ── */
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.chip{font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(147,197,253,.14);color:var(--sky);border:1px solid rgba(147,197,253,.25)}
+.slide-h{font-family:var(--fe);font-size:clamp(1.4rem,2.2vw,2rem);font-weight:800;color:#fff;line-height:1.1}
+.slide-sub{font-family:var(--fc);font-size:.86rem;color:var(--t-dim);line-height:1.75;margin-top:.45rem}
+.sh-row{display:flex;align-items:center;gap:.7rem;margin-bottom:2.5vh}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100% - 54px)}
+.col-l{padding:3.5vh 2.5vw 3.5vh 4vw;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.05)}
+.col-r{padding:3.5vh 4vw 3.5vh 2.5vw;display:flex;flex-direction:column;justify-content:center}
+.full-inner{padding:2.5vh 4vw;height:calc(100% - 54px);display:flex;flex-direction:column}
+
+/* tip / warn boxes */
+.tip-box{background:rgba(147,197,253,.07);border:1px solid rgba(147,197,253,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.tip-box b{color:var(--sky)}
+.warn-box{background:rgba(249,168,212,.07);border:1px solid rgba(249,168,212,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.warn-box b{color:var(--pink)}
+.green-box{background:rgba(134,239,172,.07);border:1px solid rgba(134,239,172,.2);border-radius:4px;padding:9px 13px;font-family:var(--fc);font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+.green-box b{color:var(--green)}
+
+/* step list */
+.step-list{display:flex;flex-direction:column;gap:9px}
+.step{display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-left:3px solid var(--blue)}
+.step-n{font-family:var(--fm);font-size:.58rem;color:var(--sky);min-width:20px;margin-top:2px}
+.step-body{flex:1}
+.step-title{font-family:var(--fd);font-size:.74rem;font-weight:700;color:#fff}
+.step-desc{font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:2px;line-height:1.5}
+
+/* CODE BLOCKS */
+.code{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:12px 15px;font-family:var(--fm);font-size:.65rem;line-height:1.9;color:rgba(255,255,255,.58)}
+.code-bar{background:#1a2a44;padding:5px 10px;display:flex;align-items:center;gap:5px;border-radius:4px 4px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:none}
+.code-bar+.code{border-radius:0 0 4px 4px}
+.dot-r{width:8px;height:8px;border-radius:50%;background:#ff5f57}
+.dot-y{width:8px;height:8px;border-radius:50%;background:#febc2e}
+.dot-g{width:8px;height:8px;border-radius:50%;background:#28c840}
+.cb-lang{margin-left:auto;font-family:var(--fd);font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sky)}
+/* syntax */
+.ck{color:#c084fc}.cf{color:#93c5fd}.cs{color:#86efac}.cn{color:#fde68a}.cc{color:rgba(255,255,255,.28);font-style:italic}.ch{color:#fff;font-weight:600}.cop{color:#f9a8d4}
+.hl{background:rgba(37,99,235,.2);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--blue)}
+.hl2{background:rgba(134,239,172,.1);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--green)}
+.hl3{background:rgba(240,192,64,.08);display:block;margin:0 -15px;padding:0 15px;border-left:3px solid var(--gold)}
+
+/* result tables */
+.rtable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:.6rem;margin-top:8px}
+.rtable th{background:rgba(147,197,253,.12);color:var(--sky);padding:4px 8px;text-align:left;font-weight:700;letter-spacing:.06em;border:1px solid rgba(255,255,255,.06)}
+.rtable td{padding:4px 8px;border:1px solid rgba(255,255,255,.05);color:rgba(255,255,255,.65)}
+.rtable tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.rtable .num{text-align:right;color:var(--cn,#fde68a)}
+.rtable .hl-row td{background:rgba(37,99,235,.15);color:#fff}
+.rtable .hl-g td{background:rgba(134,239,172,.08);color:var(--green)}
+
+/* function cards */
+.fn-grid{display:grid;gap:8px;width:100%}
+.fn-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start}
+.fn-badge{font-family:var(--fm);font-size:.62rem;font-weight:700;color:var(--sky);background:rgba(147,197,253,.12);border:1px solid rgba(147,197,253,.2);padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.fn-body{flex:1}
+.fn-name{font-family:var(--fd);font-size:.72rem;font-weight:700;color:#fff;margin-bottom:2px}
+.fn-desc{font-family:var(--fc);font-size:.74rem;color:var(--t-dim);line-height:1.5}
+.fn-use{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-top:4px}
+
+/* anatomy diagram */
+.anatomy{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:14px;font-family:var(--fm);font-size:.7rem;line-height:2.2;color:rgba(255,255,255,.6)}
+.an-line{display:flex;align-items:center;gap:8px;padding:2px 0}
+.an-kw{color:var(--purple);font-weight:600}
+.an-fn{color:var(--sky)}
+.an-clause{color:var(--green)}
+.an-arg{color:var(--gold)}
+.an-arrow{color:rgba(255,255,255,.2);font-size:.6rem}
+.an-label{font-family:var(--fd);font-size:.54rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-left:auto}
+
+/* slides backgrounds */
+.bg-navy{background:linear-gradient(135deg,#060e1e 0%,#0d1f3c 100%)}
+.bg-dark{background:#070d1a}
+.bg-darker{background:#040810}
+.bg-mid{background:#091422}
+.bg-code{background:#060d18}
+.bg-green{background:linear-gradient(135deg,#031a10 0%,#052d18 100%)}
+.bg-close{background:linear-gradient(135deg,#0a1628 0%,#1a3060 100%)}
+.accent-blob{position:absolute;border-radius:50%;pointer-events:none}
+
+/* db badges */
+.db-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.6rem}
+.db-badge{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.07em;padding:3px 9px;border-radius:3px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+.db-badge.bq{border-color:rgba(66,133,244,.4);color:#4285f4}
+.db-badge.sf{border-color:rgba(41,182,246,.4);color:#29b6f6}
+.db-badge.pg{border-color:rgba(51,153,204,.4);color:#336699}
+.db-badge.ss{border-color:rgba(204,0,0,.4);color:#cc0000}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+<button class="sp-toggle" id="spToggle">📄 Guión</button>
+
+<div class="sp-panel" id="spPanel">
+  <span class="sp-label">🎙️ Guión — pegar en ElevenLabs</span>
+  <div class="sp-title" id="spTitle"></div>
+  <div class="sp-text" id="spText"></div>
+  <button class="sp-copy" id="spCopy">📋 Copiar guión</button>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ══ SLIDE 01 · PORTADA ══ -->
+<div class="slide bg-navy"
+  data-title="Portada"
+  data-script="Hola, soy Antonio Moro. Llevo más de veinte años construyendo pipelines de datos y modelos analíticos en empresas como Accenture, IBM, Bankinter y Orange. En este tutorial vamos a dominar las Window Functions de SQL, también conocidas como funciones de ventana. Son la funcionalidad más potente del SQL moderno y, en mi experiencia revisando cientos de proyectos, también la más infrautilizada. La mayoría de analistas saben hacer un SELECT y un GROUP BY, pero cuando ven un OVER con PARTITION BY, se pierden. Eso termina hoy. Vamos a cubrir ocho funciones en profundidad, con sintaxis completa, casos de uso reales y diferencias entre BigQuery, Snowflake, PostgreSQL y SQL Server. Al final del tutorial vas a poder resolver el noventa por ciento de los problemas de análisis de datos que hoy resuelves con subqueries lentas o en Python, directamente en SQL.">
+  <div class="accent-blob" style="right:-80px;top:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(37,99,235,.15) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-60px;bottom:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(147,197,253,.06) 0%,transparent 70%)"></div>
+  <div class="grid-bg"></div>
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:calc(100% - 54px);padding:0 8vw">
+    <div style="font-family:var(--fd);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sky);margin-bottom:1.8rem;display:flex;align-items:center;gap:12px">
+      <span style="display:block;width:26px;height:2px;background:var(--sky)"></span>Tutorial 02 · SQL Avanzado · 22 Secciones
+    </div>
+    <h1 style="font-family:var(--fe);font-size:clamp(2.6rem,5.2vw,4.8rem);font-weight:900;color:#fff;line-height:1.0;margin-bottom:1.2rem;max-width:780px">
+      SQL <span style="color:var(--sky)">Window</span><br>Functions
+    </h1>
+    <p style="font-family:var(--fc);font-size:1.05rem;font-weight:300;color:var(--t-dim);max-width:520px;line-height:1.85;margin-bottom:2rem">
+      La guía definitiva con 20+ ejemplos reales. ROW_NUMBER, RANK, LAG, LEAD, SUM OVER, AVG OVER, NTILE, FIRST_VALUE y más.
+    </p>
+    <div style="display:flex;gap:2rem;margin-bottom:1.5rem">
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">28'</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Duración</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">22</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Secciones</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">4</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Motores SQL</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff">20+</span><span style="font-family:var(--fd);font-size:.56rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Ejemplos</span></div>
+    </div>
+    <div class="db-row">
+      <span class="db-badge bq">BigQuery</span>
+      <span class="db-badge sf">Snowflake</span>
+      <span class="db-badge pg">PostgreSQL</span>
+      <span class="db-badge ss">SQL Server</span>
+    </div>
+    <div style="width:100%;height:1px;background:rgba(255,255,255,.07);margin-top:1.8rem;margin-bottom:.8rem;max-width:580px"></div>
+    <div style="font-family:var(--fd);font-size:.66rem;font-weight:600;letter-spacing:.07em;color:var(--t-faint)">Por <span style="color:rgba(255,255,255,.55)">Antonio Moro</span> · Senior Data Engineer · antonio-moro.es</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 02 · AGENDA ══ -->
+<div class="slide bg-dark"
+  data-title="Agenda"
+  data-script="Aquí tienes el mapa completo del tutorial. Primero vamos a entender qué son las window functions y en qué se diferencian de un GROUP BY normal, porque es fundamental tener ese concepto claro antes de ver el código. Después veremos la anatomía de la cláusula OVER con PARTITION BY, ORDER BY y el FRAME. Luego iremos función por función: ROW_NUMBER y RANK para numeración y ranking, LAG y LEAD para comparar con períodos anteriores y posteriores, SUM OVER y AVG OVER para acumulados y medias móviles, NTILE para segmentación en cuartiles o deciles, y FIRST_VALUE y LAST_VALUE para valores extremos. Después veremos casos de uso reales con queries completas: deduplicación de datos, análisis de cohortes, detección de churn y segmentación RFM. Y cerraremos con las diferencias de sintaxis entre BigQuery, Snowflake, PostgreSQL y SQL Server, porque hay matices importantes.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">00 · Agenda</span><h2 class="slide-h">Lo que vas<br>a aprender</h2></div>
+      <p class="slide-sub">De cero a dominar las funciones de ventana. Sin simplificaciones, con los mismos patrones que uso en proyectos reales.</p>
+      <div class="db-row" style="margin-top:1rem">
+        <span class="db-badge bq">BigQuery</span><span class="db-badge sf">Snowflake</span>
+        <span class="db-badge pg">PostgreSQL</span><span class="db-badge ss">SQL Server</span>
+      </div>
+      <div class="tip-box" style="margin-top:1rem"><b>📦 Archivo incluido:</b> El SQL Cheatsheet con todos los ejemplos de este tutorial está disponible en antonio-moro.es/productos.</div>
+    </div>
+    <div class="col-r">
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">01</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">¿Qué son las Window Functions?</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">GROUP BY vs OVER — la diferencia fundamental</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">0:00–4:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">02</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">Anatomía de OVER()</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">PARTITION BY · ORDER BY · FRAME</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">4:00–7:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">03</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">ROW_NUMBER · RANK · DENSE_RANK</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">Numeración, ranking y deduplicación</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">7:00–13:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">04</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">LAG · LEAD</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">Comparativas MoM, YoY y detección de churn</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">13:00–19:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">05</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">SUM OVER · AVG OVER</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">Running totals, YTD y medias móviles</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">19:00–23:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">06</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">NTILE · PERCENT_RANK · CUME_DIST</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">Segmentación RFM y distribuciones</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">23:00–26:00</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:.9rem 0">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:26px;margin-top:2px">07</span>
+          <div><div style="font-family:var(--fd);font-size:.78rem;font-weight:700;color:#fff">Casos de uso reales + diferencias por motor</div><div style="font-family:var(--fc);font-size:.74rem;color:var(--t-dim);margin-top:1px">Cohortes, RFM, churn y compatibilidad</div></div>
+          <span style="font-family:var(--fm);font-size:.56rem;color:var(--t-faint);white-space:nowrap;margin-left:auto;margin-top:2px">26:00–28:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 03 · QUÉ SON ══ -->
+<div class="slide bg-darker"
+  data-title="¿Qué son las Window Functions?"
+  data-script="Empecemos por lo más importante: qué son exactamente las window functions y en qué se diferencian de un GROUP BY. Cuando haces un GROUP BY, colapsas filas. Una query con GROUP BY por mes te devuelve una fila por mes. Pierdes el detalle de cada transacción. Las window functions son diferentes: calculan un valor para cada fila usando un conjunto de filas relacionadas, llamado ventana, pero sin colapsar el resultado. Cada fila del resultado sigue existiendo con todos sus campos, más el campo calculado por la window function. El ejemplo más simple: imagina una tabla de ventas. Con GROUP BY SUM de importe por cliente obtienes una fila por cliente con el total. Con SUM OVER PARTITION BY cliente_id obtienes todas las filas de ventas, con un campo adicional que es el total del cliente repetido en cada fila. Eso te permite calcular en la misma query el porcentaje que representa cada venta sobre el total del cliente, algo imposible de hacer elegantemente con GROUP BY.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">01 · Concepto</span><h2 class="slide-h">GROUP BY<br>vs OVER()</h2></div>
+      <p class="slide-sub">La diferencia fundamental que cambia cómo piensas en SQL.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="warn-box">
+          <b>❌ GROUP BY</b> — colapsa filas<br>
+          <span style="font-family:var(--fm);font-size:.65rem;color:rgba(255,255,255,.5)">N filas → 1 fila por grupo</span><br>
+          Pierdes el detalle de cada transacción. No puedes calcular % sobre total en la misma query.
+        </div>
+        <div class="green-box">
+          <b>✅ OVER() — ventana deslizante</b><br>
+          <span style="font-family:var(--fm);font-size:.65rem;color:rgba(255,255,255,.5)">N filas → N filas (más columnas calculadas)</span><br>
+          Cada fila conserva su detalle más el valor calculado sobre el grupo. Puedes combinar métricas de fila y de grupo en la misma query.
+        </div>
+        <div class="tip-box"><b>💡 Regla práctica:</b> Si necesitas un resultado por grupo → GROUP BY. Si necesitas el detalle de cada fila más información del grupo → Window Function.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,168,212,.6);margin-bottom:6px">❌ Con GROUP BY — pierdes el detalle</div>
+      <div class="code" style="margin-bottom:10px;font-size:.62rem">
+<span class="ck">SELECT</span> cliente_id,<br>
+&nbsp;&nbsp;<span class="cf">SUM</span>(importe) <span class="ck">AS</span> total_cliente<br>
+<span class="ck">FROM</span> ventas<br>
+<span class="ck">GROUP BY</span> cliente_id<br>
+<span class="cc">-- Resultado: 1 fila por cliente. Pierdes las ventas individuales.</span>
+      </div>
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(134,239,172,.6);margin-bottom:6px">✅ Con OVER() — conservas el detalle</div>
+      <div class="code" style="font-size:.62rem">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;venta_id, cliente_id, importe,<br>
+<span class="hl">  <span class="cf">SUM</span>(importe) <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> cliente_id)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">AS</span> total_cliente,<br>
+<span class="hl2">  <span class="cf">ROUND</span>(importe * <span class="cn">100.0</span> /</span>
+<span class="hl2">    <span class="cf">SUM</span>(importe) <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> cliente_id), <span class="cn">1</span>)</span>
+<span class="hl2">    <span class="ck">AS</span> pct_sobre_total</span>
+<span class="ck">FROM</span> ventas<br>
+<span class="cc">-- Resultado: todas las filas + total del cliente + % de cada venta</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 04 · ANATOMÍA DE OVER() ══ -->
+<div class="slide bg-dark"
+  data-title="Anatomía de OVER()"
+  data-script="Antes de ver las funciones una a una, necesitas dominar la cláusula OVER, porque es la misma para todas. OVER tiene tres partes opcionales: PARTITION BY, ORDER BY y el FRAME. PARTITION BY es como un GROUP BY dentro de la ventana: define las particiones. Si pones PARTITION BY cliente_id, la función calcula por separado para cada cliente. Si no pones PARTITION BY, la ventana es toda la tabla. ORDER BY dentro del OVER define el orden de las filas dentro de cada partición. Es obligatorio para funciones que dependen del orden, como LAG, LEAD, ROW_NUMBER, RANK o SUM OVER acumulativo. Sin ORDER BY, el resultado de estas funciones es no determinista, es decir, puede variar entre ejecuciones. El FRAME, que es la parte más desconocida, define exactamente qué filas de la partición se incluyen en el cálculo. La especificación del frame usa las palabras clave ROWS BETWEEN o RANGE BETWEEN. Si no especificas el frame, el valor por defecto depende de si tienes ORDER BY o no, y ese comportamiento por defecto es fuente de muchos bugs silenciosos.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">02 · Sintaxis</span><h2 class="slide-h">Anatomía de<br>la cláusula OVER()</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n">PRT</span><div class="step-body"><div class="step-title">PARTITION BY</div><div class="step-desc">Define los grupos (ventanas). Opcional. Sin él, toda la tabla es una ventana.</div></div></div>
+        <div class="step"><span class="step-n">ORD</span><div class="step-body"><div class="step-title">ORDER BY</div><div class="step-desc">Orden dentro de la partición. Obligatorio para ROW_NUMBER, RANK, LAG, LEAD y acumulados.</div></div></div>
+        <div class="step"><span class="step-n">FRM</span><div class="step-body"><div class="step-title">FRAME (ROWS / RANGE BETWEEN)</div><div class="step-desc">Define qué filas concretas entran en el cálculo. Controla acumulados y medias móviles.</div></div></div>
+        <div class="warn-box" style="margin-top:6px"><b>⚠️ Bug silencioso:</b> Sin frame explícito y con ORDER BY, el frame por defecto es RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, lo que puede dar resultados inesperados en LAST_VALUE.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint);margin-bottom:8px">Estructura completa</div>
+      <div class="anatomy">
+        <div class="an-line"><span class="an-fn">FUNCIÓN</span><span class="an-arg">(columna_o_expresión)</span></div>
+        <div class="an-line"><span class="an-kw">OVER</span>&nbsp;(</div>
+        <div class="an-line">&nbsp;&nbsp;<span class="an-kw">PARTITION BY</span>&nbsp;<span class="an-arg">col1, col2</span>&nbsp;&nbsp;&nbsp;<span class="an-label">opcional — grupos</span></div>
+        <div class="an-line">&nbsp;&nbsp;<span class="an-kw">ORDER BY</span>&nbsp;<span class="an-arg">col3 ASC/DESC</span>&nbsp;&nbsp;<span class="an-label">orden en partición</span></div>
+        <div class="an-line">&nbsp;&nbsp;<span class="an-clause">ROWS BETWEEN</span>&nbsp;<span class="an-arg">inicio</span>&nbsp;<span class="an-kw">AND</span>&nbsp;<span class="an-arg">fin</span>&nbsp;<span class="an-label">frame</span></div>
+        <div class="an-line">)</div>
+      </div>
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t-faint);margin-top:12px;margin-bottom:6px">Valores del FRAME</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:200px">UNBOUNDED PRECEDING</span>
+          <span style="font-family:var(--fc);font-size:.7rem;color:var(--t-dim)">Desde la primera fila de la partición</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:200px">N PRECEDING</span>
+          <span style="font-family:var(--fc);font-size:.7rem;color:var(--t-dim)">N filas antes de la fila actual</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--gold);min-width:200px">CURRENT ROW</span>
+          <span style="font-family:var(--fc);font-size:.7rem;color:var(--t-dim)">La fila actual</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:200px">N FOLLOWING</span>
+          <span style="font-family:var(--fc);font-size:.7rem;color:var(--t-dim)">N filas después de la fila actual</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--fm);font-size:.6rem;color:var(--sky);min-width:200px">UNBOUNDED FOLLOWING</span>
+          <span style="font-family:var(--fc);font-size:.7rem;color:var(--t-dim)">Hasta la última fila de la partición</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 05 · ROW_NUMBER ══ -->
+<div class="slide bg-code"
+  data-title="ROW_NUMBER"
+  data-script="Empezamos con ROW_NUMBER. Es la función más usada y también la más útil para resolver un problema muy común en datos: la deduplicación. ROW_NUMBER asigna un número secuencial único a cada fila dentro de su partición, ordenado según el ORDER BY que especifiques. No hay empates: aunque dos filas tengan el mismo valor en la columna de ordenación, ROW_NUMBER les asigna números distintos. El uso más importante en la práctica es la deduplicación: quedarte con el registro más reciente de cada cliente o entidad. La query funciona así: calculamos el ROW_NUMBER particionado por cliente_id y ordenado por fecha descendente. La fila más reciente de cada cliente recibe el número uno. Luego envolvemos la query en un CTE o subquery y filtramos donde el número sea uno. El resultado: una sola fila por cliente, la más reciente. Esto es diez veces más rápido que hacerlo con un GROUP BY y una subquery correlacionada, especialmente en tablas grandes.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">03 · Ranking</span><h2 class="slide-h">ROW_NUMBER()<br>— Deduplicación</h2></div>
+      <p class="slide-sub">Numeración única por partición. El arma definitiva para deduplicar datos.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">①</span><div class="step-body"><div class="step-title">Asigna número único por partición</div><div class="step-desc">Sin empates. Dos filas iguales reciben números distintos. Determinista con ORDER BY claro.</div></div></div>
+        <div class="step"><span class="step-n">②</span><div class="step-body"><div class="step-title">Deduplicar → filtrar WHERE rn = 1</div><div class="step-desc">Ordena por fecha DESC. La fila más reciente obtiene rn=1. Filtra en CTE exterior.</div></div></div>
+        <div class="step"><span class="step-n">③</span><div class="step-body"><div class="step-title">Paginación eficiente</div><div class="step-desc">ROW_NUMBER() en vez de OFFSET/LIMIT es más rápido en tablas grandes en todos los motores.</div></div></div>
+        <div class="tip-box"><b>⚡ Rendimiento:</b> En BigQuery y Snowflake, ROW_NUMBER con PARTITION BY y ORDER BY sobre columnas con clustering o partición es extremadamente eficiente. Mucho más que DISTINCT o subqueries correlacionadas.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Deduplicar clientes</span></div>
+      <div class="code">
+<span class="cc">-- Problema: tabla clientes con duplicados históricos</span><br>
+<span class="cc">-- Solución: quedarnos con el registro más reciente</span><br>
+<br>
+<span class="ck">WITH</span> ranked <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;cliente_id, nombre, email,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fecha_actualizacion,<br>
+<span class="hl">    <span class="cf">ROW_NUMBER</span>() <span class="ck">OVER</span> (</span>
+<span class="hl">      <span class="ck">PARTITION BY</span> cliente_id</span>
+<span class="hl">      <span class="ck">ORDER BY</span> fecha_actualizacion <span class="ck">DESC</span></span>
+<span class="hl">    ) <span class="ck">AS</span> rn</span>
+&nbsp;&nbsp;<span class="ck">FROM</span> dim_clientes<br>
+)<br>
+<span class="ck">SELECT</span> cliente_id, nombre, email, fecha_actualizacion<br>
+<span class="ck">FROM</span> ranked<br>
+<span class="hl2"><span class="ck">WHERE</span> rn = <span class="cn">1</span>&nbsp;&nbsp;<span class="cc">-- Solo la fila más reciente por cliente</span></span>
+      </div>
+      <table class="rtable" style="margin-top:10px">
+        <tr><th>cliente_id</th><th>nombre</th><th>fecha_actualizacion</th><th>rn</th></tr>
+        <tr class="hl-g"><td>C001</td><td>Ana García</td><td>2025-03-15</td><td class="num">1 ← queda</td></tr>
+        <tr style="opacity:.4"><td>C001</td><td>Ana García</td><td>2024-11-02</td><td class="num">2</td></tr>
+        <tr class="hl-g"><td>C002</td><td>Luis Pérez</td><td>2025-01-20</td><td class="num">1 ← queda</td></tr>
+        <tr style="opacity:.4"><td>C002</td><td>Luis Pérez</td><td>2024-09-10</td><td class="num">2</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 06 · RANK y DENSE_RANK ══ -->
+<div class="slide bg-dark"
+  data-title="RANK y DENSE_RANK"
+  data-script="RANK y DENSE_RANK son similares a ROW_NUMBER pero manejan los empates de forma distinta. RANK asigna el mismo número a filas con el mismo valor, y salta números después del empate. Si dos filas empatan en el puesto uno, la siguiente fila recibe el número tres, no el dos. DENSE_RANK también asigna el mismo número a los empates, pero no salta: si dos filas empatan en el uno, la siguiente recibe el dos. ¿Cuándo usar cada uno? ROW_NUMBER cuando necesitas exactamente una fila por posición, sin empates posibles, como en deduplicación. RANK cuando el salto de posición refleja la realidad, como en competiciones deportivas donde dos atletas pueden compartir el segundo puesto y el siguiente es el cuarto. DENSE_RANK cuando quieres posiciones continuas sin huecos, como en rankings de ventas donde no te importa que haya empates pero sí que las posiciones sean consecutivas.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">04 · Ranking</span><h2 class="slide-h">RANK() vs<br>DENSE_RANK()</h2></div>
+      <p class="slide-sub">Tres funciones similares, comportamientos distintos ante empates.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card">
+          <span class="fn-badge">ROW_NUMBER</span>
+          <div class="fn-body"><div class="fn-desc">Siempre único. Sin empates. 1, 2, 3, 4...</div><div class="fn-use">→ Deduplicar, paginar</div></div>
+        </div>
+        <div class="fn-card">
+          <span class="fn-badge">RANK</span>
+          <div class="fn-body"><div class="fn-desc">Empates = mismo número + salta posiciones. 1, 1, 3, 4...</div><div class="fn-use">→ Rankings con huecos (deportes, concursos)</div></div>
+        </div>
+        <div class="fn-card">
+          <span class="fn-badge">DENSE_RANK</span>
+          <div class="fn-body"><div class="fn-desc">Empates = mismo número sin saltos. 1, 1, 2, 3...</div><div class="fn-use">→ Top N sin importar empates</div></div>
+        </div>
+        <div class="tip-box"><b>💡 Caso real:</b> Top 5 productos por región sin subqueries. Usa DENSE_RANK y filtra WHERE dr &lt;= 5.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Top 3 vendedores por región</span></div>
+      <div class="code">
+<span class="ck">WITH</span> ranked <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;region, vendedor, ventas_total,<br>
+<span class="hl">    <span class="cf">ROW_NUMBER</span>() <span class="ck">OVER</span> (</span>
+<span class="hl">      <span class="ck">PARTITION BY</span> region <span class="ck">ORDER BY</span> ventas_total <span class="ck">DESC</span></span>
+<span class="hl">    ) <span class="ck">AS</span> rn,</span>
+<span class="hl2">    <span class="cf">RANK</span>() <span class="ck">OVER</span> (</span>
+<span class="hl2">      <span class="ck">PARTITION BY</span> region <span class="ck">ORDER BY</span> ventas_total <span class="ck">DESC</span></span>
+<span class="hl2">    ) <span class="ck">AS</span> rk,</span>
+<span class="hl3">    <span class="cf">DENSE_RANK</span>() <span class="ck">OVER</span> (</span>
+<span class="hl3">      <span class="ck">PARTITION BY</span> region <span class="ck">ORDER BY</span> ventas_total <span class="ck">DESC</span></span>
+<span class="hl3">    ) <span class="ck">AS</span> dr</span>
+&nbsp;&nbsp;<span class="ck">FROM</span> ventas_vendedor<br>
+)<br>
+<span class="ck">SELECT</span> * <span class="ck">FROM</span> ranked <span class="ck">WHERE</span> dr <span class="cop">&lt;=</span> <span class="cn">3</span>
+      </div>
+      <table class="rtable" style="margin-top:8px">
+        <tr><th>vendedor</th><th>ventas</th><th>rn</th><th>rk</th><th>dr</th></tr>
+        <tr><td>Marta R.</td><td class="num">95.000</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+        <tr><td>Pedro S.</td><td class="num">80.000</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
+        <tr><td>Ana G.</td><td class="num">80.000</td><td class="num">3</td><td class="num">2</td><td class="num">2</td></tr>
+        <tr><td>Luis T.</td><td class="num">72.000</td><td class="num">4</td><td class="num" style="color:#fca5a5">4 ← salta</td><td class="num" style="color:#86efac">3 ← sin hueco</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 07 · LAG ══ -->
+<div class="slide bg-code"
+  data-title="LAG — Comparar con período anterior"
+  data-script="LAG es una de las funciones más útiles en análisis de datos de negocio. Permite acceder al valor de una columna en la fila anterior dentro de la partición. El uso más inmediato es calcular la variación mes a mes o año a año directamente en SQL, sin necesidad de hacer un self-join que sería mucho más lento y verboso. La sintaxis es LAG de columna, offset, valor por defecto. El offset es cuántas filas hacia atrás miras, por defecto es uno. El valor por defecto es lo que devuelve cuando no hay fila anterior, típicamente cero o null. Por ejemplo, para calcular la variación mes a mes de los ingresos: calculamos LAG de ingresos con offset uno sobre la partición del año y ordenado por mes. Eso nos da el ingreso del mes anterior. La diferencia entre el ingreso actual y el LAG es la variación absoluta. Y la variación porcentual es esa diferencia dividida entre el LAG. Todo en una sola query, sin joins, sin subqueries, procesando la tabla una sola vez.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">05 · Desplazamiento</span><h2 class="slide-h">LAG()<br>— Período anterior</h2></div>
+      <p class="slide-sub">Accede al valor de N filas anteriores dentro de la partición. Imprescindible para MoM y YoY.</p>
+      <div class="anatomy" style="margin-top:.75rem">
+        <div class="an-line"><span class="an-fn">LAG</span>(<span class="an-arg">columna</span>, <span class="an-arg">offset</span>, <span class="an-arg">default</span>)</div>
+        <div class="an-line"><span class="an-kw">OVER</span> (<span class="an-kw">PARTITION BY</span> <span class="an-arg">…</span> <span class="an-kw">ORDER BY</span> <span class="an-arg">…</span>)</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">offset=1</span><div class="step-body"><div class="step-title">Fila inmediatamente anterior</div><div class="step-desc">MoM: LAG(ingresos, 1, 0) → ingresos del mes pasado.</div></div></div>
+        <div class="step"><span class="step-n">offset=12</span><div class="step-body"><div class="step-title">12 filas atrás</div><div class="step-desc">YoY con datos mensuales: LAG(ingresos, 12, 0) → mismo mes del año anterior.</div></div></div>
+        <div class="step"><span class="step-n">default</span><div class="step-body"><div class="step-title">Valor cuando no hay fila anterior</div><div class="step-desc">Evita NULL en la primera fila. Usa 0 o NULL según el contexto.</div></div></div>
+        <div class="warn-box"><b>⚠️ Cuidado:</b> El ORDER BY del OVER debe ser el mismo que el orden lógico de tus períodos. Si tienes meses como texto "Ene", "Feb"… ordena por columna numérica de mes, no por nombre.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Variación MoM y YoY</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;año, mes, ingresos,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Mes anterior (MoM)</span><br>
+<span class="hl">  <span class="cf">LAG</span>(ingresos, <span class="cn">1</span>, <span class="cn">0</span>) <span class="ck">OVER</span> (</span>
+<span class="hl">    <span class="ck">PARTITION BY</span> año <span class="ck">ORDER BY</span> mes</span>
+<span class="hl">  ) <span class="ck">AS</span> ingresos_mes_anterior,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Variación absoluta MoM</span><br>
+&nbsp;&nbsp;ingresos - <span class="cf">LAG</span>(ingresos, <span class="cn">1</span>, <span class="cn">0</span>) <span class="ck">OVER</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="ck">PARTITION BY</span> año <span class="ck">ORDER BY</span> mes)<br>
+&nbsp;&nbsp;<span class="ck">AS</span> var_mom_abs,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Variación % MoM</span><br>
+<span class="hl2">  <span class="cf">ROUND</span>((ingresos - <span class="cf">LAG</span>(ingresos,<span class="cn">1</span>,<span class="cn">0</span>) <span class="ck">OVER</span></span>
+<span class="hl2">    (<span class="ck">PARTITION BY</span> año <span class="ck">ORDER BY</span> mes)) * <span class="cn">100.0</span></span>
+<span class="hl2">    / <span class="cf">NULLIF</span>(<span class="cf">LAG</span>(ingresos,<span class="cn">1</span>,<span class="cn">0</span>) <span class="ck">OVER</span></span>
+<span class="hl2">    (<span class="ck">PARTITION BY</span> año <span class="ck">ORDER BY</span> mes),<span class="cn">0</span>), <span class="cn">1</span>)</span>
+<span class="hl2">  <span class="ck">AS</span> var_mom_pct</span>
+<br>
+<span class="ck">FROM</span> metricas_mensuales<br>
+<span class="ck">ORDER BY</span> año, mes
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 08 · LEAD ══ -->
+<div class="slide bg-dark"
+  data-title="LEAD — Detección de churn"
+  data-script="LEAD es el complemento de LAG: en vez de mirar hacia atrás, mira hacia adelante. Accede al valor de N filas posteriores dentro de la partición. Su caso de uso más potente en análisis de negocio es la detección de churn. Un cliente hace churn cuando compra en un período pero no vuelve a comprar en el siguiente. Con LEAD puedes detectarlo directamente en SQL. La lógica es: para cada fila de compra de un cliente, usa LEAD sobre la fecha de siguiente compra. Si LEAD devuelve NULL, significa que no hay compra posterior: el cliente churneó en ese período. También puedes usar LEAD para calcular el tiempo entre compras, la duración de suscripciones, o predecir el siguiente estado en una máquina de estados. Por ejemplo, en una tabla de estados de pedidos, LEAD sobre el estado ordenado por fecha te da el estado al que transicionará cada pedido. Todo sin joins, todo en una sola pasada por los datos.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">06 · Desplazamiento</span><h2 class="slide-h">LEAD()<br>— Detección de churn</h2></div>
+      <p class="slide-sub">Mira N filas hacia adelante. Detecta clientes que no volverán y calcula tiempo entre eventos.</p>
+      <div class="anatomy" style="margin-top:.75rem">
+        <div class="an-line"><span class="an-fn">LEAD</span>(<span class="an-arg">columna</span>, <span class="an-arg">offset</span>, <span class="an-arg">default</span>)</div>
+        <div class="an-line"><span class="an-kw">OVER</span> (<span class="an-kw">PARTITION BY</span> <span class="an-arg">…</span> <span class="an-kw">ORDER BY</span> <span class="an-arg">…</span>)</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card">
+          <span class="fn-badge">LEAD IS NULL</span>
+          <div class="fn-body"><div class="fn-desc">No hay compra siguiente → cliente churneado</div><div class="fn-use">→ Identificar la última compra antes del churn</div></div>
+        </div>
+        <div class="fn-card">
+          <span class="fn-badge">días entre compras</span>
+          <div class="fn-body"><div class="fn-desc">LEAD(fecha) - fecha_actual = días hasta siguiente pedido</div><div class="fn-use">→ Frecuencia de compra por segmento</div></div>
+        </div>
+        <div class="tip-box"><b>💡 Churn real:</b> Combina LEAD con una ventana de tiempo. Un cliente sin compra en los siguientes 90 días = churned. Filtra WHERE días_siguiente_compra &gt; 90 OR siguiente IS NULL.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Detección de churn</span></div>
+      <div class="code">
+<span class="ck">WITH</span> compras_lead <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;cliente_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fecha_compra,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;importe,<br>
+<span class="hl">    <span class="cf">LEAD</span>(fecha_compra) <span class="ck">OVER</span> (</span>
+<span class="hl">      <span class="ck">PARTITION BY</span> cliente_id</span>
+<span class="hl">      <span class="ck">ORDER BY</span> fecha_compra</span>
+<span class="hl">    ) <span class="ck">AS</span> siguiente_compra,</span>
+<br>
+<span class="hl2">    <span class="cf">DATEDIFF</span>(day, fecha_compra,</span>
+<span class="hl2">      <span class="cf">LEAD</span>(fecha_compra) <span class="ck">OVER</span> (</span>
+<span class="hl2">        <span class="ck">PARTITION BY</span> cliente_id <span class="ck">ORDER BY</span> fecha_compra</span>
+<span class="hl2">      )) <span class="ck">AS</span> dias_hasta_siguiente</span>
+<br>
+&nbsp;&nbsp;<span class="ck">FROM</span> pedidos<br>
+)<br>
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;cliente_id, fecha_compra, importe,<br>
+&nbsp;&nbsp;siguiente_compra, dias_hasta_siguiente,<br>
+&nbsp;&nbsp;<span class="cf">CASE</span><br>
+<span class="hl3">    <span class="ck">WHEN</span> siguiente_compra <span class="ck">IS NULL</span> <span class="ck">THEN</span> <span class="cs">'CHURNED'</span></span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">WHEN</span> dias_hasta_siguiente <span class="cop">&gt;</span> <span class="cn">90</span> <span class="ck">THEN</span> <span class="cs">'EN RIESGO'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">ELSE</span> <span class="cs">'ACTIVO'</span><br>
+&nbsp;&nbsp;<span class="cf">END</span> <span class="ck">AS</span> estado_cliente<br>
+<span class="ck">FROM</span> compras_lead
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 09 · SUM OVER — RUNNING TOTAL ══ -->
+<div class="slide bg-code"
+  data-title="SUM OVER — Running Total"
+  data-script="SUM OVER es la función que más impacto inmediato tiene en los dashboards financieros. Permite calcular acumulados, también llamados running totals o YTD, sin perder el detalle de cada fila. La diferencia con LAG y LEAD es que aquí el frame importa mucho. Para un acumulado desde el inicio de la partición hasta la fila actual, el frame es ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW. Este es el frame que necesitas para el YTD clásico: acumula todos los ingresos desde enero hasta el mes actual. Para el total de toda la partición, el frame es ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING. Este te da el mismo valor total en todas las filas de la partición, perfecto para calcular porcentajes. Y combinando los dos, en la misma query puedes calcular los ingresos de cada mes, el acumulado hasta ese mes, y el porcentaje sobre el total anual. Todo en una pasada por los datos.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">07 · Agregados</span><h2 class="slide-h">SUM OVER()<br>— YTD y Running Total</h2></div>
+      <p class="slide-sub">Acumulados sin perder el detalle de cada fila. El frame determina qué filas entran en la suma.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card" style="border-left:3px solid var(--blue)">
+          <span class="fn-badge">UNBOUNDED PRECEDING → CURRENT ROW</span>
+          <div class="fn-body"><div class="fn-desc">Running total acumulado hasta la fila actual. Para YTD.</div></div>
+        </div>
+        <div class="fn-card" style="border-left:3px solid var(--green)">
+          <span class="fn-badge">UNBOUNDED PRECEDING → UNBOUNDED FOLLOWING</span>
+          <div class="fn-body"><div class="fn-desc">Total completo de la partición. Igual en todas las filas. Para calcular %.</div></div>
+        </div>
+        <div class="fn-card" style="border-left:3px solid var(--gold)">
+          <span class="fn-badge">N PRECEDING → CURRENT ROW</span>
+          <div class="fn-body"><div class="fn-desc">Suma de los últimos N períodos. Para ventanas móviles.</div></div>
+        </div>
+        <div class="warn-box"><b>⚠️ Sin frame explícito:</b> Si tienes ORDER BY, el frame por defecto es UNBOUNDED PRECEDING TO CURRENT ROW (acumulado). Ponlo siempre explícito para que el código sea auto-documentado.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — YTD + % sobre total anual</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;año, mes, mes_nombre, ingresos,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- YTD: acumulado desde enero hasta este mes</span><br>
+<span class="hl">  <span class="cf">SUM</span>(ingresos) <span class="ck">OVER</span> (</span>
+<span class="hl">    <span class="ck">PARTITION BY</span> año</span>
+<span class="hl">    <span class="ck">ORDER BY</span> mes</span>
+<span class="hl">    <span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING</span></span>
+<span class="hl">      <span class="ck">AND CURRENT ROW</span></span>
+<span class="hl">  ) <span class="ck">AS</span> ytd,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Total del año completo (mismo valor en todas las filas)</span><br>
+<span class="hl2">  <span class="cf">SUM</span>(ingresos) <span class="ck">OVER</span> (</span>
+<span class="hl2">    <span class="ck">PARTITION BY</span> año</span>
+<span class="hl2">    <span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING</span></span>
+<span class="hl2">      <span class="ck">AND UNBOUNDED FOLLOWING</span></span>
+<span class="hl2">  ) <span class="ck">AS</span> total_anual,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Porcentaje sobre total anual</span><br>
+<span class="hl3">  <span class="cf">ROUND</span>(ingresos * <span class="cn">100.0</span> /</span>
+<span class="hl3">    <span class="cf">SUM</span>(ingresos) <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> año</span>
+<span class="hl3">    <span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</span>), <span class="cn">1</span>)</span>
+<span class="hl3">  <span class="ck">AS</span> pct_anual</span>
+<br>
+<span class="ck">FROM</span> metricas_mensuales <span class="ck">ORDER BY</span> año, mes
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 · AVG OVER — MEDIA MÓVIL ══ -->
+<div class="slide bg-dark"
+  data-title="AVG OVER — Media móvil"
+  data-script="AVG OVER es la función perfecta para medias móviles, también llamadas rolling averages. Las medias móviles suavizan series temporales ruidosas: eliminan el ruido de los outliers diarios o semanales y permiten ver la tendencia real. El frame aquí es clave. Para una media móvil de siete días, el frame es ROWS BETWEEN 6 PRECEDING AND CURRENT ROW: incluye la fila actual y las seis anteriores, que son siete en total. Para una media móvil de treinta días, son veintinueve filas anteriores más la actual. Un patrón muy habitual en dashboards de e-commerce es mostrar las ventas diarias con la media móvil de siete días superpuesta. La media móvil elimina el efecto de los días de la semana, donde los lunes siempre son más bajos y los viernes más altos, y permite ver si la tendencia real está creciendo o decayendo. Esto que en Python requeriría pandas y un rolling mean, en SQL se hace con una sola línea de código.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">08 · Agregados</span><h2 class="slide-h">AVG OVER()<br>— Media móvil 7/30 días</h2></div>
+      <p class="slide-sub">Suaviza series temporales ruidosas. Elimina el efecto día-de-la-semana.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">7d</span><div class="step-body"><div class="step-title">Media móvil 7 días</div><div class="step-desc">ROWS BETWEEN 6 PRECEDING AND CURRENT ROW. Elimina ruido semanal.</div></div></div>
+        <div class="step"><span class="step-n">30d</span><div class="step-body"><div class="step-title">Media móvil 30 días</div><div class="step-desc">ROWS BETWEEN 29 PRECEDING AND CURRENT ROW. Tendencia mensual.</div></div></div>
+        <div class="step"><span class="step-n">CEN</span><div class="step-body"><div class="step-title">Media centrada</div><div class="step-desc">ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING. Ventana simétrica alrededor de la fila actual.</div></div></div>
+        <div class="tip-box"><b>💡 También funciona con MIN, MAX:</b> MAX OVER con una ventana deslizante te da el máximo de los últimos N días. Muy útil para detectar picos anómalos.</div>
+        <div class="green-box"><b>✅ Vs Python/pandas:</b> <code style="color:#86efac">df['ventas'].rolling(7).mean()</code> ≡ <code style="color:#86efac">AVG(ventas) OVER (ORDER BY fecha ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)</code>. Directo en SQL, sin extraer datos.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Media móvil 7 y 30 días</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;fecha,<br>
+&nbsp;&nbsp;ventas_diarias,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Media móvil 7 días</span><br>
+<span class="hl">  <span class="cf">ROUND</span>(<span class="cf">AVG</span>(ventas_diarias) <span class="ck">OVER</span> (</span>
+<span class="hl">    <span class="ck">ORDER BY</span> fecha</span>
+<span class="hl">    <span class="ck">ROWS BETWEEN</span> <span class="cn">6</span> <span class="ck">PRECEDING AND CURRENT ROW</span></span>
+<span class="hl">  ), <span class="cn">0</span>) <span class="ck">AS</span> mm_7d,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Media móvil 30 días</span><br>
+<span class="hl2">  <span class="cf">ROUND</span>(<span class="cf">AVG</span>(ventas_diarias) <span class="ck">OVER</span> (</span>
+<span class="hl2">    <span class="ck">ORDER BY</span> fecha</span>
+<span class="hl2">    <span class="ck">ROWS BETWEEN</span> <span class="cn">29</span> <span class="ck">PRECEDING AND CURRENT ROW</span></span>
+<span class="hl2">  ), <span class="cn">0</span>) <span class="ck">AS</span> mm_30d,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Máximo de los últimos 7 días</span><br>
+<span class="hl3">  <span class="cf">MAX</span>(ventas_diarias) <span class="ck">OVER</span> (</span>
+<span class="hl3">    <span class="ck">ORDER BY</span> fecha</span>
+<span class="hl3">    <span class="ck">ROWS BETWEEN</span> <span class="cn">6</span> <span class="ck">PRECEDING AND CURRENT ROW</span></span>
+<span class="hl3">  ) <span class="ck">AS</span> max_7d</span>
+<br>
+<span class="ck">FROM</span> ventas_diarias<br>
+<span class="ck">ORDER BY</span> fecha
+      </div>
+      <table class="rtable" style="margin-top:8px">
+        <tr><th>fecha</th><th>ventas</th><th>mm_7d</th><th>mm_30d</th></tr>
+        <tr><td>2025-01-01</td><td class="num">8.200</td><td class="num">8.200</td><td class="num">8.200</td></tr>
+        <tr><td>2025-01-05</td><td class="num">11.400</td><td class="num">9.750</td><td class="num">9.750</td></tr>
+        <tr class="hl-row"><td>2025-01-15</td><td class="num">9.800</td><td class="num">9.943</td><td class="num">9.620</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11 · NTILE ══ -->
+<div class="slide bg-code"
+  data-title="NTILE — Segmentación RFM"
+  data-script="NTILE divide las filas de cada partición en N grupos de tamaño igual, numerados de uno a N. Es la función perfecta para segmentación de clientes. El análisis RFM, que significa Recencia, Frecuencia y Valor Monetario, es el estándar en marketing para segmentar clientes. Con NTILE puedes calcularlo completamente en SQL. Para el valor monetario: NTILE de cuatro sobre todos los clientes ordenados por gasto total. El grupo cuatro es el cuartil de mayor gasto, los clientes premium. El grupo uno es el cuartil de menor gasto. Para la recencia: NTILE de cuatro ordenado por fecha de última compra descendente. Los clientes que compraron más recientemente están en el grupo cuatro. Para la frecuencia: NTILE de cuatro ordenado por número de pedidos. Combinando los tres scores en un solo número puedes crear segmentos como Campeones, que son cuatro cuatro cuatro, Clientes en riesgo, que tienen recencia baja pero frecuencia y valor altos, y Clientes perdidos, con scores bajos en las tres dimensiones.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">09 · Segmentación</span><h2 class="slide-h">NTILE()<br>— Segmentación RFM</h2></div>
+      <p class="slide-sub">Divide clientes en N grupos de igual tamaño. La base del análisis RFM en SQL puro.</p>
+      <div style="margin-top:.75rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card" style="border-left:3px solid var(--gold)">
+          <span class="fn-badge">NTILE(4)</span>
+          <div class="fn-body"><div class="fn-desc">Cuartiles. Q4 = top 25% (los mejores). Q1 = bottom 25%.</div><div class="fn-use">→ RFM Monetario</div></div>
+        </div>
+        <div class="fn-card" style="border-left:3px solid var(--sky)">
+          <span class="fn-badge">NTILE(10)</span>
+          <div class="fn-body"><div class="fn-desc">Deciles. D10 = top 10% de clientes por valor.</div><div class="fn-use">→ Segmentación premium/mass</div></div>
+        </div>
+        <div class="fn-card" style="border-left:3px solid var(--green)">
+          <span class="fn-badge">RFM combinado</span>
+          <div class="fn-body"><div class="fn-desc">CONCAT(r_score, f_score, m_score) = segmento 3D</div><div class="fn-use">→ Champions (444), At Risk (244), Lost (111)</div></div>
+        </div>
+        <div class="warn-box"><b>⚠️ Grupos desiguales:</b> Si el número de filas no es divisible exactamente entre N, NTILE reparte las filas extra empezando por el primer grupo. No todos los grupos son exactamente del mismo tamaño.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Análisis RFM completo</span></div>
+      <div class="code">
+<span class="ck">WITH</span> metricas_cliente <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;cliente_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">MAX</span>(fecha_pedido) <span class="ck">AS</span> ultima_compra,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">COUNT</span>(*) <span class="ck">AS</span> num_pedidos,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">SUM</span>(importe) <span class="ck">AS</span> gasto_total<br>
+&nbsp;&nbsp;<span class="ck">FROM</span> pedidos<br>
+&nbsp;&nbsp;<span class="ck">GROUP BY</span> cliente_id<br>
+),<br>
+rfm_scores <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span> cliente_id,<br>
+<span class="hl">    <span class="cc">-- Recencia: compra reciente = score alto</span></span>
+<span class="hl">    <span class="cf">NTILE</span>(<span class="cn">4</span>) <span class="ck">OVER</span> (<span class="ck">ORDER BY</span> ultima_compra) <span class="ck">AS</span> r,</span>
+<span class="hl2">    <span class="cc">-- Frecuencia</span></span>
+<span class="hl2">    <span class="cf">NTILE</span>(<span class="cn">4</span>) <span class="ck">OVER</span> (<span class="ck">ORDER BY</span> num_pedidos) <span class="ck">AS</span> f,</span>
+<span class="hl3">    <span class="cc">-- Monetario</span></span>
+<span class="hl3">    <span class="cf">NTILE</span>(<span class="cn">4</span>) <span class="ck">OVER</span> (<span class="ck">ORDER BY</span> gasto_total) <span class="ck">AS</span> m</span>
+&nbsp;&nbsp;<span class="ck">FROM</span> metricas_cliente<br>
+)<br>
+<span class="ck">SELECT</span> *,<br>
+&nbsp;&nbsp;<span class="cf">CASE</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">WHEN</span> r=<span class="cn">4</span> <span class="ck">AND</span> f=<span class="cn">4</span> <span class="ck">AND</span> m=<span class="cn">4</span> <span class="ck">THEN</span> <span class="cs">'Champions'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">WHEN</span> r&gt;=<span class="cn">3</span> <span class="ck">AND</span> m&gt;=<span class="cn">3</span> <span class="ck">THEN</span> <span class="cs">'Loyal'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">WHEN</span> r&lt;=<span class="cn">2</span> <span class="ck">AND</span> m&gt;=<span class="cn">3</span> <span class="ck">THEN</span> <span class="cs">'At Risk'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">ELSE</span> <span class="cs">'Needs Attention'</span><br>
+&nbsp;&nbsp;<span class="cf">END</span> <span class="ck">AS</span> segmento<br>
+<span class="ck">FROM</span> rfm_scores
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12 · FIRST_VALUE / LAST_VALUE ══ -->
+<div class="slide bg-dark"
+  data-title="FIRST_VALUE y LAST_VALUE"
+  data-script="FIRST_VALUE y LAST_VALUE devuelven el primer y el último valor de la columna especificada dentro de la ventana. Son muy útiles para cálculos de variación respecto a un valor base: precio inicial del producto, primer valor de una serie temporal, o primer pedido de un cliente. El error más común con LAST_VALUE es olvidar especificar el frame. Sin frame explícito, con ORDER BY, el frame por defecto termina en CURRENT ROW, lo que significa que LAST_VALUE no devuelve el último valor de la partición, sino el valor de la fila actual, que es inútil. Siempre que uses LAST_VALUE tienes que poner ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING explícitamente. Este es el bug más silencioso y más frecuente que veo en código SQL con window functions. FIRST_VALUE no tiene este problema porque el frame por defecto empieza en la primera fila y la primera fila no cambia aunque el frame termine en CURRENT ROW.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">10 · Valores extremos</span><h2 class="slide-h">FIRST_VALUE &amp;<br>LAST_VALUE</h2></div>
+      <p class="slide-sub">Primer y último valor de la ventana. Imprescindibles para variaciones respecto a base.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card">
+          <span class="fn-badge">FIRST_VALUE</span>
+          <div class="fn-body"><div class="fn-desc">Primer valor de la partición según el ORDER BY. Sin problemas de frame.</div><div class="fn-use">→ Precio inicial, primer pedido, baseline</div></div>
+        </div>
+        <div class="fn-card">
+          <span class="fn-badge">LAST_VALUE ⚠️</span>
+          <div class="fn-body"><div class="fn-desc">Último valor de la partición. <b style="color:#fca5a5">SIEMPRE especifica el frame completo.</b></div><div class="fn-use">→ Precio actual, estado final</div></div>
+        </div>
+        <div class="warn-box"><b>❌ Bug clásico de LAST_VALUE:</b> Sin frame explícito devuelve la fila actual (inútil). Siempre añade ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING.</div>
+        <div class="tip-box"><b>💡 Alternativa a LAST_VALUE:</b> En muchos casos es más legible usar FIRST_VALUE con ORDER BY DESC para obtener el último valor sin preocuparte por el frame.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Variación precio respecto a inicio</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;producto_id, mes, precio,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Precio del primer mes (base de comparación)</span><br>
+<span class="hl">  <span class="cf">FIRST_VALUE</span>(precio) <span class="ck">OVER</span> (</span>
+<span class="hl">    <span class="ck">PARTITION BY</span> producto_id</span>
+<span class="hl">    <span class="ck">ORDER BY</span> mes</span>
+<span class="hl">  ) <span class="ck">AS</span> precio_inicial,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Precio más reciente (FRAME obligatorio)</span><br>
+<span class="hl2">  <span class="cf">LAST_VALUE</span>(precio) <span class="ck">OVER</span> (</span>
+<span class="hl2">    <span class="ck">PARTITION BY</span> producto_id</span>
+<span class="hl2">    <span class="ck">ORDER BY</span> mes</span>
+<span class="hl2">    <span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING</span></span>
+<span class="hl2">      <span class="ck">AND UNBOUNDED FOLLOWING</span>  <span class="cc">-- ← OBLIGATORIO</span></span>
+<span class="hl2">  ) <span class="ck">AS</span> precio_actual,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Variación % respecto al precio inicial</span><br>
+<span class="hl3">  <span class="cf">ROUND</span>((precio -</span>
+<span class="hl3">    <span class="cf">FIRST_VALUE</span>(precio) <span class="ck">OVER</span> (</span>
+<span class="hl3">      <span class="ck">PARTITION BY</span> producto_id <span class="ck">ORDER BY</span> mes</span>
+<span class="hl3">    )) * <span class="cn">100.0</span> /</span>
+<span class="hl3">    <span class="cf">NULLIF</span>(<span class="cf">FIRST_VALUE</span>(precio) <span class="ck">OVER</span> (</span>
+<span class="hl3">      <span class="ck">PARTITION BY</span> producto_id <span class="ck">ORDER BY</span> mes</span>
+<span class="hl3">    ), <span class="cn">0</span>), <span class="cn">2</span>) <span class="ck">AS</span> var_pct</span>
+<br>
+<span class="ck">FROM</span> precios_historicos <span class="ck">ORDER BY</span> producto_id, mes
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13 · PERCENT_RANK / CUME_DIST ══ -->
+<div class="slide bg-darker"
+  data-title="PERCENT_RANK y CUME_DIST"
+  data-script="PERCENT_RANK y CUME_DIST son dos funciones menos conocidas pero muy útiles para análisis de distribuciones. PERCENT_RANK calcula el percentil de cada fila dentro de su partición, expresado como un valor entre cero y uno. Una fila con PERCENT_RANK de 0.8 significa que el ochenta por ciento de las filas de la partición tienen un valor menor. La fórmula es: rank menos uno, dividido entre el número total de filas menos uno. La primera fila siempre tiene PERCENT_RANK cero. CUME_DIST es similar pero calcula la distribución cumulativa: la proporción de filas con un valor menor o igual al de la fila actual. A diferencia de PERCENT_RANK, CUME_DIST nunca devuelve cero. Estas funciones son perfectas para responder preguntas como: ¿en qué percentil de gasto está este cliente? ¿Qué porcentaje de pedidos tiene un valor inferior a este? Son el equivalente SQL de los percentiles de numpy o scipy en Python.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">11 · Distribución</span><h2 class="slide-h">PERCENT_RANK<br>&amp; CUME_DIST</h2></div>
+      <p class="slide-sub">Percentiles y distribución acumulada directamente en SQL. Sin Python, sin exportar datos.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="fn-card">
+          <span class="fn-badge">PERCENT_RANK</span>
+          <div class="fn-body">
+            <div class="fn-desc">Rango relativo de la fila. Valor entre 0 y 1. Primera fila = 0 siempre.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.4);margin-top:3px">(rank - 1) / (total_filas - 1)</div>
+            <div class="fn-use">→ ¿En qué percentil está este cliente?</div>
+          </div>
+        </div>
+        <div class="fn-card">
+          <span class="fn-badge">CUME_DIST</span>
+          <div class="fn-body">
+            <div class="fn-desc">Proporción de filas con valor ≤ al actual. Nunca devuelve 0.</div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.4);margin-top:3px">filas_menores_o_igual / total_filas</div>
+            <div class="fn-use">→ ¿Qué % de pedidos cuesta menos que este?</div>
+          </div>
+        </div>
+        <div class="tip-box"><b>💡 Uso práctico:</b> Filtra WHERE PERCENT_RANK() OVER (...) &gt;= 0.9 para quedarte con el top 10% de clientes por gasto. Mucho más elegante que un NTILE(10) WHERE n=10.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Percentil de clientes</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;cliente_id, gasto_total,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Percentil del cliente en la distribución de gasto</span><br>
+<span class="hl">  <span class="cf">ROUND</span>(<span class="cf">PERCENT_RANK</span>() <span class="ck">OVER</span> (</span>
+<span class="hl">    <span class="ck">ORDER BY</span> gasto_total</span>
+<span class="hl">  ) * <span class="cn">100</span>, <span class="cn">1</span>) <span class="ck">AS</span> percentil,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Distribución acumulada</span><br>
+<span class="hl2">  <span class="cf">ROUND</span>(<span class="cf">CUME_DIST</span>() <span class="ck">OVER</span> (</span>
+<span class="hl2">    <span class="ck">ORDER BY</span> gasto_total</span>
+<span class="hl2">  ) * <span class="cn">100</span>, <span class="cn">1</span>) <span class="ck">AS</span> cume_dist_pct,</span>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Etiqueta de segmento por percentil</span><br>
+<span class="hl3">  <span class="cf">CASE</span></span>
+<span class="hl3">    <span class="ck">WHEN</span> <span class="cf">PERCENT_RANK</span>() <span class="ck">OVER</span> (<span class="ck">ORDER BY</span> gasto_total) &gt;= <span class="cn">.9</span></span>
+<span class="hl3">      <span class="ck">THEN</span> <span class="cs">'Top 10% — Premium'</span></span>
+<span class="hl3">    <span class="ck">WHEN</span> <span class="cf">PERCENT_RANK</span>() <span class="ck">OVER</span> (<span class="ck">ORDER BY</span> gasto_total) &gt;= <span class="cn">.5</span></span>
+<span class="hl3">      <span class="ck">THEN</span> <span class="cs">'50-90% — Standard'</span></span>
+<span class="hl3">    <span class="ck">ELSE</span> <span class="cs">'Bottom 50% — Basic'</span></span>
+<span class="hl3">  <span class="cf">END</span> <span class="ck">AS</span> segmento</span>
+<br>
+<span class="ck">FROM</span> metricas_cliente
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 14 · CASO REAL — COHORTES ══ -->
+<div class="slide bg-code"
+  data-title="Caso real — Análisis de cohortes"
+  data-script="Ahora vamos con un caso de uso real completo: el análisis de cohortes. Una cohorte es un grupo de clientes que compró por primera vez en el mismo mes. El análisis de cohortes mide la retención de cada cohorte mes a mes. Es el análisis más importante en cualquier negocio de suscripción o e-commerce. Con window functions se resuelve de forma elegante. Primero usamos MIN sobre fecha de pedido con PARTITION BY cliente_id para obtener la fecha de primera compra de cada cliente, que es el mes de la cohorte. Luego calculamos la diferencia en meses entre la fecha de cada pedido y la fecha de la primera compra, que es la columna de período de la cohorte, cero para el primer mes, uno para el segundo, y así sucesivamente. Finalmente agrupamos por mes de cohorte y período, contamos los clientes únicos en cada celda, y dividimos por el número de clientes del período cero para obtener la tasa de retención. El resultado es la tabla de cohortes que ves en cualquier dashboard de growth.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">12 · Caso real</span><h2 class="slide-h">Análisis de<br>cohortes con SQL</h2></div>
+      <p class="slide-sub">Retención mes a mes por cohorte de primera compra. El análisis más importante en SaaS y e-commerce.</p>
+      <div style="margin-top:.75rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">①</span><div class="step-body"><div class="step-title">Fecha de primera compra por cliente</div><div class="step-desc">MIN(fecha) OVER (PARTITION BY cliente_id) — mes de la cohorte.</div></div></div>
+        <div class="step"><span class="step-n">②</span><div class="step-body"><div class="step-title">Período dentro de la cohorte</div><div class="step-desc">Diferencia en meses entre fecha actual y fecha primera compra. 0=mes 1, 1=mes 2...</div></div></div>
+        <div class="step"><span class="step-n">③</span><div class="step-body"><div class="step-title">Tasa de retención</div><div class="step-desc">Clientes en período N / Clientes en período 0. Expresado en %.</div></div></div>
+      </div>
+      <table class="rtable" style="margin-top:8px">
+        <tr><th>Cohorte</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th></tr>
+        <tr><td>Ene-25</td><td class="num" style="color:#86efac">100%</td><td class="num">62%</td><td class="num">48%</td><td class="num">41%</td></tr>
+        <tr><td>Feb-25</td><td class="num" style="color:#86efac">100%</td><td class="num">58%</td><td class="num">44%</td><td>—</td></tr>
+        <tr><td>Mar-25</td><td class="num" style="color:#86efac">100%</td><td class="num">65%</td><td>—</td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — Cohortes de retención</span></div>
+      <div class="code">
+<span class="ck">WITH</span> primera_compra <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span> cliente_id, fecha_pedido,<br>
+<span class="hl">    <span class="cf">MIN</span>(fecha_pedido) <span class="ck">OVER</span> (</span>
+<span class="hl">      <span class="ck">PARTITION BY</span> cliente_id</span>
+<span class="hl">    ) <span class="ck">AS</span> fecha_primera_compra</span>
+&nbsp;&nbsp;<span class="ck">FROM</span> pedidos<br>
+),<br>
+con_cohorte <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;cliente_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">DATE_TRUNC</span>(<span class="cs">'month'</span>, fecha_primera_compra)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">AS</span> mes_cohorte,<br>
+<span class="hl2">    <span class="cf">DATEDIFF</span>(month, fecha_primera_compra,</span>
+<span class="hl2">      fecha_pedido) <span class="ck">AS</span> periodo_cohorte</span>
+&nbsp;&nbsp;<span class="ck">FROM</span> primera_compra<br>
+)<br>
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;mes_cohorte,<br>
+&nbsp;&nbsp;periodo_cohorte,<br>
+&nbsp;&nbsp;<span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> cliente_id) <span class="ck">AS</span> clientes,<br>
+<span class="hl3">  <span class="cf">ROUND</span>(<span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> cliente_id) * <span class="cn">100.0</span> /</span>
+<span class="hl3">    <span class="cf">FIRST_VALUE</span>(<span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> cliente_id))</span>
+<span class="hl3">      <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> mes_cohorte <span class="ck">ORDER BY</span> periodo_cohorte),<span class="cn">1</span>)</span>
+<span class="hl3">  <span class="ck">AS</span> retencion_pct</span>
+<span class="ck">FROM</span> con_cohorte<br>
+<span class="ck">GROUP BY</span> mes_cohorte, periodo_cohorte<br>
+<span class="ck">ORDER BY</span> mes_cohorte, periodo_cohorte
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 15 · ERRORES COMUNES ══ -->
+<div class="slide bg-dark"
+  data-title="Los 5 errores más comunes"
+  data-script="Voy a repasar los cinco errores más frecuentes que veo en código SQL con window functions. Primero: olvidar el frame en LAST_VALUE. Ya lo hemos visto, pero es tan común que lo repito. Sin ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING, LAST_VALUE devuelve la fila actual, no la última. Segundo: ordenar por texto en vez de por número o fecha. Si ordenas el ORDER BY del OVER por la columna de nombre de mes en texto, como enero, febrero, marzo, el orden será alfabético, no cronológico. Siempre ordena por columnas numéricas o de fecha. Tercero: usar window functions en el WHERE. No puedes filtrar por el resultado de una window function en el WHERE de la misma query. Tienes que envolver en un CTE o subquery y filtrar en el nivel exterior. Cuarto: no especificar PARTITION BY cuando lo necesitas. Si omites PARTITION BY, la ventana es toda la tabla. El ROW_NUMBER irá del uno al total de filas, sin reiniciarse por cliente. Quinto: confundir ROWS con RANGE en el frame. ROWS trabaja con filas físicas y es determinista. RANGE trabaja con valores lógicos y puede incluir filas adicionales con el mismo valor. Para acumulados, usa siempre ROWS.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">13 · Debugging</span><h2 class="slide-h">Los 5 errores más comunes con Window Functions</h2></div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;align-content:start">
+      <div class="warn-box"><b>❌ 1. LAST_VALUE sin frame</b><br><br>Sin ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING, devuelve la fila actual. Siempre especifica el frame completo.</div>
+      <div class="warn-box"><b>❌ 2. ORDER BY texto en fechas</b><br><br>ORDER BY mes_nombre (texto) → orden alfabético, no cronológico. Siempre ordena por columna numérica de mes o por columna DATE.</div>
+      <div class="warn-box"><b>❌ 3. Window function en WHERE</b><br><br><code style="color:#fca5a5">WHERE ROW_NUMBER() OVER(...) = 1</code> → error. Envuelve en CTE y filtra en el SELECT exterior.</div>
+      <div class="warn-box"><b>❌ 4. PARTITION BY olvidado</b><br><br>Sin PARTITION BY, la ventana es toda la tabla. ROW_NUMBER va del 1 al total, sin reiniciarse por cliente o departamento.</div>
+      <div class="warn-box"><b>❌ 5. ROWS vs RANGE</b><br><br>RANGE puede incluir filas extra con el mismo valor. Para acumulados y medias móviles usa siempre ROWS BETWEEN, no RANGE BETWEEN.</div>
+      <div class="tip-box"><b>✅ Regla de oro</b><br><br>Prueba siempre tus window functions con un dataset pequeño y datos conocidos antes de ejecutar en producción. Los bugs silenciosos son los más peligrosos.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 16 · RENDIMIENTO ══ -->
+<div class="slide bg-darker"
+  data-title="Rendimiento y optimización"
+  data-script="Las window functions son potentes, pero si no las usas bien pueden ser lentas. Tres reglas de rendimiento que aplico siempre. Primera: filtra antes de calcular. Si puedes reducir el número de filas con un WHERE antes de calcular las window functions, hazlo. Envuelve el filtro en un CTE previo. Así la ventana opera sobre menos filas. Segunda: evita múltiples pasadas innecesarias. Si necesitas varias window functions sobre la misma partición y ordenación, ponlas todas en el mismo CTE. Los motores modernos como BigQuery y Snowflake optimizan para calcular todas las funciones con el mismo OVER en una sola pasada. Tercera: en BigQuery, si la tabla está particionada por fecha, el PARTITION BY de tu window function debe coincidir con la partición de la tabla para que el motor no haga un full scan. En Snowflake, si la tabla está agrupada por clustering keys, usa esas mismas columnas en el PARTITION BY. Seguir la estructura de particionado de la tabla en tus ventanas puede hacer que una query de diez segundos pase a ejecutarse en menos de uno.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14 · Performance</span><h2 class="slide-h">Optimización<br>de Window Functions</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div class="step"><span class="step-n">①</span><div class="step-body"><div class="step-title">Filtra antes con CTE</div><div class="step-desc">Reduce filas antes de calcular la ventana. WHERE en CTE previo, no después.</div></div></div>
+        <div class="step"><span class="step-n">②</span><div class="step-body"><div class="step-title">Agrupa funciones con mismo OVER</div><div class="step-desc">Varias funciones con idéntico OVER() en un mismo SELECT → una sola pasada por los datos.</div></div></div>
+        <div class="step"><span class="step-n">③</span><div class="step-body"><div class="step-title">PARTITION BY = columnas de partición de la tabla</div><div class="step-desc">En BigQuery y Snowflake, usa las mismas columnas de partición/clustering en el PARTITION BY.</div></div></div>
+        <div class="tip-box"><b>💡 BigQuery:</b> Usa QUALIFY en vez de CTE para filtrar resultados de window functions. Es más eficiente y evita una subquery extra. <code style="color:#93c5fd">QUALIFY ROW_NUMBER() OVER(...) = 1</code></div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(249,168,212,.6);margin-bottom:6px">❌ Lento — múltiples pasadas</div>
+      <div class="code" style="font-size:.6rem;margin-bottom:10px">
+<span class="ck">SELECT</span> id, val,<br>
+&nbsp;&nbsp;<span class="cf">SUM</span>(val) <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> dep <span class="ck">ORDER BY</span> fecha<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>) ytd,<br>
+&nbsp;&nbsp;<span class="cf">AVG</span>(val) <span class="ck">OVER</span> (<span class="ck">PARTITION BY</span> dep <span class="ck">ORDER BY</span> fecha<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">ROWS BETWEEN</span> <span class="cn">6</span> <span class="ck">PRECEDING AND CURRENT ROW</span>) mm7<br>
+<span class="ck">FROM</span> (
+&nbsp;&nbsp;<span class="cc">-- Subquery innecesaria: los motores no pueden</span><br>
+&nbsp;&nbsp;<span class="cc">-- fusionar las dos ventanas si están separadas</span><br>
+&nbsp;&nbsp;<span class="ck">SELECT</span> * <span class="ck">FROM</span> tabla <span class="ck">WHERE</span> fecha <span class="cop">&gt;</span> <span class="cs">'2025-01-01'</span><br>
+) t
+      </div>
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(134,239,172,.6);margin-bottom:6px">✅ Rápido — filtra primero, agrupa ventanas</div>
+      <div class="code" style="font-size:.6rem">
+<span class="ck">WITH</span> filtrado <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span> * <span class="ck">FROM</span> tabla<br>
+&nbsp;&nbsp;<span class="ck">WHERE</span> fecha <span class="cop">&gt;</span> <span class="cs">'2025-01-01'</span>  <span class="cc">-- ← filtra PRIMERO</span><br>
+)<br>
+<span class="ck">SELECT</span> id, dep, fecha, val,<br>
+<span class="hl2">  <span class="cc">-- Mismo OVER → una sola pasada</span></span>
+<span class="hl2">  <span class="cf">SUM</span>(val) <span class="ck">OVER</span> w <span class="ck">AS</span> ytd,</span>
+<span class="hl2">  <span class="cf">AVG</span>(val) <span class="ck">OVER</span> w <span class="ck">AS</span> media_acum,</span>
+<span class="hl2">  <span class="cf">MAX</span>(val) <span class="ck">OVER</span> w <span class="ck">AS</span> max_acum</span>
+<span class="ck">FROM</span> filtrado<br>
+<span class="ck">WINDOW</span> w <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">PARTITION BY</span> dep <span class="ck">ORDER BY</span> fecha<br>
+&nbsp;&nbsp;<span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span><br>
+)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 17 · CLÁUSULA WINDOW ══ -->
+<div class="slide bg-dark"
+  data-title="Cláusula WINDOW (alias)"
+  data-script="La cláusula WINDOW es una funcionalidad de SQL estándar que permite definir un alias para una especificación de ventana y reutilizarlo en varias funciones. En vez de repetir el mismo OVER con PARTITION BY y ORDER BY en cada función, defines la ventana una vez con WINDOW alias AS y luego la referencias como OVER alias en cada función. Esto tiene dos ventajas. Primera: el código es mucho más legible y mantenible. Si cambias la partición, solo la cambias en un sitio. Segunda: los motores SQL que soportan esta sintaxis pueden optimizar mejor porque saben que varias funciones usan la misma ventana. La cláusula WINDOW está soportada en PostgreSQL, BigQuery, Snowflake y SQL Server 2022+. Antes de usarla verifica la versión de tu motor. En versiones más antiguas tienes que repetir el OVER completo en cada función.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">15 · Sintaxis avanzada</span><h2 class="slide-h">Cláusula WINDOW<br>— Alias de ventana</h2></div>
+      <p class="slide-sub">Define la ventana una sola vez y reutilízala. Código más limpio y motores más eficientes.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="step"><span class="step-n">✅</span><div class="step-body"><div class="step-title">Una definición, múltiples funciones</div><div class="step-desc">WINDOW w AS (PARTITION BY ... ORDER BY ...) → todas las funciones usan OVER w.</div></div></div>
+        <div class="step"><span class="step-n">✅</span><div class="step-body"><div class="step-title">Mantenimiento simplificado</div><div class="step-desc">Cambias la partición en un sitio. Sin riesgo de inconsistencias entre funciones.</div></div></div>
+        <div class="tip-box"><b>🔧 Compatibilidad:</b> PostgreSQL ✅ BigQuery ✅ Snowflake ✅ SQL Server 2022+ ✅ MySQL 8+ ✅ SQLite 3.25+ ✅</div>
+        <div class="warn-box"><b>⚠️ SQL Server &lt; 2022:</b> La cláusula WINDOW no está disponible. Repite el OVER completo en cada función o usa CTEs intermedias.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div class="code-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><span class="cb-lang">SQL — WINDOW alias (PostgreSQL / BigQuery)</span></div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+&nbsp;&nbsp;vendedor_id, region, mes, ventas,<br>
+<br>
+&nbsp;&nbsp;<span class="cc">-- Todas usan el mismo alias de ventana</span><br>
+<span class="hl">  <span class="cf">ROW_NUMBER</span>() <span class="ck">OVER</span> w_region <span class="ck">AS</span> ranking,</span>
+<span class="hl">  <span class="cf">SUM</span>(ventas) <span class="ck">OVER</span> w_region <span class="ck">AS</span> acum_region,</span>
+<span class="hl">  <span class="cf">AVG</span>(ventas) <span class="ck">OVER</span> w_region <span class="ck">AS</span> media_acum,</span>
+<span class="hl">  <span class="cf">LAG</span>(ventas) <span class="ck">OVER</span> w_region <span class="ck">AS</span> ventas_mes_ant</span>
+<br>
+<span class="ck">FROM</span> ventas_mensuales<br>
+<br>
+<span class="cc">-- Definición única al final de la query</span><br>
+<span class="hl2"><span class="ck">WINDOW</span> w_region <span class="ck">AS</span> (</span>
+<span class="hl2">  <span class="ck">PARTITION BY</span> region</span>
+<span class="hl2">  <span class="ck">ORDER BY</span> mes</span>
+<span class="hl2">  <span class="ck">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span></span>
+<span class="hl2">)</span>
+<br>
+<span class="cc">-- SQL Server: sin cláusula WINDOW, repite el OVER</span><br>
+<span class="cc">-- ROW_NUMBER() OVER (PARTITION BY region ORDER BY mes)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 18 · DIFERENCIAS POR MOTOR ══ -->
+<div class="slide bg-darker"
+  data-title="Diferencias entre motores SQL"
+  data-script="Las window functions son estándar SQL pero hay diferencias importantes entre motores que tienes que conocer. En BigQuery, en vez de un CTE para filtrar por ROW_NUMBER, puedes usar la cláusula QUALIFY, que es exclusiva de BigQuery y es mucho más eficiente. QUALIFY ROW_NUMBER OVER igual a uno filtra el resultado de la window function directamente sin subquery adicional. En Snowflake también tienes QUALIFY y es igualmente eficiente. En PostgreSQL tienes la sintaxis más estándar y completa, incluyendo la cláusula WINDOW. También puedes usar FILTER dentro de funciones de ventana para filtrar qué filas participan en el cálculo. En SQL Server, antes de la versión 2022 no existe la cláusula WINDOW. Y ROWS BETWEEN con RANGE tiene algunas limitaciones en versiones antiguas. Para DATEDIFF, BigQuery usa DATE_DIFF, Snowflake usa DATEDIFF, PostgreSQL usa AGE o la resta directa de fechas, y SQL Server usa DATEDIFF con parámetros distintos. Siempre ten a mano la documentación de tu motor específico para estas diferencias de sintaxis.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">16 · Compatibilidad</span><h2 class="slide-h">Diferencias entre BigQuery · Snowflake · PostgreSQL · SQL Server</h2></div>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:start">
+      <!-- BigQuery -->
+      <div style="background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.25);border-radius:4px;overflow:hidden">
+        <div style="background:rgba(66,133,244,.2);padding:7px 10px;font-family:var(--fd);font-size:.62rem;font-weight:700;color:#4285f4;letter-spacing:.06em">BigQuery</div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px">
+          <div class="green-box" style="padding:6px 8px"><b>✅ QUALIFY</b> — Filtra window functions directamente sin CTE</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ DATE_DIFF</b>(fecha2, fecha1, unit)</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ WINDOW alias</b> — soportado</div>
+          <div class="tip-box" style="padding:6px 8px;font-size:.7rem"><b>💡</b> PARTITION BY debe coincidir con columnas de partición de la tabla para evitar full scans</div>
+        </div>
+      </div>
+      <!-- Snowflake -->
+      <div style="background:rgba(41,182,246,.08);border:1px solid rgba(41,182,246,.25);border-radius:4px;overflow:hidden">
+        <div style="background:rgba(41,182,246,.2);padding:7px 10px;font-family:var(--fd);font-size:.62rem;font-weight:700;color:#29b6f6;letter-spacing:.06em">Snowflake</div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px">
+          <div class="green-box" style="padding:6px 8px"><b>✅ QUALIFY</b> — Igual que BigQuery</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ DATEDIFF</b>(unit, fecha1, fecha2)</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ WINDOW alias</b> — soportado</div>
+          <div class="tip-box" style="padding:6px 8px;font-size:.7rem"><b>💡</b> Usa columnas de clustering en PARTITION BY para mejor rendimiento</div>
+        </div>
+      </div>
+      <!-- PostgreSQL -->
+      <div style="background:rgba(51,153,204,.08);border:1px solid rgba(51,153,204,.25);border-radius:4px;overflow:hidden">
+        <div style="background:rgba(51,153,204,.2);padding:7px 10px;font-family:var(--fd);font-size:.62rem;font-weight:700;color:#4db8e8;letter-spacing:.06em">PostgreSQL</div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px">
+          <div class="warn-box" style="padding:6px 8px"><b>❌ QUALIFY</b> — No existe. Usa CTE</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ AGE</b> / fecha2 - fecha1</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ WINDOW alias</b> — soportado</div>
+          <div class="green-box" style="padding:6px 8px;font-size:.7rem"><b>✅ FILTER(WHERE ...)</b> dentro de funciones de agregado con OVER</div>
+        </div>
+      </div>
+      <!-- SQL Server -->
+      <div style="background:rgba(204,0,0,.08);border:1px solid rgba(204,0,0,.25);border-radius:4px;overflow:hidden">
+        <div style="background:rgba(204,0,0,.2);padding:7px 10px;font-family:var(--fd);font-size:.62rem;font-weight:700;color:#ff6b6b;letter-spacing:.06em">SQL Server</div>
+        <div style="padding:10px;display:flex;flex-direction:column;gap:6px">
+          <div class="warn-box" style="padding:6px 8px"><b>❌ QUALIFY</b> — No existe. Usa CTE</div>
+          <div class="green-box" style="padding:6px 8px"><b>✅ DATEDIFF</b>(unit, fecha1, fecha2)</div>
+          <div class="warn-box" style="padding:6px 8px"><b>⚠️ WINDOW alias</b> — Solo desde 2022</div>
+          <div class="warn-box" style="padding:6px 8px;font-size:.7rem"><b>⚠️</b> ROWS/RANGE con UNBOUNDED limitado en versiones &lt; 2012</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 19 · QUALIFY (BigQuery/Snowflake) ══ -->
+<div class="slide bg-code"
+  data-title="QUALIFY — BigQuery y Snowflake"
+  data-script="Dedico una slide entera a QUALIFY porque es una de esas funcionalidades que, una vez la conoces, no puedes dejar de usarla. QUALIFY es una cláusula exclusiva de BigQuery y Snowflake que permite filtrar el resultado de una window function directamente en la misma query, sin necesidad de envolver en un CTE o subquery. El problema que resuelve: en SQL estándar, si intentas poner ROW_NUMBER en el WHERE, obtienes un error, porque las window functions se evalúan después del WHERE. Tienes que usar un CTE. Con QUALIFY puedes filtrar directamente. QUALIFY ROW_NUMBER OVER igual a uno es equivalente a todo el bloque de CTE con WHERE rn igual a uno, pero mucho más conciso y, en la práctica, igual de eficiente o más porque el motor puede optimizar mejor. Para deduplicación, para filtrar el top N por grupo, para quedarte con el primer o último evento de cada usuario, QUALIFY es la herramienta más elegante disponible en BigQuery y Snowflake.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">17 · BigQuery / Snowflake</span><h2 class="slide-h">QUALIFY<br>— Filtrar sin CTE</h2></div>
+      <p class="slide-sub">La cláusula que simplifica el código al eliminar CTEs de deduplicación.</p>
+      <div style="margin-top:1rem;display:flex;flex-direction:column;gap:8px">
+        <div class="warn-box"><b>❌ SQL estándar:</b> Window function en WHERE → error. Obligatorio usar CTE o subquery exterior.</div>
+        <div class="green-box"><b>✅ QUALIFY:</b> Filtra window functions directamente. Misma potencia, menos código. BigQuery y Snowflake.</div>
+        <div class="tip-box"><b>💡 Usos clave:</b><br>
+          • Deduplicar: <code style="color:#93c5fd">QUALIFY ROW_NUMBER() OVER(...) = 1</code><br>
+          • Top N por grupo: <code style="color:#93c5fd">QUALIFY RANK() OVER(...) &lt;= 5</code><br>
+          • Último evento: <code style="color:#93c5fd">QUALIFY ROW_NUMBER() OVER(ORDER BY ts DESC) = 1</code>
+        </div>
+        <div class="warn-box"><b>❌ No disponible en:</b> PostgreSQL, SQL Server, MySQL. Usa CTE en estos motores.</div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(249,168,212,.6);margin-bottom:6px">❌ SQL estándar — requiere CTE</div>
+      <div class="code" style="font-size:.6rem;margin-bottom:10px">
+<span class="ck">WITH</span> ranked <span class="ck">AS</span> (<br>
+&nbsp;&nbsp;<span class="ck">SELECT</span> *,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">ROW_NUMBER</span>() <span class="ck">OVER</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">PARTITION BY</span> cliente_id<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">ORDER BY</span> fecha_pedido <span class="ck">DESC</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;) <span class="ck">AS</span> rn<br>
+&nbsp;&nbsp;<span class="ck">FROM</span> pedidos<br>
+)<br>
+<span class="ck">SELECT</span> * <span class="ck">FROM</span> ranked <span class="ck">WHERE</span> rn = <span class="cn">1</span>
+      </div>
+      <div style="font-family:var(--fd);font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(134,239,172,.6);margin-bottom:6px">✅ BigQuery / Snowflake — QUALIFY</div>
+      <div class="code" style="font-size:.6rem">
+<span class="ck">SELECT</span> *<br>
+<span class="ck">FROM</span> pedidos<br>
+<span class="hl2"><span class="ck">QUALIFY</span></span>
+<span class="hl2">  <span class="cf">ROW_NUMBER</span>() <span class="ck">OVER</span> (</span>
+<span class="hl2">    <span class="ck">PARTITION BY</span> cliente_id</span>
+<span class="hl2">    <span class="ck">ORDER BY</span> fecha_pedido <span class="ck">DESC</span></span>
+<span class="hl2">  ) = <span class="cn">1</span></span>
+<br>
+<span class="cc">-- Top 3 por región con QUALIFY</span><br>
+<span class="ck">SELECT</span> region, vendedor, ventas<br>
+<span class="ck">FROM</span> ventas<br>
+<span class="hl3"><span class="ck">QUALIFY</span> <span class="cf">DENSE_RANK</span>() <span class="ck">OVER</span> (</span>
+<span class="hl3">  <span class="ck">PARTITION BY</span> region</span>
+<span class="hl3">  <span class="ck">ORDER BY</span> ventas <span class="ck">DESC</span></span>
+<span class="hl3">) &lt;= <span class="cn">3</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 20 · RESUMEN CHEATSHEET ══ -->
+<div class="slide bg-dark"
+  data-title="Resumen — Cheatsheet"
+  data-script="Aquí tienes el resumen completo de todas las funciones que hemos visto. ROW_NUMBER: numeración única sin empates. Para deduplicar y paginar. RANK: numeración con empates y saltos. Para rankings con huecos. DENSE_RANK: numeración con empates sin saltos. Para top N por grupo. LAG: valor N filas atrás. Para variación MoM y YoY. LEAD: valor N filas adelante. Para detectar churn y calcular tiempo hasta el siguiente evento. SUM OVER: suma acumulada o total de la partición. Para YTD y porcentajes. AVG OVER: media móvil. Para suavizar series temporales. NTILE: división en N grupos iguales. Para segmentación RFM y cuartiles. PERCENT_RANK: percentil relativo entre 0 y 1. Para saber en qué posición está cada fila en la distribución. CUME_DIST: distribución acumulada. Para saber qué porcentaje de filas tiene un valor menor. FIRST_VALUE: primer valor de la partición. Para baselines y valores de referencia. LAST_VALUE: último valor con frame obligatorio UNBOUNDED. Para estado final y precio actual. Y recuerda: siempre ROWS en vez de RANGE para acumulados, siempre especifica el frame en LAST_VALUE, y usa QUALIFY en BigQuery y Snowflake para filtrar sin CTE.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">18 · Resumen</span><h2 class="slide-h">Cheatsheet completo — Window Functions</h2></div>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start">
+      <div class="fn-card"><span class="fn-badge">ROW_NUMBER()</span><div class="fn-body"><div class="fn-name">Numeración única</div><div class="fn-desc">Sin empates. 1,2,3,4...</div><div class="fn-use">→ Deduplicar, paginar</div></div></div>
+      <div class="fn-card"><span class="fn-badge">RANK()</span><div class="fn-body"><div class="fn-name">Ranking con saltos</div><div class="fn-desc">Empates = mismo nº + salta. 1,1,3,4...</div><div class="fn-use">→ Competiciones, concursos</div></div></div>
+      <div class="fn-card"><span class="fn-badge">DENSE_RANK()</span><div class="fn-body"><div class="fn-name">Ranking sin saltos</div><div class="fn-desc">Empates = mismo nº sin saltar. 1,1,2,3...</div><div class="fn-use">→ Top N por grupo</div></div></div>
+      <div class="fn-card"><span class="fn-badge">LAG(col, n, def)</span><div class="fn-body"><div class="fn-name">N filas atrás</div><div class="fn-desc">Valor de la fila N posiciones anterior</div><div class="fn-use">→ MoM, YoY, variaciones</div></div></div>
+      <div class="fn-card"><span class="fn-badge">LEAD(col, n, def)</span><div class="fn-body"><div class="fn-name">N filas adelante</div><div class="fn-desc">Valor de la fila N posiciones posterior</div><div class="fn-use">→ Churn, duración, siguiente estado</div></div></div>
+      <div class="fn-card"><span class="fn-badge">SUM() OVER</span><div class="fn-body"><div class="fn-name">Suma / acumulado</div><div class="fn-desc">YTD con UNBOUNDED PRECEDING</div><div class="fn-use">→ Running total, porcentajes</div></div></div>
+      <div class="fn-card"><span class="fn-badge">AVG() OVER</span><div class="fn-body"><div class="fn-name">Media móvil</div><div class="fn-desc">N PRECEDING → N días móviles</div><div class="fn-use">→ Suavizar series temporales</div></div></div>
+      <div class="fn-card"><span class="fn-badge">NTILE(n)</span><div class="fn-body"><div class="fn-name">N grupos iguales</div><div class="fn-desc">Divide partición en N cubos</div><div class="fn-use">→ RFM, cuartiles, deciles</div></div></div>
+      <div class="fn-card"><span class="fn-badge">PERCENT_RANK()</span><div class="fn-body"><div class="fn-name">Percentil 0-1</div><div class="fn-desc">Rango relativo en la distribución</div><div class="fn-use">→ Top 10%, bottom 20%</div></div></div>
+      <div class="fn-card"><span class="fn-badge">CUME_DIST()</span><div class="fn-body"><div class="fn-name">Distribución acumulada</div><div class="fn-desc">% de filas con valor ≤ al actual</div><div class="fn-use">→ Análisis de distribución</div></div></div>
+      <div class="fn-card"><span class="fn-badge">FIRST_VALUE(col)</span><div class="fn-body"><div class="fn-name">Primer valor</div><div class="fn-desc">Sin problemas de frame</div><div class="fn-use">→ Baseline, precio inicial</div></div></div>
+      <div class="fn-card" style="border-left:3px solid var(--pink)"><span class="fn-badge" style="border-color:rgba(249,168,212,.3);color:var(--pink)">LAST_VALUE(col) ⚠️</span><div class="fn-body"><div class="fn-name">Último valor</div><div class="fn-desc"><b style="color:#fca5a5">SIEMPRE frame UNBOUNDED</b></div><div class="fn-use">→ Precio actual, estado final</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 21 · RECURSOS ══ -->
+<div class="slide bg-darker"
+  data-title="Recursos y próximos pasos"
+  data-script="Aquí tienes los recursos que te recomiendo para seguir practicando y profundizando. Para practicar SQL con ejercicios progresivos, el mejor sitio es pgexercises.com, que usa PostgreSQL y tiene ejercicios específicos de window functions. Para la referencia de funciones de cada motor, tienes la documentación oficial de BigQuery en cloud.google.com, la de Snowflake en docs.snowflake.com, y la de PostgreSQL en postgresql.org. Todos tienen secciones completas de window functions con ejemplos. Para practicar con datos reales de negocio, te recomiendo los datasets públicos de BigQuery, especialmente el de Google Analytics y el de Stack Overflow, que tienen millones de filas y son perfectos para practicar análisis de cohortes y segmentación. Y si quieres llevar lo que has aprendido hoy al siguiente nivel, en mi web antonio-moro.es tienes el SQL Templates Pack con cincuenta queries listas para producción que cubren cohortes, RFM, deduplicación, medias móviles y mucho más, en cuatro motores SQL.">
+  <div class="grid-bg"></div>
+  <div class="two-col" style="height:calc(100% - 54px)">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">19 · Recursos</span><h2 class="slide-h">Para seguir<br>practicando</h2></div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:.5rem">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:11px 13px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:3px">🏋️ pgexercises.com</div>
+          <div style="font-family:var(--fc);font-size:.76rem;color:var(--t-dim);line-height:1.6">Ejercicios de SQL progresivos con PostgreSQL. Sección completa de window functions.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:11px 13px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:3px">📗 Documentación oficial</div>
+          <div style="font-family:var(--fm);font-size:.58rem;color:var(--sky);line-height:1.9">cloud.google.com/bigquery/docs<br>docs.snowflake.com/sql-reference<br>postgresql.org/docs/current</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:11px 13px">
+          <div style="font-family:var(--fd);font-size:.62rem;font-weight:700;color:#fff;margin-bottom:3px">🎓 Datasets públicos BigQuery</div>
+          <div style="font-family:var(--fc);font-size:.76rem;color:var(--t-dim);line-height:1.6">Google Analytics + Stack Overflow. Millones de filas reales para practicar cohortes y RFM.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-r">
+      <div style="background:rgba(147,197,253,.07);border:1px solid rgba(147,197,253,.2);border-radius:5px;padding:20px;height:100%;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);margin-bottom:.9rem">📦 SQL Templates Pack</div>
+        <div style="font-family:var(--fe);font-size:1.4rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.7rem">50+ queries listas<br>para producción</div>
+        <div style="font-family:var(--fc);font-size:.86rem;color:var(--t-dim);line-height:1.75;margin-bottom:1.4rem">Todos los patrones de este tutorial: cohortes, RFM, deduplicación, YTD, medias móviles y más. Para BigQuery, Snowflake, PostgreSQL y SQL Server.</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="background:var(--blue);color:#fff;font-family:var(--fd);font-size:.68rem;font-weight:700;padding:9px;border-radius:3px;text-align:center;letter-spacing:.06em">antonio-moro.es/productos →</div>
+          <div style="background:rgba(255,255,255,.06);color:var(--t-dim);font-family:var(--fd);font-size:.66rem;font-weight:700;padding:8px;border-radius:3px;text-align:center;letter-spacing:.06em">hola@antonio-moro.es</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 22 · CIERRE ══ -->
+<div class="slide bg-close"
+  data-title="Cierre"
+  data-script="Y con esto cerramos el tutorial de SQL Window Functions. Has aprendido a usar las doce funciones principales: ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM OVER, AVG OVER, NTILE, PERCENT_RANK, CUME_DIST, FIRST_VALUE y LAST_VALUE. Has visto cómo resolver deduplicación, análisis de cohortes, detección de churn, segmentación RFM y medias móviles directamente en SQL, sin necesidad de Python ni de múltiples subqueries. Y conoces las diferencias clave entre BigQuery, Snowflake, PostgreSQL y SQL Server. La próxima vez que te encuentres con un problema de análisis que normalmente resolverías con un GROUP BY complejo o con pandas en Python, pregúntate si se puede resolver con una window function. La respuesta, el noventa por ciento de las veces, es que sí. Si este tutorial te ha resultado útil, suscríbete y compártelo. Cada semana publico un tutorial técnico de este nivel. El siguiente es sobre dbt y arquitectura Medallion. Nos vemos allí.">
+  <div class="accent-blob" style="right:-80px;top:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(147,197,253,.1) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-60px;bottom:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,.08) 0%,transparent 70%)"></div>
+  <div class="grid-bg"></div>
+  <div style="position:relative;z-index:2;height:calc(100% - 54px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4vh 10vw">
+    <div style="font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sky);margin-bottom:1.5rem;display:flex;align-items:center;gap:12px">
+      <span style="display:block;width:26px;height:2px;background:var(--sky)"></span>Fin del Tutorial 02<span style="display:block;width:26px;height:2px;background:var(--sky)"></span>
+    </div>
+    <h2 style="font-family:var(--fe);font-size:clamp(2rem,4vw,3.8rem);font-weight:900;color:#fff;line-height:1.05;margin-bottom:1.2rem">
+      ¿Listo para usar<br>Window Functions en <span style="color:var(--sky)">producción?</span>
+    </h2>
+    <p style="font-family:var(--fc);font-size:1rem;font-weight:300;color:var(--t-dim);max-width:500px;line-height:1.85;margin-bottom:2rem">SQL Templates Pack — 50+ queries listas para BigQuery, Snowflake, PostgreSQL y SQL Server. Todos los patrones de este tutorial.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem">
+      <a href="https://antonio-moro.es/productos" style="font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:11px 26px;border-radius:3px;background:var(--blue);color:#fff;display:block">Ver SQL Templates Pack →</a>
+      <a href="mailto:hola@antonio-moro.es" style="font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:11px 26px;border-radius:3px;background:transparent;color:var(--t-dim);border:1px solid rgba(255,255,255,.18);display:block">Contratar mentoring</a>
+    </div>
+    <div style="display:flex;gap:3rem;justify-content:center">
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.2rem;font-weight:800;color:#fff">22</span><span style="font-family:var(--fd);font-size:.54rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Secciones</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.2rem;font-weight:800;color:#fff">12</span><span style="font-family:var(--fd);font-size:.54rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Funciones</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.2rem;font-weight:800;color:#fff">4</span><span style="font-family:var(--fd);font-size:.54rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Motores SQL</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-family:var(--fd);font-size:1.2rem;font-weight:800;color:#fff">20+</span><span style="font-family:var(--fd);font-size:.54rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)">Ejemplos</span></div>
+    </div>
+    <div style="margin-top:2rem;font-family:var(--fd);font-size:.63rem;font-weight:600;letter-spacing:.07em;color:var(--t-faint)">antonio-moro.es · hola@antonio-moro.es · Madrid, España · Remote OK</div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-counter" id="counter">01 / 22</div>
+    <div class="nav-title" id="navTitle"></div>
+  </div>
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="nbtn nbtn-p" onclick="go(-1)">← Ant.</button>
+    <button class="nbtn nbtn-n" onclick="go(1)">Sig. →</button>
+  </div>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+function render(){
+  slides.forEach((s,i) => s.classList.toggle('active', i === cur));
+  document.getElementById('prog').style.width = ((cur+1)/total*100) + '%';
+  document.getElementById('counter').textContent = String(cur+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  document.getElementById('navTitle').textContent = slides[cur].dataset.title || '';
+  document.querySelectorAll('.ndot').forEach((d,i) => d.classList.toggle('on', i === cur));
+  document.getElementById('spTitle').textContent = slides[cur].dataset.title || '';
+  document.getElementById('spText').textContent = slides[cur].dataset.script || '';
+  const btn = document.getElementById('spCopy');
+  btn.textContent = '📋 Copiar guión de esta slide';
+  btn.classList.remove('ok');
+}
+
+function go(d){
+  cur = Math.max(0, Math.min(total-1, cur+d));
+  render();
+}
+
+// Build dots
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i) => {
+  const b = document.createElement('button');
+  b.className = 'ndot';
+  b.title = slides[i].dataset.title || '';
+  b.onclick = () => { cur = i; render(); };
+  dotsEl.appendChild(b);
+});
+
+// Script panel
+document.getElementById('spToggle').onclick = () => {
+  document.getElementById('spPanel').classList.toggle('open');
+};
+document.getElementById('spCopy').onclick = function(){
+  navigator.clipboard.writeText(document.getElementById('spText').textContent).then(() => {
+    this.textContent = '✅ ¡Copiado! Pega en ElevenLabs';
+    this.classList.add('ok');
+    setTimeout(() => {
+      this.textContent = '📋 Copiar guión de esta slide';
+      this.classList.remove('ok');
+    }, 3000);
+  });
+};
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+  if(e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if(e.key === 'Escape') document.getElementById('spPanel').classList.remove('open');
+});
+
+// Touch
+let tx = 0;
+document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const d = e.changedTouches[0].clientX - tx;
+  if(Math.abs(d) > 50) go(d < 0 ? 1 : -1);
+});
+
+render();
+</script>
+</body>
+</html>

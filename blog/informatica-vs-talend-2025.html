@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Comparativa de Informatica PowerCenter/IDMC vs Talend tras 20 anyos usando ambas en proyectos enterprise. Precio, rendimiento, soporte y cuando migrar.">
+<title>Informatica vs Talend: comparativa honesta 2025 &mdash; DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}.hdr.scrolled{box-shadow:var(--s2)}.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}.hnav a:hover,.hnav a.active{color:var(--t)}.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}.mnav.open{display:flex;flex-direction:column;gap:.25rem}.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}.iz.iz-in img{transform:scale(1);opacity:1}
+.art-hero{position:relative;height:460px;margin-top:64px}.art-hero-bg{position:absolute;inset:0}.art-hero-bg img{width:100%;height:100%;object-fit:cover}.art-hero-overlay{position:absolute;inset:0;background:rgba(8,14,28,.78);display:flex;align-items:flex-end;padding-bottom:3.5rem}.art-hero-inner{max-width:860px;padding:0 2rem}
+.art-crumb{display:flex;align-items:center;gap:.5rem;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1.25rem}.art-crumb a{color:rgba(255,255,255,.45)}.art-crumb span{color:rgba(255,255,255,.25)}
+.art-cat{display:inline-block;font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2563eb;margin-bottom:.75rem}
+.art-title{font-family:var(--fe);font-size:clamp(1.9rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.25rem;max-width:760px}
+.art-meta{display:flex;align-items:center;gap:1.5rem;font-family:var(--fd);font-size:.72rem;color:rgba(255,255,255,.45)}.art-meta strong{color:rgba(255,255,255,.7)}
+.art-body{max-width:760px;margin:0 auto;padding:72px 2rem 100px}.art-body h2{font-family:var(--fe);font-size:1.65rem;font-weight:700;color:var(--t);margin:2.75rem 0 1rem;line-height:1.25}.art-body h3{font-family:var(--fe);font-size:1.2rem;font-weight:700;color:var(--t);margin:2rem 0 .75rem}.art-body p{font-size:.97rem;color:var(--t2);line-height:1.8;margin-bottom:1.2rem}.art-body ul,.art-body ol{padding-left:1.5rem;margin-bottom:1.2rem}.art-body li{font-size:.97rem;color:var(--t2);line-height:1.75;margin-bottom:.4rem}.art-body ul li{list-style:disc}.art-body ol li{list-style:decimal}.art-body strong{color:var(--t);font-weight:600}.art-body em{font-style:italic}.art-body a{color:var(--ac);border-bottom:1px solid var(--bd2);transition:border-color .2s}.art-body a:hover{border-color:var(--ac)}
+.art-lead{font-size:1.08rem;color:var(--t);line-height:1.85;margin-bottom:2rem;border-left:3px solid var(--ac);padding-left:1.25rem}
+.art-quote{background:var(--bg2);border-left:4px solid var(--ac);padding:1.25rem 1.5rem;margin:2rem 0;border-radius:0 var(--r) var(--r) 0}.art-quote p{margin-bottom:0;font-style:italic;color:var(--t)}
+pre{background:#0f1f40;color:#e2e8f0;padding:1.5rem;border-radius:var(--r);overflow-x:auto;margin:1.5rem 0;font-size:.82rem;line-height:1.7;font-family:'Consolas','Monaco',monospace}code{background:#f0f0ec;color:#0f1f40;padding:.15rem .4rem;border-radius:3px;font-size:.84rem;font-family:'Consolas','Monaco',monospace}pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.art-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.88rem}.art-table th{background:var(--ac);color:#fff;padding:.65rem 1rem;text-align:left;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}.art-table td{padding:.6rem 1rem;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:top}.art-table tr:last-child td{border-bottom:none}.art-table tr:nth-child(even) td{background:var(--bg2)}
+.art-tip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-tip strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;margin-bottom:.4rem}.art-tip p{margin-bottom:0;font-size:.88rem;color:#1e3a5f}
+.art-warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-warn strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#c2410c;margin-bottom:.4rem}.art-warn p{margin-bottom:0;font-size:.88rem;color:#7c2d12}
+.art-divider{border:none;border-top:1px solid var(--bd);margin:2.5rem 0}
+.art-cta{background:var(--ac);border-radius:var(--r);padding:2.5rem;margin:3rem 0;text-align:center}.art-cta h3{font-family:var(--fe);font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.75rem}.art-cta p{font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:1.5rem;line-height:1.7}.btn-white{display:inline-block;background:#fff;color:var(--ac);padding:.75rem 1.75rem;border-radius:var(--r);font-family:var(--fd);font-size:.82rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}.btn-white:hover{opacity:.88}
+.art-related{border-top:1px solid var(--bd);padding-top:2.5rem;margin-top:1rem}.art-related h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:1.5rem}.rel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}.rel-card{border:1px solid var(--bd);border-radius:var(--r);padding:1.25rem;transition:border-color .2s,box-shadow .2s}.rel-card:hover{border-color:var(--bd2);box-shadow:var(--s)}.rel-cat{font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:.4rem}.rel-title{font-family:var(--fe);font-size:.95rem;font-weight:700;color:var(--t);line-height:1.3}@media(max-width:600px){.rel-grid{grid-template-columns:1fr}}
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}.ft-col ul li{margin-bottom:.5rem}.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="../index.html">Inicio</a>
+      <a href="../productos.html">Productos</a>
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../sobre-mi.html">Sobre m&#237;</a>
+      <a href="../contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="../index.html">Inicio</a><a href="../productos.html">Productos</a><a href="../blog.html">Blog</a><a href="../video-tutoriales.html">V&iacute;deos</a><a href="../sobre-mi.html">Sobre m&#237;</a><a href="../contacto.html">Contacto</a>
+</nav>
+
+<div class="art-hero">
+  <div class="art-hero-bg iz">
+    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1400&auto=format&fit=crop&q=80" alt="Herramientas de desarrollo de datos">
+  </div>
+  <div class="art-hero-overlay">
+    <div class="art-hero-inner">
+      <nav class="art-crumb rv"><a href="../index.html">Inicio</a><span>/</span><a href="../blog.html">Blog</a><span>/</span><span>Tools</span></nav>
+      <span class="art-cat">Tools</span>
+      <h1 class="art-title rv d1">Informatica vs Talend: comparativa honesta 2025</h1>
+      <div class="art-meta rv d2"><span>Por <strong>Antonio Moro</strong></span><span>5 Ene 2025</span><span>7 min lectura</span></div>
+    </div>
+  </div>
+</div>
+
+<article class="art-body">
+  <p class="art-lead rv">He trabajado con Informatica PowerCenter desde la versi&oacute;n 8.x y con Talend desde su versi&oacute;n 5 Open Studio. He implementado ambas herramientas en proyectos enterprise reales: banca, seguros, telecomunicaciones, retail. Esta comparativa no es te&oacute;rica &mdash; es la experiencia acumulada de cientos de pipelines en producci&oacute;n.</p>
+
+  <h2 class="rv">Informatica PowerCenter / IDMC</h2>
+  <p>Informatica lleva m&aacute;s de 30 a&ntilde;os en el mercado y es la herramienta ETL m&aacute;s usada en entornos enterprise de alta exigencia. Su producto principal era <strong>PowerCenter</strong> (on-premise), y su apuesta actual es <strong>IDMC</strong> (Informatica Data Management Cloud), una plataforma cloud unificada que incluye integraci&oacute;n de datos, calidad, gobierno y API management.</p>
+
+  <h3>Puntos fuertes de Informatica</h3>
+  <ul>
+    <li><strong>Madurez y estabilidad:</strong> PowerCenter est&aacute; en producci&oacute;n en los bancos m&aacute;s grandes del mundo. Ha procesado billones de registros. Su fiabilidad es fuera de serie.</li>
+    <li><strong>Soporte enterprise 24/7:</strong> cuando tienes un problema en producci&oacute;n a las 3 de la ma&ntilde;ana, Informatica tiene ingenieros esperando. Esto vale mucho en sectores cr&iacute;ticos.</li>
+    <li><strong>Calidad de dato integrada:</strong> Informatica Data Quality (IDQ) es uno de los mejores motores de calidad del mercado. Reglas de validaci&oacute;n, estandarizaci&oacute;n, deduplicaci&oacute;n y enriquecimiento en el mismo ecosistema.</li>
+    <li><strong>Conectores certificados:</strong> m&aacute;s de 500 conectores certificados para SAP, Salesforce, Oracle, mainframes, sistemas financieros legados. Si existe el sistema, probablemente hay conector.</li>
+    <li><strong>CLAIRE AI:</strong> la capa de inteligencia artificial de IDMC que sugiere mapeos, detecta anomal&iacute;as y automatiza tareas de gobierno.</li>
+  </ul>
+
+  <h3>Puntos d&eacute;biles</h3>
+  <ul>
+    <li><strong>Precio prohibitivo:</strong> una instalaci&oacute;n enterprise de PowerCenter puede costar entre 150.000 y 500.000 EUR/a&ntilde;o entre licencias, soporte y mantenimiento.</li>
+    <li><strong>Rigidez del entorno:</strong> el desarrollo en PowerCenter tiene una curva de aprendizaje alta y el entorno de desarrollo no ha evolucionado tanto como deber&iacute;a.</li>
+    <li><strong>Migraci&oacute;n a IDMC costosa:</strong> pasar de PowerCenter a IDMC no es trivial. Los workflows, sesiones y mappings requieren redise&ntilde;o.</li>
+  </ul>
+
+  <h2 class="rv">Talend Data Integration / Talend Cloud</h2>
+  <p>Talend naci&oacute; en 2006 como alternativa open source a Informatica. En 2023 fue adquirido por Qlik (a su vez parte de Thoma Bravo), lo que ha generado incertidumbre sobre su roadmap independiente.</p>
+
+  <h3>Puntos fuertes de Talend</h3>
+  <ul>
+    <li><strong>Precio/valor:</strong> Talend Enterprise cuesta entre 3 y 10 veces menos que Informatica. Para empresas medianas o proyectos con presupuesto limitado, es una diferencia determinante.</li>
+    <li><strong>Open Studio gratuito:</strong> permite aprender la herramienta, hacer proyectos piloto o incluso proyectos peque&ntilde;os en producci&oacute;n sin coste de licencia.</li>
+    <li><strong>Generaci&oacute;n de c&oacute;digo Java:</strong> los jobs de Talend compilan a c&oacute;digo Java ejecutable. Esto permite depurar el c&oacute;digo generado e integrarlo en pipelines de CI/CD.</li>
+    <li><strong>Buena integraci&oacute;n con Big Data:</strong> Talend tiene componentes nativos para Spark, Hadoop, Kafka y servicios cloud.</li>
+  </ul>
+
+  <h3>Puntos d&eacute;biles</h3>
+  <ul>
+    <li><strong>Incertidumbre post-Qlik:</strong> la integraci&oacute;n con Qlik Analytics y el futuro del roadmap de Talend genera dudas en proyectos de larga duraci&oacute;n.</li>
+    <li><strong>Complejidad del c&oacute;digo generado:</strong> depurar un job grande de Talend que ha generado 10.000 l&iacute;neas de Java puede ser una pesadilla.</li>
+    <li><strong>Soporte menos &aacute;gil:</strong> en comparaci&oacute;n con Informatica, el soporte enterprise de Talend es menos r&aacute;pido en incidentes cr&iacute;ticos.</li>
+  </ul>
+
+  <h2 class="rv">Comparativa directa</h2>
+  <table class="art-table">
+    <thead><tr><th>Criterio</th><th>Informatica IDMC</th><th>Talend Cloud</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Rendimiento en vol&uacute;menes altos</strong></td><td>Excelente (optimizado para terabytes)</td><td>Bueno (mejora con Spark)</td></tr>
+      <tr><td><strong>Precio anual (referencia)</strong></td><td>100.000&ndash;500.000 EUR</td><td>20.000&ndash;80.000 EUR</td></tr>
+      <tr><td><strong>Soporte enterprise</strong></td><td>24/7, SLA garantizado</td><td>Horario comercial (enterprise)</td></tr>
+      <tr><td><strong>N&uacute;mero de conectores</strong></td><td>500+ certificados</td><td>900+ (muchos open source)</td></tr>
+      <tr><td><strong>Curva de aprendizaje</strong></td><td>Alta (6-12 meses para producir)</td><td>Media (3-6 meses)</td></tr>
+      <tr><td><strong>Cloud native</strong></td><td>S&iacute; (IDMC)</td><td>S&iacute; (Talend Cloud / Stitch)</td></tr>
+      <tr><td><strong>Comunidad</strong></td><td>Grande y especializada</td><td>Grande (open source activo)</td></tr>
+      <tr><td><strong>Calidad de dato integrada</strong></td><td>IDQ &mdash; top del mercado</td><td>TDQ &mdash; competente</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="rv">Alternativas modernas que no puedes ignorar</h2>
+  <p>En 2025 no podemos hablar de ETL sin mencionar las alternativas cloud-native:</p>
+  <ul>
+    <li><strong>Fivetran:</strong> para la fase de ingesta (Extract + Load), Fivetran es el l&iacute;der indiscutible. Conectores mantenidos autom&aacute;ticamente, sin infraestructura que gestionar.</li>
+    <li><strong>Airbyte:</strong> la alternativa open source a Fivetran. Self-hosted o en cloud. Ideal para equipos que quieren control y no quieren vendor lock-in.</li>
+    <li><strong>Azure Data Factory:</strong> si tu stack es Azure, ADF es la elecci&oacute;n natural. Visual, integrado con Synapse y el ecosistema Microsoft.</li>
+    <li><strong>AWS Glue:</strong> similar a ADF pero en el ecosistema AWS. Basado en Apache Spark, buen precio/valor para proyectos en AWS.</li>
+  </ul>
+
+  <div class="art-warn">
+    <strong>Cuidado con el lock-in</strong>
+    <p>Tanto Informatica como Talend generan dependencia en sus formatos propietarios de mappings/jobs. Antes de comprometerte con cualquiera de las dos, eval&uacute;a el coste de migraci&oacute;n futura. En proyectos nuevos, considera seriamente una arquitectura ELT con dbt que es mucho m&aacute;s portable.</p>
+  </div>
+
+  <h2 class="rv">Mi recomendaci&oacute;n seg&uacute;n perfil</h2>
+  <ul>
+    <li><strong>Banco o aseguradora grande con PowerCenter existente:</strong> mantener y migrar progresivamente a IDMC. No cambiar de vendor hasta tener una estrategia clara de salida.</li>
+    <li><strong>Empresa mediana en cloud Azure:</strong> Azure Data Factory + dbt. Sin licencias, escalable.</li>
+    <li><strong>Empresa mediana en GCP o AWS:</strong> Airbyte (ingesta) + dbt (transformaci&oacute;n). Stack moderno, open source, sin vendor lock-in.</li>
+    <li><strong>Empresa que busca alternativa a Informatica sin subirse al cloud:</strong> Talend Enterprise on-premise sigue siendo una opci&oacute;n v&aacute;lida y significativamente m&aacute;s barata.</li>
+    <li><strong>Proyecto nuevo con equipo moderno:</strong> evita Informatica y Talend salvo que haya una raz&oacute;n muy espec&iacute;fica. El stack ELT moderno es m&aacute;s &aacute;gil, m&aacute;s barato y m&aacute;s f&aacute;cil de contratar.</li>
+  </ul>
+
+  <div class="art-quote">
+    <p>&ldquo;Informatica es el mejor coche de gama alta del mercado. Si tu empresa puede permitirse el precio y el equipo, es imbatible. Si no, hay coches muy buenos por mucho menos dinero.&rdquo;</p>
+  </div>
+
+  <hr class="art-divider">
+  <div class="art-cta rv">
+    <h3>Plantillas de pipelines ETL documentadas para producci&oacute;n</h3>
+    <p>Colecci&oacute;n de pipelines ETL documentados, patrones de dise&ntilde;o para integraci&oacute;n de datos y gu&iacute;as de migraci&oacute;n de herramientas legacy a stacks modernos. Basado en proyectos reales.</p>
+    <a href="../productos.html" class="btn-white">Ver recursos &rarr;</a>
+  </div>
+  <div class="art-related rv">
+    <h4>Tambi&eacute;n te puede interesar</h4>
+    <div class="rel-grid">
+      <a href="etl-vs-elt-2025.html" class="rel-card"><div class="rel-cat">ETL</div><div class="rel-title">ETL vs ELT en 2025: &iquest;cu&aacute;l domina el mercado cloud?</div></a>
+      <a href="dbt-data-warehouse-2025.html" class="rel-card"><div class="rel-cat">Cloud</div><div class="rel-title">dbt en 2025: el est&aacute;ndar del Data Warehouse moderno</div></a>
+    </div>
+  </div>
+</article>
+
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="../index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+        </div>
+      </div>
+      <div class="ft-col"><h4>Recursos</h4><ul><li><a href="../productos.html">Power BI Templates</a></li><li><a href="../productos.html">SQL Pack</a></li><li><a href="../productos.html">dbt Starter</a></li></ul></div>
+      <div class="ft-col"><h4>P&aacute;ginas</h4><ul><li><a href="../blog.html">Blog</a></li><li><a href="../sobre-mi.html">Sobre m&#237;</a></li><li><a href="../contacto.html">Contacto</a></li></ul></div>
+      <div class="ft-col"><h4>Legal</h4><ul><li><a href="../contacto.html">Aviso legal</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p></div>
+  </div>
+</footer>
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>

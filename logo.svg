@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 52" width="230" height="52" role="img" aria-label="DataFlujo — Data Engineering and BI">
+  <title>DataFlujo</title>
+  <desc>DataFlujo — recursos de Data Engineering y BI por Antonio Moro</desc>
+  <defs>
+    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- Bar chart icon -->
+  <rect x="2"  y="26" width="10" height="20" rx="1.5" fill="#0f1f40" opacity=".75"/>
+  <rect x="15" y="13" width="10" height="33" rx="1.5" fill="#0f1f40" opacity=".75"/>
+  <rect x="28" y="30" width="10" height="16" rx="1.5" fill="#0f1f40" opacity=".75"/>
+  <rect x="41" y="4"  width="10" height="42" rx="1.5" fill="url(#fg)"/>
+  <!-- Flow arrow -->
+  <path d="M46 4 Q54 4 54 12" stroke="#06b6d4" stroke-width="2" fill="none" opacity="0.7"/>
+  <!-- Baseline -->
+  <rect x="0" y="47" width="54" height="2" rx="1" fill="#0f1f40"/>
+  <!-- Vertical separator -->
+  <rect x="62" y="8" width="1.5" height="35" rx="0.75" fill="#0f1f40" opacity="0.12"/>
+  <!-- Brand name: "Data" navy, "Flujo" gradient -->
+  <text y="34" font-family="Georgia, 'Palatino Linotype', Palatino, serif" font-size="26" font-weight="700" letter-spacing="-0.5">
+    <tspan x="70" fill="#0f1f40">Data</tspan><tspan fill="url(#fg)">Flujo</tspan>
+  </text>
+  <!-- Tagline -->
+  <text x="71" y="47" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#0f1f40" letter-spacing="2" opacity="0.5">by antonio-moro.es</text>
+</svg>

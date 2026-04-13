@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 03 — Arquitectura Medallion dbt + BigQuery · Antonio Moro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f1f40;--navy2:#1a3a6b;--blue:#2563eb;--blue2:#3b82f6;
+  --gold:#f0c040;--white:#ffffff;--off:#f0f0ec;
+  --t-dim:rgba(255,255,255,.55);--t-faint:rgba(255,255,255,.25);
+  --fe:'Playfair Display',Georgia,serif;
+  --fd:'Syne',sans-serif;
+  --fm:'JetBrains Mono',monospace;
+  --fc:'Crimson Pro',Georgia,serif;
+  --green:#10b981;--green2:#34d399;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--fd)}
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s cubic-bezier(.22,1,.36,1)}
+.slide.active{opacity:1;pointer-events:all}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--green);z-index:100;transition:width .4s cubic-bezier(.22,1,.36,1)}
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(0,0,0,.9);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:100;border-top:1px solid rgba(255,255,255,.07)}
+.nav-left{display:flex;align-items:center;gap:1rem}
+.nav-counter{font-family:var(--fm);font-size:.65rem;color:var(--t-dim);letter-spacing:.1em;white-space:nowrap}
+.nav-title{font-family:var(--fd);font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.nav-dots{display:flex;gap:4px;flex-wrap:wrap;max-width:400px}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:all .25s;border:none;flex-shrink:0}
+.dot.on{background:var(--green);transform:scale(1.4)}
+.nav-btns{display:flex;gap:8px}
+.nbtn{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
+.nbtn-prev{background:rgba(255,255,255,.07);color:var(--t-dim)}.nbtn-prev:hover{background:rgba(255,255,255,.14);color:#fff}
+.nbtn-next{background:var(--blue);color:#fff}.nbtn-next:hover{background:var(--blue2)}
+.script-toggle{position:fixed;right:1.2rem;top:.7rem;z-index:200;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:3px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.7);color:rgba(255,255,255,.55);cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
+.script-toggle:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.script-panel{position:fixed;right:0;top:0;bottom:56px;width:340px;background:rgba(8,12,24,.98);border-left:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:52px 20px 20px;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);z-index:150}
+.script-panel.open{transform:none}
+.sp-label{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:8px;display:block}
+.sp-title{font-family:var(--fe);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.3}
+.sp-text{font-family:var(--fc);font-size:.9rem;color:rgba(255,255,255,.72);line-height:1.9}
+.sp-copy{margin-top:14px;width:100%;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px;border-radius:3px;border:none;cursor:pointer;background:var(--navy2);color:#fff;transition:background .2s}
+.sp-copy:hover{background:var(--blue)}.sp-copy.ok{background:#16a34a}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.chip{font-family:var(--fd);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;border-radius:2px;background:rgba(37,99,235,.22);color:var(--blue2);border:1px solid rgba(37,99,235,.28)}
+.slide-h{font-family:var(--fe);font-size:clamp(1.4rem,2.2vw,2rem);font-weight:800;color:#fff;line-height:1.1}
+.slide-sub{font-family:var(--fc);font-size:.88rem;color:var(--t-dim);line-height:1.75;margin-top:.5rem}
+.sh-row{display:flex;align-items:center;gap:.75rem;margin-bottom:2.5vh}
+.code{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:14px 16px;font-family:var(--fm);font-size:.68rem;line-height:1.9;color:rgba(255,255,255,.6)}
+.c-fn{color:#93c5fd}.c-kw{color:#c084fc}.c-str{color:#86efac}.c-num{color:#fde68a}.c-cm{color:rgba(255,255,255,.28);font-style:italic}.c-hl{color:#fff;font-weight:600}.c-op{color:#f9a8d4}.c-ref{color:#fbbf24}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100% - 56px)}
+.col-l{padding:4vh 2.5vw 4vh 4vw;display:flex;flex-direction:column;justify-content:center;border-right:1px solid rgba(255,255,255,.05)}
+.col-r{padding:4vh 4vw 4vh 2.5vw;display:flex;flex-direction:column;justify-content:center}
+.full-inner{padding:3vh 4vw;height:calc(100% - 56px);display:flex;flex-direction:column}
+.tip-box{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:4px;padding:10px 14px;font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.6}
+.tip-box b{color:var(--green)}
+.warn-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:10px 14px;font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.6}
+.warn-box b{color:#fca5a5}
+.step-list{display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-left:3px solid var(--green)}
+.step-n{font-family:var(--fm);font-size:.6rem;color:var(--green2);min-width:22px;margin-top:2px}
+.step-body{flex:1}
+.step-title{font-family:var(--fd);font-size:.76rem;font-weight:700;color:#fff}
+.step-desc{font-family:var(--fc);font-size:.76rem;color:var(--t-dim);margin-top:2px;line-height:1.5}
+.bg-dark{background:#080e1c}
+.bg-navy{background:var(--navy)}
+.bg-darker{background:#040810}
+.bg-mid{background:#0a1220}
+.accent-blob{position:absolute;border-radius:50%;pointer-events:none}
+.s1-noise{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");opacity:.5}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:calc(100% - 56px);padding:0 8vw}
+.hero-eyebrow{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:1.8rem;display:flex;align-items:center;gap:12px}
+.hero-eyebrow::before{content:'';display:block;width:28px;height:2px;background:var(--green)}
+.hero-title{font-family:var(--fe);font-size:clamp(2.8rem,5.5vw,5rem);font-weight:900;color:#fff;line-height:1.0;margin-bottom:1.2rem;max-width:760px}
+.hero-title em{color:var(--green);font-style:normal}
+.hero-desc{font-family:var(--fc);font-size:1.05rem;font-weight:300;color:var(--t-dim);max-width:500px;line-height:1.85;margin-bottom:2rem}
+.hero-stats{display:flex;gap:2rem}
+.hs{display:flex;flex-direction:column;gap:2px}
+.hs-n{font-family:var(--fd);font-size:1.3rem;font-weight:800;color:#fff}
+.hs-l{font-family:var(--fd);font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t-faint)}
+.hero-divider{width:100%;height:1px;background:rgba(255,255,255,.07);margin-top:1.5rem;margin-bottom:.8rem;max-width:580px}
+.hero-author{font-family:var(--fd);font-size:.68rem;font-weight:600;letter-spacing:.07em;color:var(--t-faint)}
+.hero-author span{color:rgba(255,255,255,.6)}
+.nbtn-tts{background:rgba(134,239,172,.12);color:#86efac;border:1px solid rgba(134,239,172,.28)}.nbtn-tts:hover{background:rgba(134,239,172,.25);color:#fff}
+.nbtn-tts.stop{background:#dc2626 !important;color:#fff !important;border-color:#dc2626 !important}
+.nbtn-auto{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.22)}.nbtn-auto:hover{background:rgba(251,191,36,.25);color:#fff}
+.nbtn-auto.on{background:#f59e0b !important;color:#000 !important;border-color:#f59e0b !important}
+.tts-bar{position:fixed;bottom:56px;left:0;right:0;height:3px;background:rgba(134,239,172,.15);z-index:99;display:none}.tts-bar.active{display:block}.tts-prog{height:100%;background:#86efac;width:0%;transition:width .5s linear}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+<button class="script-toggle" id="scriptToggle">📄 Guión</button>
+<div class="script-panel" id="scriptPanel">
+  <span class="sp-label">🎙️ Guión — pegar en ElevenLabs</span>
+  <div class="sp-title" id="spTitle"></div>
+  <div class="sp-text" id="spText"></div>
+  <button class="sp-copy" id="spCopy">📋 Copiar guión de esta slide</button>
+  <button class="sp-copy" id="spExport" style="margin-top:6px;background:#1a3a6b">📤 Exportar TODOS los guiones</button>
+</div>
+
+<div class="deck" id="deck">
+<div class="slide bg-navy" data-title="Portada" data-script="Hola, soy Antonio Moro, ingeniero de datos con más de veinte años construyendo arquitecturas de datos en producción para empresas como Accenture, IBM y Sopra Steria. En este tutorial vas a aprender a montar una arquitectura Medallion completa con dbt y BigQuery, desde la primera línea de configuración del proyecto hasta los modelos Gold listos para alimentar dashboards de negocio. Cubriremos veinte puntos clave: instalación y estructura del proyecto, conexión a BigQuery con service account, las tres capas Bronze, Silver y Gold, sources y referencias entre modelos, tests genéricos y personalizados, macros reutilizables en Jinja, seeds para tablas de catálogo, documentación automática con el grafo de dependencias, modelos incrementales, optimización con particionado y clustering en BigQuery, y un pipeline de CI/CD con GitHub Actions. Todo el código es real, es exactamente lo que yo despliego en producción. Si trabajas con datos y quieres dominar dbt, este tutorial es para ti.">
+  <div class="s1-noise"></div>
+  <div class="accent-blob" style="right:-100px;top:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,.15) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-80px;bottom:-80px;width:450px;height:450px;background:radial-gradient(circle,rgba(16,185,129,.07) 0%,transparent 70%)"></div>
+  <div class="grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Tutorial 03 · dbt + BigQuery · 26 Secciones</div>
+    <h1 class="hero-title">Arquitectura<br><em>Medallion</em><br>dbt + BigQuery</h1>
+    <p class="hero-desc">Tres capas Bronze, Silver y Gold con dbt Core 1.8 sobre BigQuery. Tests genéricos y unit tests, macros, packages, seeds, snapshots SCD2, documentación automática, modelos incrementales, variables, selectors, Airflow y CI/CD.</p>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-n">75min</div><div class="hs-l">Duración</div></div>
+      <div class="hs"><div class="hs-n">26</div><div class="hs-l">Secciones</div></div>
+      <div class="hs"><div class="hs-n">Avanzado</div><div class="hs-l">Nivel</div></div>
+      <div class="hs"><div class="hs-n">.sql</div><div class="hs-l">Descargable</div></div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-author">Por <span>Antonio Moro</span> · Senior Data Engineer · dataflujo.com</div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="¿Qué es dbt?" data-script="dbt, Data Build Tool, es la herramienta que cambió el data engineering en los últimos cinco años. Antes de dbt, las transformaciones de datos vivían en stored procedures de SQL Server que nadie versionaba, en scripts Python dispersos, o en la lógica interna de herramientas ETL propietarias. dbt unifica todo eso en un flujo de trabajo basado en SQL, con versionado en Git, tests automáticos y documentación viva. Yo empecé a usarlo en la versión 0.17 y desde entonces no he vuelto a escribir un stored procedure para transformaciones. El concepto central es simple: cada modelo dbt es un fichero SQL con una SELECT, y dbt se encarga de materializar ese SELECT como una tabla o una vista en BigQuery. La versión actual es la 1.8, que incluye mejoras en el protocolo de unit tests y en la gestión de contratos de datos. Lo que más me gusta de dbt es que obliga a estructurar las transformaciones de forma modular, testeada y documentada, tres cosas que en los proyectos sin dbt rara vez ocurren.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">00 · dbt Core</span><h2 class="slide-h">¿Qué es dbt?</h2></div>
+      <p class="slide-sub">La herramienta que transformó el data engineering en los últimos cinco años.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">SQL-first</div><div class="step-desc">Cada modelo es un fichero .sql con una SELECT. Sin stored procedures ni ETL propietario.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Git versionado</div><div class="step-desc">Todo el código vive en Git. Pull requests, branches, historial completo.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Tests automáticos</div><div class="step-desc">not_null, unique, accepted_values, relationships out of the box.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Documentado</div><div class="step-desc">Catálogo automático con descripción de modelos y columnas.</div></div></div>
+        <div class="step"><div class="step-n">05</div><div class="step-body"><div class="step-title">DAG automático</div><div class="step-desc">dbt construye el grafo de dependencias y ejecuta en orden.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:1rem"><b>dbt Core 1.8</b> — Unit tests nativos y contratos de datos (data contracts) para validar esquemas entre modelos upstream y downstream.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/staging/stg_orders.sql</span><br>
+<span class="c-ref">{{ config(materialized=<span class="c-str">'view'</span>) }}</span><br>
+<br>
+<span class="c-kw">with</span> source <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ source(<span class="c-str">'raw'</span>, <span class="c-str">'orders'</span>) }}</span><br>
+),<br>
+renamed <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">cast</span>(order_date <span class="c-kw">as</span> date)&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> order_date,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">cast</span>(amount <span class="c-kw">as</span> numeric)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> amount_eur,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">lower</span>(<span class="c-fn">trim</span>(status))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> status,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">current_timestamp</span>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> _loaded_at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">where</span> order_id <span class="c-kw">is not null</span><br>
+)<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> renamed</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="¿Por qué Medallion?" data-script="La arquitectura Medallion organiza los datos en tres capas con calidad creciente. La capa Bronze, que en dbt llamamos staging, contiene los datos tal como llegan del origen: sin transformar, sin limpiar, solo tipados y con mínima validación. La capa Silver, que llamamos intermediate, aplica las transformaciones de negocio: joins entre entidades, limpieza de nulos, estandarización de formatos y enriquecimiento de datos. La capa Gold, que llamamos marts, contiene las agregaciones y métricas de negocio listas para consumo directo en dashboards. La ventaja principal de esta separación en capas es la trazabilidad: cuando un número del dashboard no cuadra, puedo trazar exactamente en qué capa se introdujo el error. Sin esta estructura, depurar un problema de datos es como buscar una aguja en un pajar. Además, las capas permiten reutilización: múltiples modelos Gold pueden compartir el mismo modelo Silver, y múltiples modelos Silver pueden compartir el mismo modelo Bronze. En proyectos de más de cincuenta modelos dbt, esta estructura es la diferencia entre un proyecto mantenible y un proyecto que nadie quiere tocar.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">01 · Arquitectura</span><h2 class="slide-h">¿Por qué Arquitectura Medallion?</h2></div>
+    <div style="display:flex;align-items:stretch;gap:1rem;margin-bottom:1.5rem;flex:1;max-height:38vh">
+      <div style="flex:1;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:.5rem">
+        <div style="font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.18em;color:#fbbf24">BRONZE</div>
+        <div style="font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4)">models/staging/</div>
+        <div style="font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1">Datos crudos tipados. Sin JOINs. Solo cast y rename.</div>
+        <div style="font-family:var(--fm);font-size:.58rem;color:#fbbf24;background:rgba(251,191,36,.1);padding:3px 8px;border-radius:2px;align-self:flex-start">VIEW</div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:1.5rem;color:rgba(255,255,255,.25)">→</div>
+      <div style="flex:1;border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.06);border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:.5rem">
+        <div style="font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.18em;color:var(--blue2)">SILVER</div>
+        <div style="font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4)">models/intermediate/</div>
+        <div style="font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1">JOINs entre entidades. Lógica de negocio. Enriquecimiento.</div>
+        <div style="font-family:var(--fm);font-size:.58rem;color:var(--blue2);background:rgba(59,130,246,.1);padding:3px 8px;border-radius:2px;align-self:flex-start">TABLE</div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:1.5rem;color:rgba(255,255,255,.25)">→</div>
+      <div style="flex:1;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.06);border-radius:6px;padding:1.2rem;display:flex;flex-direction:column;gap:.5rem">
+        <div style="font-family:var(--fd);font-size:.65rem;font-weight:800;letter-spacing:.18em;color:var(--green)">GOLD</div>
+        <div style="font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4)">models/marts/</div>
+        <div style="font-family:var(--fc);font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1">Agregaciones y métricas. Listas para dashboards de BI.</div>
+        <div style="font-family:var(--fm);font-size:.58rem;color:var(--green);background:rgba(16,185,129,.1);padding:3px 8px;border-radius:2px;align-self:flex-start">TABLE</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+      <div class="tip-box"><b>Trazabilidad</b> — Cuando un KPI no cuadra, la arquitectura en capas te dice exactamente en qué capa y modelo se introdujo el error.</div>
+      <div class="tip-box"><b>Reutilización</b> — Múltiples modelos Gold comparten el mismo Silver. La lógica se escribe una vez y se reutiliza.</div>
+      <div class="tip-box"><b>Tests por capa</b> — Cada capa tiene sus propios tests. Los errores se detectan en Bronze antes de llegar a Gold.</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Setup inicial: proyecto dbt" data-script="Para inicializar un proyecto dbt necesitas Python 3.8 o superior y una cuenta de servicio de Google Cloud con permisos de BigQuery Data Editor. El proceso tiene cuatro pasos. Primero, instalar dbt-bigquery con pip. Segundo, ejecutar dbt init con el nombre del proyecto, que crea la estructura de carpetas automáticamente. Tercero, configurar el fichero profiles.yml con las credenciales de BigQuery. Y cuarto, ejecutar dbt debug para verificar que la conexión funciona. La estructura de carpetas que genera dbt init es muy intuitiva: models contiene todos los modelos SQL, macros contiene las funciones Jinja reutilizables, seeds contiene los ficheros CSV para tablas de catálogo, tests contiene los tests custom, y snapshots para las tablas de tipo 2 con historial. El fichero dbt_project.yml es la configuración central del proyecto: nombre, version, qué modelos van en qué carpeta, y las materializaciones por defecto para cada capa.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">02 · Setup</span><h2 class="slide-h">Setup inicial del proyecto</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">pip install dbt-bigquery</div><div class="step-desc">Instala dbt-bigquery==1.8.*. Requiere Python 3.8+. Recomendado usar un entorno virtual.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">dbt init mi_proyecto</div><div class="step-desc">Crea la estructura de carpetas y el dbt_project.yml inicial.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Configurar profiles.yml</div><div class="step-desc">Credenciales de BigQuery en ~/.dbt/profiles.yml. Nunca en Git.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">dbt debug</div><div class="step-desc">Verifica la conexión a BigQuery. Debe mostrar All checks passed.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:1rem"><b>Consejo</b> — Ejecuta siempre dbt debug antes de empezar a desarrollar. Detecta problemas de credenciales o red antes de perder tiempo.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">## Estructura generada por dbt init</span><br>
+<span class="c-hl">mi_proyecto/</span><br>
+<span class="c-str">├── dbt_project.yml</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># Config central</span><br>
+<span class="c-str">├── models/</span><br>
+<span class="c-str">│&nbsp;&nbsp; ├── staging/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># Bronze</span><br>
+<span class="c-str">│&nbsp;&nbsp; ├── intermediate/</span>&nbsp;&nbsp;<span class="c-cm"># Silver</span><br>
+<span class="c-str">│&nbsp;&nbsp; └── marts/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># Gold</span><br>
+<span class="c-str">├── macros/</span><br>
+<span class="c-str">├── seeds/</span><br>
+<span class="c-str">├── tests/</span><br>
+<span class="c-str">└── snapshots/</span><br>
+<br>
+<span class="c-cm">## dbt_project.yml</span><br>
+<span class="c-hl">name</span>: <span class="c-str">'mi_proyecto'</span><br>
+<span class="c-hl">version</span>: <span class="c-str">'1.0.0'</span><br>
+<span class="c-hl">models</span>:<br>
+&nbsp;&nbsp;<span class="c-hl">mi_proyecto</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">staging</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+materialized</span>: <span class="c-str">view</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">intermediate</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+materialized</span>: <span class="c-str">table</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">marts</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+materialized</span>: <span class="c-str">table</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Conectar BigQuery" data-script="La conexión de dbt a BigQuery se configura en el fichero profiles.yml, que por defecto vive en el directorio home del usuario en punto dbt barra profiles punto yml. Este fichero no se sube a Git nunca, porque contiene credenciales. Hay dos métodos de autenticación: service account con fichero JSON, que es lo que uso en servidores y CI/CD, y oauth, que es para desarrollo local donde tienes las credenciales de gcloud configuradas. Para producción siempre uso service account: crea una cuenta de servicio en GCP, le asignas el rol BigQuery Data Editor y BigQuery Job User, descargas el fichero JSON de clave, y referencias la ruta de ese fichero en el profiles.yml. El parámetro dataset en profiles.yml indica el dataset de BigQuery donde dbt va a crear los modelos. Yo suelo tener un dataset por entorno: dbt_dev para desarrollo, dbt_staging para integración, y dbt_prod para producción. El parámetro threads indica cuántos modelos puede ejecutar dbt en paralelo, yo lo pongo en cuatro para desarrollo y en ocho para producción.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">03 · Conexión</span><h2 class="slide-h">Conectar a BigQuery</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Crear Service Account</div><div class="step-desc">IAM &gt; Service Accounts en GCP. Roles: BigQuery Data Editor + BigQuery Job User.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Asignar roles IAM</div><div class="step-desc">BigQuery Data Editor para leer/escribir datasets. BigQuery Job User para ejecutar queries.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Descargar clave JSON</div><div class="step-desc">Genera y descarga el fichero JSON de la service account.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Configurar profiles.yml</div><div class="step-desc">Apunta keyfile a la ruta del JSON. Nunca hardcodees el JSON en el repo.</div></div></div>
+      </div>
+      <div class="warn-box" style="margin-top:1rem"><b>⚠️ Seguridad crítica</b> — profiles.yml NUNCA se sube a Git. Añádelo al .gitignore. En CI/CD, inyecta las credenciales como secret de GitHub.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># ~/.dbt/profiles.yml</span><br>
+<span class="c-hl">mi_proyecto</span>:<br>
+&nbsp;&nbsp;<span class="c-hl">outputs</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">dev</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">type</span>: <span class="c-str">bigquery</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">method</span>: <span class="c-str">service-account</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">project</span>: <span class="c-str">mi-proyecto-gcp</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">dataset</span>: <span class="c-str">dbt_dev</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">keyfile</span>: <span class="c-str">/home/user/.gcp/keyfile.json</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">threads</span>: <span class="c-num">4</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">timeout_seconds</span>: <span class="c-num">300</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">prod</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">type</span>: <span class="c-str">bigquery</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">method</span>: <span class="c-str">service-account</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">project</span>: <span class="c-str">mi-proyecto-gcp</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">dataset</span>: <span class="c-str">dbt_prod</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">keyfile</span>: <span class="c-str">/home/user/.gcp/keyfile.json</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">threads</span>: <span class="c-num">8</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">timeout_seconds</span>: <span class="c-num">600</span><br>
+&nbsp;&nbsp;<span class="c-hl">target</span>: <span class="c-str">dev</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Capa Bronze: staging models" data-script="Los modelos de staging son la primera capa de transformación. Su función es exclusivamente preparar los datos crudos para que sean usables: renombrar columnas a nombres estándar, castear tipos de datos, filtrar filas claramente erróneas como registros con clave primaria nula, y añadir metadatos de carga como la fecha de procesamiento. Una regla de oro que aplico siempre: los modelos de staging nunca hacen joins. Si un modelo de staging necesita un join, eso es una señal de que la lógica pertenece a la capa Silver. Los modelos de staging se materializan como vistas en BigQuery, no como tablas, porque no queremos duplicar datos. Los modelos staging tienen un naming convention muy claro: stg guión nombre del origen guión nombre de la entidad. Por ejemplo stg guión orders, stg guión customers, stg guión products. Esta convención me ayuda a identificar de un vistazo de dónde viene cada modelo sin necesidad de mirar el código.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">04 · Bronze</span><h2 class="slide-h">Capa Bronze: Staging Models</h2></div>
+      <p class="slide-sub">Primera capa de calidad. Datos tipados y normalizados desde el origen.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Renombrar columnas</div><div class="step-desc">Nombres snake_case consistentes. Sin abreviaciones crípticas. customer_id, no cust_id.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Castear tipos</div><div class="step-desc">Fechas como DATE o TIMESTAMP. Montos como NUMERIC. IDs como STRING.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Filtrar erróneos</div><div class="step-desc">WHERE order_id IS NOT NULL. Solo filtros evidentes, no lógica de negocio.</div></div></div>
+      </div>
+      <div class="warn-box" style="margin-top:.8rem"><b>Regla de oro</b> — Los modelos de staging NUNCA hacen JOINs. Si necesitas un JOIN, pertenece a la capa Silver.</div>
+      <div class="tip-box" style="margin-top:.6rem"><b>Materialización</b> — Siempre VIEW en staging. No duplicar datos del origen. BigQuery evalúa la vista en cada consulta.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/staging/stg_orders.sql</span><br>
+<span class="c-ref">{{ config(materialized=<span class="c-str">'view'</span>) }}</span><br>
+<br>
+<span class="c-kw">with</span> source <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> *<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> <span class="c-ref">{{ source(<span class="c-str">'raw'</span>, <span class="c-str">'orders'</span>) }}</span><br>
+),<br>
+staged <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">cast</span>(order_date <span class="c-kw">as</span> date)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> order_date,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">cast</span>(amount <span class="c-kw">as</span> numeric)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> amount_eur,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">lower</span>(<span class="c-fn">trim</span>(status))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> status,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">current_timestamp</span>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> _loaded_at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">where</span> order_id <span class="c-kw">is not null</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm">-- Solo filtros de calidad básica</span><br>
+)<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> staged</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-mid" data-title="Capa Silver: intermediate models" data-script="Los modelos intermediate son la capa más compleja del proyecto. Aquí es donde se hacen los joins entre entidades, se aplica la lógica de negocio compleja, y se construyen las estructuras de datos que los marts van a necesitar. Un modelo intermediate típico toma dos o más modelos de staging, los une con un join, y aplica transformaciones como derivar campos calculados, estandarizar categorías o gestionar los nulos de forma inteligente. La convención de nombres en esta capa es int guión descripción de la transformación: int_orders_enriched para pedidos con los datos del cliente ya enriquecidos, int_revenue_by_day para los ingresos pre-agrupados por día. Los modelos intermediate se materializan como tablas o vistas según el volumen de datos. Si el modelo tiene más de un millón de filas o se usa en más de tres modelos downstream, lo materializo como tabla para evitar recalcular la misma lógica costosa múltiples veces en BigQuery.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">05 · Silver</span><h2 class="slide-h">Capa Silver: Intermediate Models</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">JOINs entre entidades</div><div class="step-desc">Aquí se unen stg_orders con stg_customers y stg_products.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Lógica de negocio</div><div class="step-desc">Derivar campos calculados, estandarizar categorías, gestionar nulos.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Campos calculados</div><div class="step-desc">margin_pct, fiscal_quarter, customer_lifetime_value.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Estandarizar categorías</div><div class="step-desc">Unificar valores equivalentes. 'COMPLETADO' y 'completed' son lo mismo.</div></div></div>
+        <div class="step"><div class="step-n">05</div><div class="step-body"><div class="step-title">Gestionar nulos</div><div class="step-desc">COALESCE para nulos esperados. Documentar los inesperados.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Regla del millón</b> — Si el modelo supera 1M filas o lo usan más de 3 modelos downstream, materialízalo como TABLE. Evita recalcular lógica costosa en cada consulta.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/intermediate/int_orders_enriched.sql</span><br>
+<span class="c-ref">{{ config(materialized=<span class="c-str">'table'</span>) }}</span><br>
+<br>
+<span class="c-kw">with</span> orders <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'stg_orders'</span>) }}</span><br>
+),<br>
+customers <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'stg_customers'</span>) }}</span><br>
+),<br>
+products <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'stg_products'</span>) }}</span><br>
+),<br>
+enriched <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o.order_id, o.order_date, o.amount_eur, o.status,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c.customer_name, c.country, c.segment,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p.category, p.brand<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> orders o<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">left join</span> customers c <span class="c-kw">using</span> (customer_id)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">left join</span> products  p <span class="c-kw">using</span> (product_id)<br>
+)<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> enriched</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Capa Gold: mart models" data-script="Los modelos mart son la capa de consumo: tablas agregadas, denormalizadas y optimizadas para que los dashboards de Power BI, Looker o Metabase las consulten de forma eficiente. La estructura organizativa de los marts sigue la lógica de dominio de negocio: marts barra finance para métricas financieras, marts barra sales para métricas de ventas, marts barra operations para operaciones. Cada mart tiene una responsabilidad clara y un owner de negocio que lo consume. La diferencia entre un mart y un modelo intermediate es que el mart está optimizado para la consulta, no para la transformación. Eso significa que en un mart está bien denormalizar: repetir columnas descriptivas del cliente en la tabla de pedidos para evitar joins en el dashboard. La regla de oro aquí es que los dashboards no deben hacer joins, solo consultas simples contra los marts. Si el analista tiene que hacer un join en su herramienta de BI para construir una métrica, esa métrica debería estar en el mart.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">06 · Gold</span><h2 class="slide-h">Capa Gold: Mart Models</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">marts/finance</div><div class="step-desc">mart_revenue, mart_pl, mart_cashflow. Owner: equipo Finance.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">marts/sales</div><div class="step-desc">mart_sales_pipeline, mart_quota_attainment. Owner: equipo Ventas.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">marts/operations</div><div class="step-desc">mart_fulfillment, mart_inventory. Owner: equipo Operaciones.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:1rem"><b>Denormalización inteligente</b> — En los marts está bien repetir columnas descriptivas. Los dashboards no deben hacer JOINs. Si el analista necesita un JOIN en BI, esa métrica pertenece al mart.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/marts/finance/mart_revenue.sql</span><br>
+<span class="c-ref">{{ config(materialized=<span class="c-str">'table'</span>) }}</span><br>
+<br>
+<span class="c-kw">with</span> base <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'int_orders_enriched'</span>) }}</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">where</span> status = <span class="c-str">'completed'</span><br>
+),<br>
+aggregated <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;order_date,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;country,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;segment,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;category,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">count</span>(<span class="c-kw">distinct</span> order_id) <span class="c-kw">as</span> order_count,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">sum</span>(amount_eur)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> revenue_eur,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">avg</span>(amount_eur)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> avg_order_eur<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> base<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">group by</span> <span class="c-num">1</span>, <span class="c-num">2</span>, <span class="c-num">3</span>, <span class="c-num">4</span><br>
+)<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> aggregated</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Sources y ref()" data-script="dbt tiene dos funciones macro fundamentales para referenciar datos: source y ref. La función source referencia una tabla del origen de datos, es decir, una tabla que existe en BigQuery pero que no fue creada por dbt. Defines las sources en ficheros YAML llamados sources.yml dentro de la carpeta de staging, y luego las referencias con doble llave source comillas nombre origen comillas coma comillas nombre tabla comillas. La función ref referencia otro modelo dbt. Cuando escribes doble llave ref comillas stg_orders comillas, dbt sabe que debe ejecutar ese modelo primero, y construye automáticamente el DAG de dependencias. La magia de ref es que dbt resuelve el nombre completo de la tabla incluyendo el dataset y el entorno, así que el mismo modelo funciona en desarrollo, staging y producción sin cambiar nada. Yo uso una regla simple: si la tabla viene de fuera de dbt, usa source. Si viene de otro modelo dbt, usa ref. Mezclar los dos es un error que genera dependencias invisibles que rompen el DAG.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">07 · Sources</span><h2 class="slide-h">Sources y ref()</h2></div>
+      <p class="slide-sub">Las dos macros fundamentales de dbt para referenciar datos.</p>
+      <div class="code" style="font-size:.62rem"><span class="c-cm"># models/staging/sources.yml</span><br>
+<span class="c-hl">version</span>: <span class="c-num">2</span><br>
+<span class="c-hl">sources</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">raw</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">database</span>: <span class="c-str">mi-proyecto-gcp</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">schema</span>: <span class="c-str">raw_data</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">freshness</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">warn_after</span>: {count: <span class="c-num">6</span>, period: hour}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">error_after</span>: {count: <span class="c-num">12</span>, period: hour}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">tables</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">orders</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">loaded_at_field</span>: <span class="c-str">_created_at</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">customers</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">products</span></div>
+      <div class="warn-box" style="margin-top:.8rem"><b>Regla única</b> — Si la tabla viene de fuera de dbt, usa source(). Si viene de otro modelo dbt, usa ref(). Nunca mezcles los dos para el mismo objeto.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- ✅ Source: tabla EXTERNA a dbt</span><br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ source(<span class="c-str">'raw'</span>, <span class="c-str">'orders'</span>) }}</span><br>
+<span class="c-cm">-- Resuelve a: mi-proyecto.raw_data.orders</span><br>
+<br>
+<span class="c-cm">-- ✅ Ref: modelo dbt INTERNO</span><br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'stg_orders'</span>) }}</span><br>
+<span class="c-cm">-- Dev:  mi-proyecto.dbt_dev.stg_orders</span><br>
+<span class="c-cm">-- Prod: mi-proyecto.dbt_prod.stg_orders</span><br>
+<br>
+<span class="c-cm">-- ❌ NUNCA source() para modelos dbt</span><br>
+<span class="c-cm">-- {{ source('staging', 'stg_orders') }}</span><br>
+<span class="c-cm">-- Rompe el DAG: dbt no ve la dependencia</span><br>
+<br>
+<span class="c-cm">-- Chequear frescura de sources:</span><br>
+<span class="c-cm">-- $ dbt source freshness</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Tests genéricos" data-script="Los tests en dbt son la diferencia entre un proyecto de datos que da confianza y uno que da miedo. dbt incluye cuatro tests genéricos out of the box: not_null verifica que una columna no tiene valores nulos, unique verifica que los valores son únicos, accepted_values verifica que los valores están dentro de un conjunto permitido, y relationships verifica que las claves foráneas existen en la tabla referenciada. Estos cuatro tests, aplicados sistemáticamente a todos los modelos, detectan el noventa por ciento de los problemas de calidad de datos antes de que lleguen a producción. La configuración es en YAML, dentro del fichero schema.yml de cada capa. Yo aplico siempre not_null y unique a las claves primarias de todos los modelos, relationships entre todos los modelos que tienen claves foráneas, y accepted_values a todas las columnas de estado como status o tipo. Los tests se ejecutan con dbt test, y en CI/CD se ejecutan automáticamente en cada pull request. Si un test falla, el pipeline se detiene y no se despliega.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">08 · Tests</span><h2 class="slide-h">Tests genéricos de dbt</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">not_null</div><div class="step-desc">Ningún valor puede ser NULL. Obligatorio en todas las claves primarias.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">unique</div><div class="step-desc">Los valores son únicos en la columna. Obligatorio en claves primarias.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">accepted_values</div><div class="step-desc">Los valores pertenecen a un conjunto definido. Para status, tipo, país.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">relationships</div><div class="step-desc">La clave foránea existe en la tabla referenciada. Integridad referencial.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:1rem"><b>dbt build</b> — Ejecuta dbt run + dbt test en un solo comando, en orden de dependencias. Siempre usa dbt build en CI/CD.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># models/staging/schema.yml</span><br>
+<span class="c-hl">version</span>: <span class="c-num">2</span><br>
+<span class="c-hl">models</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">stg_orders</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">description</span>: <span class="c-str">Pedidos normalizados</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">columns</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">order_id</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">tests</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-hl">not_null</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-hl">unique</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">status</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">tests</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-hl">accepted_values</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">values</span>: [<span class="c-str">'completed'</span>, <span class="c-str">'pending'</span>, <span class="c-str">'cancelled'</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">customer_id</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">tests</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-hl">not_null</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-hl">relationships</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">to</span>: <span class="c-ref">ref(<span class="c-str">'stg_customers'</span>)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">field</span>: <span class="c-str">customer_id</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Tests custom con macros" data-script="Los cuatro tests genéricos de dbt cubren la mayoría de casos, pero a veces necesitas lógica de validación específica de tu negocio. Para eso existen los tests custom: macros SQL que devuelven las filas que fallan el test. La convención es simple: si el resultado de la query del test es vacío, el test pasa. Si devuelve alguna fila, el test falla con el detalle de qué filas son problemáticas. Yo uso tests custom para validar reglas de negocio complejas como que el total de una factura cuadra con la suma de sus líneas, que las fechas están en rango lógico, o que los descuentos no superan el cien por cien. Los tests custom van en la carpeta tests barra generic si son reutilizables entre modelos, o en tests si son específicos de un modelo. Los tests custom se configuran en el schema.yml igual que los genéricos, referenciando el nombre de la macro como si fuera un test built-in. Esta uniformidad es lo que más me gusta: el analista usa la misma sintaxis para tests estándar y para tests custom.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">09 · Tests Custom</span><h2 class="slide-h">Tests custom con macros Jinja</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Lógica de negocio custom</div><div class="step-desc">Validar que el total de factura cuadra con la suma de líneas.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">SQL devuelve filas fallidas</div><div class="step-desc">El test falla si la query devuelve CUALQUIER fila. Filas = errores.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Vacío = OK, Filas = FAIL</div><div class="step-desc">Convención universal de dbt para todos los tests.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Misma sintaxis en schema.yml</div><div class="step-desc">Los tests custom se configuran igual que not_null o unique.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Reutilización</b> — Los tests en tests/generic/ se usan en cualquier modelo del proyecto. Escríbelos una vez, aplícalos en todos los schema.yml.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- tests/generic/assert_positive_amount.sql</span><br>
+<span class="c-kw">{% test</span> assert_positive_amount(model, column_name) <span class="c-kw">%}</span><br>
+<br>
+<span class="c-kw">with</span> validation <span class="c-kw">as</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-ref">{{ column_name }}</span> <span class="c-kw">as</span> valor,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">count</span>(*) <span class="c-kw">as</span> n_failures<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">from</span> <span class="c-ref">{{ model }}</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">where</span> <span class="c-ref">{{ column_name }}</span> <span class="c-kw">is null</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">or</span> <span class="c-ref">{{ column_name }}</span> &lt; <span class="c-num">0</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">group by</span> <span class="c-num">1</span><br>
+)<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> validation<br>
+<br>
+<span class="c-kw">{% endtest %}</span><br>
+<br>
+<span class="c-cm">-- Uso en schema.yml:</span><br>
+<span class="c-cm">-- tests:</span><br>
+<span class="c-cm">--   - assert_positive_amount:</span><br>
+<span class="c-cm">--       column_name: amount_eur</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-mid" data-title="Unit Tests en dbt 1.8" data-script="La versión 1.8 de dbt introdujo los unit tests nativos, una funcionalidad muy esperada por la comunidad. Los unit tests permiten probar la lógica SQL de un modelo con datos ficticios definidos en YAML, sin necesidad de conectarse a BigQuery ni de tener datos reales. Defines los datos de entrada como fixtures, especificas los outputs esperados, y dbt verifica que la lógica del modelo produce el resultado correcto. Esto es especialmente valioso para lógica compleja como el cálculo de trimestres fiscales, derivación de segmentos de cliente, o reglas de descuento por volumen. Antes de dbt 1.8 esto requería plugins externos. La diferencia clave con los tests de datos es que los unit tests prueban la LÓGICA del modelo, no la calidad de los datos en producción. Los tests de datos garantizan que order_id es always not_null en los datos reales. Los unit tests garantizan que la macro get_fiscal_quarter devuelve el trimestre correcto para una fecha dada. Son dos capas complementarias y ambas son necesarias en proyectos robustos. Ejecuta solo los unit tests con dbt test --select test_type:unit para no mezclarlos con los tests de datos de producción.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">10b · Unit Tests</span><h2 class="slide-h">Unit Tests nativos en dbt 1.8</h2></div>
+      <p class="slide-sub">Prueba la lógica SQL con datos mock en YAML. Sin conexión a BigQuery necesaria.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Fixtures de entrada en YAML</div><div class="step-desc">Filas mock definidas en YAML. Sin datos reales en BigQuery. Ciclo de dev mucho más rápido.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Outputs esperados</div><div class="step-desc">Define exactamente qué filas y columnas debe producir el modelo con esos fixtures.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">dbt test --select test_type:unit</div><div class="step-desc">Ejecuta solo unit tests. Sin materializar modelos ni procesar datos reales de producción.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Falla si hay diferencias</div><div class="step-desc">Cualquier columna que no coincida con el expected genera un FAIL con detalle preciso.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Dos capas de testing</b> — Unit tests prueban la LÓGICA (modelos). Tests de datos prueban la CALIDAD (producción). Son complementarios: ambos son necesarios en proyectos robustos.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># tests/unit/test_fiscal_quarter.yml</span><br>
+<span class="c-hl">unit_tests</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">test_fiscal_quarter_logic</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">model</span>: <span class="c-str">mart_revenue</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">given</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">input</span>: <span class="c-ref">ref(<span class="c-str">'int_orders_enriched'</span>)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">rows</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {order_date: <span class="c-str">'2024-04-01'</span>, amount_eur: <span class="c-num">1000</span>, status: <span class="c-str">'completed'</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {order_date: <span class="c-str">'2024-07-01'</span>, amount_eur: <span class="c-num">2000</span>, status: <span class="c-str">'completed'</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {order_date: <span class="c-str">'2024-01-15'</span>, amount_eur: <span class="c-num">500</span>,&nbsp;&nbsp;status: <span class="c-str">'cancelled'</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">expect</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">rows</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {fiscal_q: <span class="c-num">1</span>, revenue_eur: <span class="c-num">1000</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- {fiscal_q: <span class="c-num">2</span>, revenue_eur: <span class="c-num">2000</span>}<br>
+<br>
+<span class="c-cm"># Ejecutar solo unit tests:</span><br>
+$ <span class="c-hl">dbt test --select test_type:unit</span><br>
+<span class="c-cm"># cancelled excluido: WHERE status = 'completed'</span><br>
+<span class="c-cm"># ✅ 2 passed — lógica del trimestre verificada</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Macros reutilizables" data-script="Las macros de dbt son funciones Jinja que encapsulan lógica SQL reutilizable. Son la equivalent a las funciones en cualquier lenguaje de programación: defines la lógica una vez y la reutilizas en todos los modelos que la necesitan. Sin macros, si tienes que cambiar la lógica de cómo se calcula el trimestre fiscal, tienes que editar cincuenta modelos. Con una macro get_fiscal_quarter, editas un solo fichero. Las macros van en la carpeta macros barra y se definen con la sintaxis de Jinja: llave porcentaje macro nombre_macro parámetros porcentaje llave. Dentro de la macro escribes SQL o Jinja. Las macros pueden recibir parámetros, tener lógica condicional con if else, e incluso iterar con for. Yo tengo un conjunto de macros estándar en todos mis proyectos: get_fiscal_quarter para el trimestre fiscal, generate_surrogate_key para claves subrogadas, safe_divide para divisiones seguras, y cents_to_euros para conversión de moneda. Estas macros forman la base de código de cualquier proyecto nuevo.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">10 · Macros</span><h2 class="slide-h">Macros Jinja reutilizables</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">get_fiscal_quarter</div><div class="step-desc">Calcula el trimestre fiscal configurable. Inicio de año en cualquier mes.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">generate_surrogate_key</div><div class="step-desc">Clave subrogada MD5 de múltiples columnas. Para tablas sin PK natural.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">safe_divide</div><div class="step-desc">División segura con NULLIF. Evita division by zero en métricas de ratio.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">cents_to_euros</div><div class="step-desc">Conversión de céntimos a euros con precisión NUMERIC. Para sistemas legados.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Librería de macros</b> — Mantén un repo de macros estándar para todos tus proyectos. packages.yml permite instalar paquetes de macros de la comunidad dbt (dbt_utils, dbt_date).</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- macros/get_fiscal_quarter.sql</span><br>
+<span class="c-kw">{% macro</span> get_fiscal_quarter(date_col, start_month=<span class="c-num">4</span>) <span class="c-kw">%}</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">case</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">when</span> <span class="c-fn">extract</span>(month <span class="c-kw">from</span> <span class="c-ref">{{ date_col }}</span>) &gt;= <span class="c-ref">{{ start_month }}</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">then</span> <span class="c-fn">cast</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">ceil</span>((<span class="c-fn">extract</span>(month <span class="c-kw">from</span> <span class="c-ref">{{ date_col }}</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-ref">{{ start_month }}</span> + <span class="c-num">1.0</span>) / <span class="c-num">3</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> int64)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">else</span> <span class="c-fn">cast</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">ceil</span>((<span class="c-fn">extract</span>(month <span class="c-kw">from</span> <span class="c-ref">{{ date_col }}</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="c-num">12</span> - <span class="c-ref">{{ start_month }}</span> + <span class="c-num">1.0</span>) / <span class="c-num">3</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> int64)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">end</span><br>
+<span class="c-kw">{% endmacro %}</span><br>
+<br>
+<span class="c-cm">-- Uso en mart_revenue.sql:</span><br>
+<span class="c-kw">select</span> order_id,<br>
+&nbsp;&nbsp;<span class="c-ref">{{ get_fiscal_quarter(<span class="c-str">'order_date'</span>) }}</span> <span class="c-kw">as</span> fiscal_q<br>
+<span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'int_orders_enriched'</span>) }}</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-mid" data-title="Seeds para lookup tables" data-script="Los seeds de dbt son ficheros CSV que dbt carga automáticamente en BigQuery como tablas. Son perfectos para tablas de catálogo pequeñas que cambian poco: países con sus códigos ISO, categorías de productos, regiones geográficas, tasas de cambio históricas, o cualquier tabla de referencia que el negocio mantiene manualmente en un Excel. La ventaja sobre cargar el CSV manualmente en BigQuery es que el seed está versionado en Git junto con el resto del proyecto, y se carga o actualiza automáticamente con dbt seed. Yo uso seeds para todo lo que el equipo de negocio mantiene en un fichero y que no tiene sistema de origen. El límite es el tamaño: para ficheros de más de cien mil filas, prefiero usar una tabla real en BigQuery con un proceso de carga incremental, no un seed. Los seeds van en la carpeta seeds barra, con subcarpetas por dominio si tienes muchos. La configuración de tipos de datos y nombres de columnas va en el fichero dbt_project.yml bajo la clave seeds.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">11 · Seeds</span><h2 class="slide-h">Seeds para tablas de catálogo</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Versionado en Git</div><div class="step-desc">El CSV vive en el repo junto al SQL. Historial completo de cambios.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">dbt seed</div><div class="step-desc">Carga el CSV en BigQuery como tabla. Primera vez crea, siguientes actualiza.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">dbt seed --full-refresh</div><div class="step-desc">Recrea la tabla desde cero. Útil si cambia el esquema del CSV.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Referenciar con ref()</div><div class="step-desc">Los modelos usan ref('exchange_rates') igual que cualquier modelo.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.6rem"><b>Casos de uso ideales</b> — Tablas de divisas, calendarios fiscales, mapas de categorías, listas de países ISO, configuración de umbrales de negocio.</div>
+      <div class="warn-box" style="margin-top:.6rem"><b>Límite de tamaño</b> — Para ficheros de más de 100K filas usa una tabla BigQuery con carga incremental, no un seed. dbt seed no está optimizado para volúmenes grandes.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># seeds/finance/exchange_rates.csv</span><br>
+<span class="c-hl">currency_code,currency_name,rate_to_eur</span><br>
+<span class="c-str">USD,US Dollar,0.9200</span><br>
+<span class="c-str">GBP,British Pound,1.1700</span><br>
+<span class="c-str">BRL,Brazilian Real,0.1900</span><br>
+<span class="c-str">JPY,Japanese Yen,0.0061</span><br>
+<span class="c-str">MXN,Mexican Peso,0.0540</span><br>
+<br>
+<span class="c-cm"># dbt_project.yml — configuración de seeds</span><br>
+<span class="c-hl">seeds</span>:<br>
+&nbsp;&nbsp;<span class="c-hl">mi_proyecto</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">finance</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">exchange_rates</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+column_types</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">currency_code</span>: <span class="c-str">string</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">currency_name</span>: <span class="c-str">string</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">rate_to_eur</span>: <span class="c-str">float64</span><br>
+<br>
+<span class="c-cm"># Uso en modelos SQL:</span><br>
+<span class="c-cm"># from {{ ref('exchange_rates') }}</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Packages y dbt_utils" data-script="dbt tiene un ecosistema de packages que añaden funcionalidades al proyecto sin tener que escribir el código desde cero. Los packages se declaran en el fichero packages.yml en la raíz del proyecto y se instalan ejecutando dbt deps. El package más importante es dbt_utils, mantenido por dbt Labs. Yo lo instalo en todos mis proyectos porque incluye macros que resuelven problemas que de otro modo tendría que implementar manualmente. generate_surrogate_key crea una clave subrogada MD5 concatenando múltiples columnas, perfecta para fact tables sin clave natural. safe_divide hace divisiones evitando el error de dividir por cero usando NULLIF internamente. date_spine genera una secuencia continua de fechas entre dos puntos, imprescindible para detectar huecos en series temporales. union_relations hace un UNION ALL de múltiples tablas con el mismo esquema, útil para consolidar datos de múltiples orígenes. El segundo package que instalo es dbt_date, que añade funciones de calendario: trimestres fiscales, semanas laborales, conversión de formatos. La versión de los packages se fija explícitamente para garantizar reproducibilidad. Si el package actualiza su API sin que tú lo decidas, tu pipeline de CI/CD no se rompe de forma inesperada. La carpeta dbt_packages se añade siempre al .gitignore: se genera automáticamente con dbt deps, igual que node_modules en proyectos de JavaScript.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">12b · Packages</span><h2 class="slide-h">Packages y dbt_utils</h2></div>
+      <p class="slide-sub">El ecosistema de packages añade macros probadas sin escribir código desde cero.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">packages.yml + dbt deps</div><div class="step-desc">Declara packages con versión fija. dbt deps los instala en dbt_packages/. Nunca a Git.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">generate_surrogate_key</div><div class="step-desc">MD5 de múltiples columnas. Clave subrogada cuando no hay PK natural en la fact table.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">date_spine</div><div class="step-desc">Genera secuencia continua de fechas. Detecta huecos en series temporales sin gaps.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">audit_helper</div><div class="step-desc">Compara dos versiones de un modelo. Detecta diferencias antes de desplegar a producción.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>dbt_packages/ en .gitignore</b> — Nunca subas dbt_packages/ al repo. Se genera con dbt deps, igual que node_modules. Añade dbt_packages/ y target/ al .gitignore.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># packages.yml (raíz del proyecto)</span><br>
+<span class="c-hl">packages</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">package</span>: <span class="c-str">dbt-labs/dbt_utils</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">version</span>: [<span class="c-str">"&gt;=1.2.0"</span>, <span class="c-str">"&lt;2.0.0"</span>]<br>
+&nbsp;&nbsp;- <span class="c-kw">package</span>: <span class="c-str">calogica/dbt_date</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">version</span>: [<span class="c-str">"&gt;=0.10.0"</span>, <span class="c-str">"&lt;1.0.0"</span>]<br>
+&nbsp;&nbsp;- <span class="c-kw">package</span>: <span class="c-str">dbt-labs/audit_helper</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">version</span>: [<span class="c-str">"&gt;=0.9.0"</span>, <span class="c-str">"&lt;1.0.0"</span>]<br>
+<br>
+<span class="c-cm"># Instalar: $ dbt deps</span><br>
+<br>
+<span class="c-cm">-- Uso de dbt_utils en mart_revenue.sql</span><br>
+<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-ref">{{ dbt_utils.generate_surrogate_key([<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'order_id'</span>, <span class="c-str">'order_date'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;]) }}</span> <span class="c-kw">as</span> sk_order,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-ref">{{ dbt_utils.safe_divide(<span class="c-str">'revenue_eur'</span>, <span class="c-str">'order_count'</span>) }}</span> <span class="c-kw">as</span> avg_amount,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;order_date, country, segment<br>
+<span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'int_orders_enriched'</span>) }}</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Documentación automática" data-script="Una de las funcionalidades más potentes de dbt es la generación automática de documentación. Con dbt docs generate, dbt construye un sitio web estático con el catálogo completo del proyecto: todos los modelos, todas las columnas, todos los tests, y el grafo de dependencias interactivo que muestra cómo fluyen los datos desde las fuentes hasta los marts. El grafo de dependencias o lineage graph es especialmente valioso: de un vistazo puedes ver qué modelos de staging alimentan qué intermediate, y qué intermediate alimentan qué marts. Cuando un modelo falla en producción, el lineage te dice exactamente qué dashboards están afectados. Para servir la documentación localmente uso dbt docs serve, que levanta un servidor en el puerto ocho mil ochenta. En producción, genero la documentación en CI/CD y la subo a un bucket de Cloud Storage como sitio estático. Añadir descripciones a modelos y columnas se hace en el schema.yml con la clave description. Yo tengo como regla de equipo que ningún modelo puede ir a producción sin descripción en el schema.yml.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">12 · Docs</span><h2 class="slide-h">Documentación automática con dbt docs</h2></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="code"><span class="c-cm"># Generar catálogo JSON</span><br>
+$ <span class="c-hl">dbt docs generate</span><br>
+<br>
+<span class="c-cm"># Genera en target/:</span><br>
+<span class="c-str">catalog.json</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># Metadatos</span><br>
+<span class="c-str">manifest.json</span>&nbsp;&nbsp;<span class="c-cm"># DAG completo</span><br>
+<span class="c-str">index.html</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># Sitio web</span></div>
+      <div class="code"><span class="c-cm"># Servidor local doc</span><br>
+$ <span class="c-hl">dbt docs serve</span><br>
+<br>
+<span class="c-cm"># http://localhost:8080</span><br>
+<span class="c-cm"># Lineage interactivo</span><br>
+<span class="c-cm"># Catálogo de columnas</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <div style="background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.3);border-radius:4px;padding:6px 14px;font-family:var(--fm);font-size:.62rem;color:var(--blue2)">raw.orders</div>
+      <div style="color:rgba(255,255,255,.3);font-size:.9rem">→</div>
+      <div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:4px;padding:6px 14px;font-family:var(--fm);font-size:.62rem;color:#fbbf24">stg_orders</div>
+      <div style="color:rgba(255,255,255,.3);font-size:.9rem">→</div>
+      <div style="background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.3);border-radius:4px;padding:6px 14px;font-family:var(--fm);font-size:.62rem;color:var(--blue2)">int_orders_enriched</div>
+      <div style="color:rgba(255,255,255,.3);font-size:.9rem">→</div>
+      <div style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:4px;padding:6px 14px;font-family:var(--fm);font-size:.62rem;color:var(--green)">mart_revenue</div>
+      <div style="margin-left:1rem;color:rgba(255,255,255,.3);font-size:.75rem;font-family:var(--fm)">+ raw.customers → stg_customers ↗</div>
+    </div>
+    <div class="code" style="font-size:.62rem"><span class="c-cm"># models/marts/finance/schema.yml</span><br>
+<span class="c-hl">models</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">mart_revenue</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">description</span>: &gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">Métricas de ingresos diarios por país y segmento.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">Fuente de verdad para el dashboard Finance.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">Owner: equipo Analytics.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">columns</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">revenue_eur</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">description</span>: <span class="c-str">Ingresos totales en euros.</span></div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Modelos incrementales" data-script="Los modelos incrementales son la clave para trabajar con tablas de hechos grandes en BigQuery de forma eficiente. En vez de recalcular toda la tabla en cada ejecución, un modelo incremental solo procesa los datos nuevos o modificados desde la última ejecución. La configuración es simple: en el config del modelo especificas materializado igual a incremental, la columna unique_key para identificar filas de forma única, y la estrategia de merge. Dentro del modelo, el macro is_incremental cierra con paréntesis te permite filtrar solo los datos nuevos con un WHERE que compara la fecha de evento con el máximo ya cargado. En BigQuery yo uso la estrategia merge, que es la más robusta: si la fila ya existe, la actualiza; si no existe, la inserta. La primera ejecución siempre carga todos los datos como si fuera un full refresh. Las siguientes solo procesan el delta. Para forzar un full refresh puedes pasar la opción double dash full dash refresh a dbt run. Yo ejecuto full refresh una vez al mes en producción para garantizar la coherencia del historial.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">13 · Incremental</span><h2 class="slide-h">Modelos incrementales</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">materialized='incremental'</div><div class="step-desc">Solo procesa datos nuevos desde la última ejecución. Ideal para fact tables.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">unique_key</div><div class="step-desc">Columna(s) que identifican una fila de forma única. Se usa para el MERGE.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">is_incremental()</div><div class="step-desc">Macro que activa el filtro de delta solo en ejecuciones no-full-refresh.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">--full-refresh</div><div class="step-desc">Fuerza la reconstrucción completa. Ejecutar una vez al mes en producción.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Primera ejecución</b> — La primera vez que ejecutas un modelo incremental, dbt carga TODOS los datos (full refresh automático). Las siguientes solo el delta. BigQuery MERGE es transaccional.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/marts/fact_events_incremental.sql</span><br>
+<span class="c-ref">{{ config(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;materialized&nbsp;&nbsp;&nbsp;&nbsp; = <span class="c-str">'incremental'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unique_key&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <span class="c-str">'event_id'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;on_schema_change = <span class="c-str">'sync_all_columns'</span><br>
+) }}</span><br>
+<br>
+<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">cast</span>(event_timestamp <span class="c-kw">as</span> timestamp) <span class="c-kw">as</span> event_ts,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;session_id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;properties<br>
+<span class="c-kw">from</span> <span class="c-ref">{{ source(<span class="c-str">'raw'</span>, <span class="c-str">'events'</span>) }}</span><br>
+<br>
+<span class="c-kw">{% if</span> is_incremental() <span class="c-kw">%}</span><br>
+<span class="c-kw">where</span> event_timestamp &gt; (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">select</span> <span class="c-fn">max</span>(event_ts) <span class="c-kw">from</span> <span class="c-ref">{{ this }}</span><br>
+)<br>
+<span class="c-kw">{% endif %}</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-mid" data-title="Snapshots: historial SCD Type 2" data-script="Las snapshots de dbt resuelven uno de los problemas más comunes en data engineering: capturar el historial de cambios en tablas que se sobreescriben. Imagina una tabla de clientes donde el segmento puede cambiar de pequeño a enterprise. Sin snapshots, cuando el segmento cambia pierdes el historial: no puedes saber qué segmento tenía el cliente cuando hizo sus pedidos hace seis meses. Con snapshots, dbt implementa un Slowly Changing Dimension de tipo 2: cuando detecta un cambio en una fila, crea una nueva versión de esa fila con la fecha de inicio y la fecha de fin del periodo de validez. La snapshot más simple usa la estrategia timestamp: dbt compara el campo updated_at de la tabla fuente con el que ya tiene almacenado, y actualiza solo las filas que han cambiado. La estrategia check es más potente: compara el valor actual de columnas específicas con el histórico, aunque la tabla fuente no tenga campo updated_at. Las snapshots van en la carpeta snapshots con extensión .sql y se ejecutan con dbt snapshot. Una advertencia importante: las snapshots capturan el estado de la tabla en el momento de ejecución. Si no ejecutas dbt snapshot durante tres días, perderás los cambios intermedios. En producción las ejecuto al menos una vez al día.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14b · Snapshots</span><h2 class="slide-h">Snapshots: historial SCD Type 2</h2></div>
+      <p class="slide-sub">Captura el historial de cambios en tablas que se sobreescriben. SCD2 con dbt.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">dbt snapshot</div><div class="step-desc">Ejecuta todas las snapshots. Primera vez crea la tabla. Siguientes añaden historial.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Estrategia timestamp</div><div class="step-desc">Compara el campo updated_at. Eficiente para tablas con timestamp de modificación.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Estrategia check</div><div class="step-desc">Compara columnas específicas. Funciona sin campo updated_at en la tabla fuente.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">dbt_valid_from / dbt_valid_to</div><div class="step-desc">Metadatos generados automáticamente. dbt_valid_to = NULL indica el registro activo.</div></div></div>
+      </div>
+      <div class="warn-box" style="margin-top:.8rem"><b>⚠️ Frecuencia de ejecución</b> — Las snapshots capturan el estado en el momento de correr. Si no ejecutas dbt snapshot durante 3 días, perderás los cambios intermedios. Ejecútalas mínimo una vez al día.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- snapshots/customers_snapshot.sql</span><br>
+<span class="c-kw">{% snapshot</span> customers_snapshot <span class="c-kw">%}</span><br>
+<br>
+<span class="c-ref">{{ config(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;target_schema = <span class="c-str">'snapshots'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unique_key&nbsp;&nbsp;&nbsp; = <span class="c-str">'customer_id'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;strategy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <span class="c-str">'timestamp'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;updated_at&nbsp;&nbsp;&nbsp; = <span class="c-str">'updated_at'</span><br>
+) }}</span><br>
+<br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ source(<span class="c-str">'raw'</span>, <span class="c-str">'customers'</span>) }}</span><br>
+<br>
+<span class="c-kw">{% endsnapshot %}</span><br>
+<br>
+<span class="c-cm">-- Resultado en snapshots.customers_snapshot:</span><br>
+<span class="c-cm">-- customer_id | segment    | dbt_valid_from | dbt_valid_to</span><br>
+<span class="c-cm">-- 101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | small      | 2024-01-01     | 2024-06-15</span><br>
+<span class="c-cm">-- 101&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | enterprise | 2024-06-15     | NULL  ← activo</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Variables y env_var()" data-script="Las variables de dbt permiten parametrizar los modelos para comportarse de forma diferente según el entorno o los argumentos de ejecución. Hay dos tipos principales: las variables de proyecto definidas en dbt_project.yml y las variables de entorno accedidas con env_var. Las variables de proyecto son útiles para configuración que varía entre ejecuciones: fechas de backfill, umbrales de negocio configurables, flags de feature. Se definen en el bloque vars de dbt_project.yml y se acceden en los modelos con la macro var. Si quieres sobreescribir el valor en tiempo de ejecución, pasas --vars como argumento al comando dbt. La función env_var accede a las variables de entorno del sistema operativo, ideal para credenciales, endpoints de API, o configuración sensible que no puede ir en el repositorio Git. En producción defino las variables de entorno como secrets en GitHub Actions. target.name es otra variable especial que contiene el entorno activo: dev, staging o prod. Yo la uso para aplicar filtros de fecha diferentes en desarrollo, procesando solo los últimos treinta días en vez del histórico completo. Esta técnica reduce drásticamente el coste de BigQuery durante el desarrollo: en vez de procesar dos años de datos, procesas solo un mes.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14c · Variables</span><h2 class="slide-h">Variables y env_var()</h2></div>
+      <p class="slide-sub">Parametriza modelos por entorno. Misma lógica, distinto comportamiento en dev vs prod.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">var() en dbt_project.yml</div><div class="step-desc">Variables con valores por defecto. Sobreescribibles con --vars en CLI o CI/CD.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">env_var()</div><div class="step-desc">Variables de entorno del SO. Para secrets y configuración sensible. Nunca a Git.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">target.name</div><div class="step-desc">Nombre del entorno activo: dev / staging / prod. Para condicionar lógica por entorno.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Coste reducido en dev</div><div class="step-desc">Filtra los últimos 30 días en dev. Misma lógica, 95% menos datos escaneados en BigQuery.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Segundo parámetro de env_var()</b> — env_var acepta un valor por defecto: env_var('SLACK_WEBHOOK', ''). Si la variable no existe, usa el default en vez de lanzar un error. Muy útil para desarrollo local.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># dbt_project.yml</span><br>
+<span class="c-hl">vars</span>:<br>
+&nbsp;&nbsp;<span class="c-kw">start_date</span>: <span class="c-str">'2020-01-01'</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># override: --vars</span><br>
+&nbsp;&nbsp;<span class="c-kw">enable_new_feature</span>: <span class="c-kw">false</span><br>
+&nbsp;&nbsp;<span class="c-kw">slack_url</span>: <span class="c-ref">{{ env_var(<span class="c-str">'SLACK_WEBHOOK'</span>, <span class="c-str">''</span>) }}</span><br>
+<br>
+<span class="c-cm">-- models/marts/mart_revenue.sql</span><br>
+<span class="c-kw">select</span> * <span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'int_orders_enriched'</span>) }}</span><br>
+<span class="c-kw">where</span> order_date &gt;= <span class="c-str">'</span><span class="c-ref">{{ var(<span class="c-str">"start_date"</span>) }}</span><span class="c-str">'</span><br>
+<br>
+<span class="c-cm">-- En dev: procesar solo últimos 30 días</span><br>
+<span class="c-kw">{% if</span> target.name == <span class="c-str">'dev'</span> <span class="c-kw">%}</span><br>
+&nbsp;&nbsp;<span class="c-kw">and</span> order_date &gt;= <span class="c-fn">date_sub</span>(<span class="c-fn">current_date</span>(), interval <span class="c-num">30</span> day)<br>
+<span class="c-kw">{% endif %}</span><br>
+<br>
+<span class="c-cm"># CLI: sobreescribir variable</span><br>
+$ dbt run <span class="c-hl">--vars</span> <span class="c-str">'{"start_date": "2024-01-01"}'</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Tags y selectors" data-script="A medida que el proyecto crece y tienes cincuenta o cien modelos, necesitas herramientas para ejecutar subconjuntos de forma controlada. Los tags de dbt son etiquetas que asignas a modelos, tests o seeds para agruparlos. Asignar el tag daily a los modelos que deben ejecutarse cada día y weekly a los semanales te permite lanzar dbt run --select tag:daily para ejecutar solo el pipeline diario, sin tocar los semanales. El operador --select de dbt es extremadamente potente: puedes seleccionar por nombre de modelo, por path, por tag, por tipo de materialización, o usando los operadores de grafo. El signo más delante del nombre del modelo selecciona todos sus ancestors upstream. El signo más detrás selecciona todos sus descendants downstream. Esta granularidad es imprescindible en producción cuando necesitas re-ejecutar solo una parte del pipeline después de un fallo. Si mart_revenue falla, ejecutas dbt run --select +mart_revenue para recalcular mart_revenue y todos los modelos que dependen de él, sin re-ejecutar los modelos no relacionados. El selector state:modified selecciona solo los modelos que han cambiado en el último commit, lo que es ideal para CI/CD incremental: en vez de ejecutar todo el proyecto en cada pull request, solo ejecutas los modelos que realmente cambiaron.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14d · Selectors</span><h2 class="slide-h">Tags y selectors avanzados</h2></div>
+      <p class="slide-sub">Ejecuta subconjuntos del pipeline con precisión. Imprescindible en proyectos grandes.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Tags por capa en dbt_project.yml</div><div class="step-desc">+tags: ['daily', 'finance'] en staging, intermediate, marts. Agrupa por frecuencia y dominio.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">+modelo (upstream)</div><div class="step-desc">Ejecuta el modelo más todos sus ancestors. Para reconstruir desde la fuente.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">modelo+ (downstream)</div><div class="step-desc">Ejecuta el modelo más todos los que dependen de él. Para propagar un cambio.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">state:modified+</div><div class="step-desc">Solo modelos modificados en el último commit más su downstream. CI/CD incremental.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>CI/CD incremental</b> — dbt run --select state:modified+ en el pipeline de PR ejecuta solo los modelos afectados por el cambio. Reduce el tiempo de CI de 15 minutos a 2 minutos en proyectos grandes.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># dbt_project.yml — tags por capa</span><br>
+<span class="c-hl">models</span>:<br>
+&nbsp;&nbsp;<span class="c-hl">mi_proyecto</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">staging</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+tags</span>: [<span class="c-str">'staging'</span>, <span class="c-str">'bronze'</span>, <span class="c-str">'daily'</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">intermediate</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+tags</span>: [<span class="c-str">'silver'</span>, <span class="c-str">'daily'</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">marts</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">finance</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+tags</span>: [<span class="c-str">'gold'</span>, <span class="c-str">'finance'</span>, <span class="c-str">'daily'</span>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-hl">operations</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">+tags</span>: [<span class="c-str">'gold'</span>, <span class="c-str">'ops'</span>, <span class="c-str">'weekly'</span>]<br>
+<br>
+<span class="c-cm"># CLI — selectors clave:</span><br>
+$ dbt run <span class="c-hl">--select tag:daily</span><br>
+$ dbt run <span class="c-hl">--select +mart_revenue</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># + upstream</span><br>
+$ dbt run <span class="c-hl">--select mart_revenue+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># downstream +</span><br>
+$ dbt run <span class="c-hl">--select state:modified+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># solo cambios</span><br>
+$ dbt test <span class="c-hl">--select staging</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># tests de capa</span><br>
+$ dbt run <span class="c-hl">--exclude tag:weekly</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># excluir</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Optimización en BigQuery" data-script="BigQuery cobra por datos escaneados, no por tiempo de ejecución. Eso significa que la optimización en BigQuery es directamente reducción de coste. Las dos técnicas más efectivas son el particionado y el clustering. El particionado divide la tabla en segmentos físicos basados en un campo de fecha, de modo que cuando filtras por fecha BigQuery solo escanea la partición correspondiente. Una tabla de mil millones de filas particionada por día, al filtrar por una semana, escanea solo siete de los trescientos sesenta y cinco particiones. El clustering ordena los datos físicamente dentro de cada partición por las columnas que usas como filtro más frecuentemente, reduciendo aún más el volumen escaneado. En dbt, la configuración de particionado y clustering va directamente en el bloque config del modelo. Para los modelos mart de producción, siempre configuro partition_by en la columna de fecha principal y cluster_by en las dos o tres columnas por las que más se filtra en los dashboards. Esta combinación puede reducir el coste de consulta entre un ochenta y un noventa y cinco por ciento en tablas grandes.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">14 · Optimización</span><h2 class="slide-h">Optimización en BigQuery</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">partition_by</div><div class="step-desc">Segmentos físicos por fecha. Solo escanea las particiones del rango filtrado.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">cluster_by</div><div class="step-desc">Ordena físicamente por columnas de filtro frecuente. Reduce scan dentro de la partición.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">BigQuery cobra por scan</div><div class="step-desc">5 USD por TB. Particionado + clustering reduce 80-95% el scan en tablas grandes.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Cuándo aplicar</div><div class="step-desc">Siempre en modelos mart con más de 100M filas. Impacto directo en factura GCP.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Ahorro real</b> — En tablas de 1B filas, partition_by + cluster_by puede reducir el coste de consulta de 50 USD a menos de 1 USD por ejecución. ROI inmediato en producción.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm">-- models/marts/finance/mart_revenue_optimized.sql</span><br>
+<span class="c-ref">{{ config(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;materialized = <span class="c-str">'table'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;partition_by = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'field'</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : <span class="c-str">'order_date'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'data_type'</span>&nbsp;&nbsp; : <span class="c-str">'date'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'granularity'</span> : <span class="c-str">'day'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cluster_by = [<span class="c-str">'country'</span>, <span class="c-str">'segment'</span>, <span class="c-str">'category'</span>],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;labels = {<span class="c-str">'env'</span>: <span class="c-str">'prod'</span>, <span class="c-str">'team'</span>: <span class="c-str">'finance'</span>}<br>
+) }}</span><br>
+<br>
+<span class="c-kw">select</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;order_date, country, segment, category,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">sum</span>(amount_eur)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">as</span> revenue_eur,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-fn">count</span>(<span class="c-kw">distinct</span> order_id) <span class="c-kw">as</span> order_count<br>
+<span class="c-kw">from</span> <span class="c-ref">{{ ref(<span class="c-str">'int_orders_enriched'</span>) }}</span><br>
+<span class="c-kw">where</span> status = <span class="c-str">'completed'</span><br>
+<span class="c-kw">group by</span> <span class="c-num">1</span>, <span class="c-num">2</span>, <span class="c-num">3</span>, <span class="c-num">4</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="CI/CD con dbt" data-script="Un proyecto dbt sin CI/CD es un proyecto que acaba rompiendo producción. El pipeline de CI/CD garantiza que cada cambio en el código pasa por un conjunto de validaciones automáticas antes de llegar al entorno de producción. El flujo que yo implemento tiene cuatro etapas. Primera, en cada pull request se ejecuta dbt build en el entorno de staging, que materializa todos los modelos modificados y ejecuta todos sus tests. Si algo falla, el PR no puede mergearse. Segunda, en el merge a main se ejecuta el mismo dbt build pero en producción con los datos reales. Tercera, de forma programada, normalmente cada hora durante el horario de negocio, se ejecuta dbt run más dbt test en producción para detectar problemas de calidad de datos en los datos entrantes. Cuarta, si algún test falla en producción, se envía una alerta a Slack o email. Esto es exactamente el pipeline que tengo en producción para mis clientes. GitHub Actions es mi herramienta de CI/CD preferida para proyectos dbt: es gratis para repositorios públicos, tiene buena integración con GCP, y el fichero de workflow es suficientemente expresivo para este caso de uso.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">15 · CI/CD</span><h2 class="slide-h">CI/CD con GitHub Actions</h2></div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:1.5rem;flex:1">
+      <div class="code" style="font-size:.62rem;overflow:auto"><span class="c-cm"># .github/workflows/dbt-ci.yml</span><br>
+<span class="c-hl">name</span>: <span class="c-str">dbt CI/CD Pipeline</span><br>
+<span class="c-hl">on</span>:<br>
+&nbsp;&nbsp;<span class="c-kw">pull_request</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">branches</span>: [<span class="c-str">main</span>]<br>
+&nbsp;&nbsp;<span class="c-kw">push</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">branches</span>: [<span class="c-str">main</span>]<br>
+&nbsp;&nbsp;<span class="c-kw">schedule</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">cron</span>: <span class="c-str">'0 * * * *'</span><br>
+<span class="c-hl">jobs</span>:<br>
+&nbsp;&nbsp;<span class="c-hl">dbt-build</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">runs-on</span>: <span class="c-str">ubuntu-latest</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">steps</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">uses</span>: <span class="c-str">actions/checkout@v4</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">uses</span>: <span class="c-str">actions/setup-python@v5</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">with</span>: {python-version: <span class="c-str">'3.11'</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">Install dbt</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">run</span>: <span class="c-str">pip install dbt-bigquery==1.8.*</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">Write profiles</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">run</span>: <span class="c-str">mkdir -p ~/.dbt &amp;&amp; echo "$DBT_PROFILES" &gt; ~/.dbt/profiles.yml</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">env</span>: {DBT_PROFILES: <span class="c-ref">secrets.DBT_PROFILES</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">dbt build</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">run</span>: <span class="c-str">dbt build --target prod --threads 8</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">env</span>: {GCP_SA_KEY: <span class="c-ref">secrets.GCP_SA_KEY</span>}</div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">PR: dbt build en staging</div><div class="step-desc">Cada pull request ejecuta dbt build completo en el entorno de staging.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Merge a main: dbt build en prod</div><div class="step-desc">Al mergear, dbt build con los datos reales de producción.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Ejecución programada</div><div class="step-desc">Cada hora en horario de negocio, dbt run + dbt test en producción.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Alertas</div><div class="step-desc">Si un test falla en producción, alerta inmediata a Slack o email.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-mid" data-title="Airflow + dbt en producción" data-script="En producción, dbt necesita un orquestador que lo ejecute de forma programada, gestione reintentos, alerte en fallos y mantenga el historial de ejecuciones. Apache Airflow es el estándar del sector para esto. Hay dos formas de integrar dbt con Airflow. La primera es usar BashOperator con comandos dbt run y dbt test directamente. Es la más sencilla y la que uso cuando el proyecto dbt ya está probado y solo necesito orquestación básica. La segunda es usar el provider astronomer-cosmos, que convierte cada modelo dbt en una tarea individual de Airflow con el DAG de dependencias completo visible en la UI. Esta segunda opción da mucha más granularidad: si falla un modelo específico, Airflow puede reintentar solo ese modelo sin re-ejecutar todo el pipeline. El DAG que implemento en producción tiene cuatro tareas secuenciales: primero dbt source freshness para verificar que los datos del origen están actualizados, segundo dbt run para materializar los modelos, tercero dbt test para ejecutar todos los tests, y cuarto una función de alerta si cualquier tarea falla. Toda la orquestación usa variables de entorno para las credenciales, con retries con backoff exponencial para gestionar errores transitorios de red. Nunca ejecuto dbt directamente en producción con el scheduling de dbt Cloud si puedo usar Airflow, porque Airflow me da mucho más control y visibilidad sobre el pipeline completo.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">16b · Airflow</span><h2 class="slide-h">Airflow + dbt en producción</h2></div>
+      <p class="slide-sub">Orquesta dbt con Airflow para pipelines robustos con alertas y reintentos automáticos.</p>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">BashOperator básico</div><div class="step-desc">dbt run + dbt test en tareas secuenciales. Setup en minutos. Ideal para proyectos simples.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">astronomer-cosmos</div><div class="step-desc">Cada modelo dbt = tarea Airflow individual. Granularidad total. Retry por modelo.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">dbt source freshness primero</div><div class="step-desc">Verifica que los datos origen están actualizados antes de materializar. Falla rápido.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Retries con backoff</div><div class="step-desc">retries=2, retry_delay=5min. Para errores transitorios de red o BigQuery API.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Airflow vs dbt Cloud</b> — dbt Cloud tiene su propio scheduler. Si ya tienes Airflow en tu stack, úsalo para dbt también. Centraliza la orquestación y el monitoring en un solo lugar.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># dags/dbt_medallion_pipeline.py</span><br>
+<span class="c-kw">from</span> airflow <span class="c-kw">import</span> DAG<br>
+<span class="c-kw">from</span> airflow.operators.bash <span class="c-kw">import</span> BashOperator<br>
+<span class="c-kw">from</span> datetime <span class="c-kw">import</span> datetime, timedelta<br>
+<br>
+<span class="c-kw">with</span> DAG(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dag_id&nbsp;&nbsp;&nbsp;&nbsp; = <span class="c-str">'dbt_medallion'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_date = datetime(<span class="c-num">2024</span>, <span class="c-num">1</span>, <span class="c-num">1</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;schedule&nbsp;&nbsp; = <span class="c-str">'0 6 * * *'</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-cm"># 6:00 cada día</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;catchup&nbsp;&nbsp;&nbsp; = <span class="c-kw">False</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;default_args = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'retries'</span>: <span class="c-num">2</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'retry_delay'</span>: timedelta(minutes=<span class="c-num">5</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">'on_failure_callback'</span>: send_slack_alert<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}) <span class="c-kw">as</span> dag:<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;freshness = BashOperator(task_id=<span class="c-str">'source_freshness'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bash_command=<span class="c-str">'dbt source freshness --target prod'</span>)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;run = BashOperator(task_id=<span class="c-str">'dbt_run'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bash_command=<span class="c-str">'dbt run --target prod --tag daily'</span>)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;test = BashOperator(task_id=<span class="c-str">'dbt_test'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bash_command=<span class="c-str">'dbt test --target prod --tag daily'</span>)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;freshness &gt;&gt; run &gt;&gt; test</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-dark" data-title="Exposures y métricas" data-script="Los exposures de dbt son una funcionalidad poco conocida pero muy valiosa en proyectos grandes. Un exposure es un fichero YAML que declara qué dashboards, reportes o APIs consumen qué modelos dbt. Cuando defines un exposure, dbt incluye ese dashboard en el grafo de dependencias, de modo que al mirar el lineage de un modelo puedo ver no solo qué modelos downstream dependen de él, sino también qué dashboards de negocio se verían afectados si ese modelo cambia. Esto es especialmente valioso cuando necesito refactorizar un modelo: antes de hacer cualquier cambio, miro el exposure del modelo para saber exactamente qué dashboards tengo que validar después. Los exposures se definen en ficheros exposures.yml dentro de la carpeta models, con metadatos como el nombre del dashboard, el tipo de herramienta, la URL, el owner, y los modelos que consume. Yo creo un exposure por cada dashboard de Power BI, Looker o Metabase que consume datos de dbt. Es documentación viva que el equipo de negocio también puede consultar.">
+  <div class="grid-bg"></div>
+  <div class="two-col">
+    <div class="col-l">
+      <div class="sh-row"><span class="chip">16 · Exposures</span><h2 class="slide-h">Exposures: documentar consumidores</h2></div>
+      <div class="step-list">
+        <div class="step"><div class="step-n">01</div><div class="step-body"><div class="step-title">Declarar dashboards</div><div class="step-desc">Cada dashboard Power BI o Looker tiene su exposure YAML.</div></div></div>
+        <div class="step"><div class="step-n">02</div><div class="step-body"><div class="step-title">Aparecer en lineage</div><div class="step-desc">El dashboard aparece en el DAG de dbt docs, conectado a sus modelos.</div></div></div>
+        <div class="step"><div class="step-n">03</div><div class="step-body"><div class="step-title">Saber el impacto</div><div class="step-desc">Antes de refactorizar un modelo, revisa qué exposures dependen de él.</div></div></div>
+        <div class="step"><div class="step-n">04</div><div class="step-body"><div class="step-title">Documentación viva</div><div class="step-desc">El equipo de negocio consulta los exposures para saber de dónde vienen sus datos.</div></div></div>
+      </div>
+      <div class="tip-box" style="margin-top:.8rem"><b>Impacto analysis</b> — Con los exposures definidos, cuando vas a cambiar mart_revenue puedes ver de inmediato qué dashboards de Power BI o Looker necesitan validación. Evita sorpresas en producción.</div>
+    </div>
+    <div class="col-r">
+      <div class="code"><span class="c-cm"># models/exposures.yml</span><br>
+<span class="c-hl">version</span>: <span class="c-num">2</span><br>
+<span class="c-hl">exposures</span>:<br>
+&nbsp;&nbsp;- <span class="c-kw">name</span>: <span class="c-str">dashboard_ventas_powerbi</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">type</span>: <span class="c-str">dashboard</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">maturity</span>: <span class="c-str">high</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">url</span>: <span class="c-str">https://app.powerbi.com/groups/...</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">description</span>: &gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">Dashboard principal de ventas.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-str">Actualizado cada hora via pipeline dbt.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">owner</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">name</span>: <span class="c-str">Equipo Analytics</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">email</span>: <span class="c-str">analytics@empresa.com</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">depends_on</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-ref">ref(<span class="c-str">'mart_revenue'</span>)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-ref">ref(<span class="c-str">'mart_customers'</span>)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="c-ref">ref(<span class="c-str">'mart_products'</span>)</span></div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-darker" data-title="Errores comunes" data-script="Después de varios años usando dbt en producción he visto los mismos errores repetirse. El primero es no usar el bloque config y dejar la materialización como view para todos los modelos incluyendo los marts. Los marts deben ser tablas, no vistas, para que las consultas de los dashboards sean rápidas. El segundo es usar source en vez de ref para referenciar modelos dbt. Si referencias un modelo dbt con source, dbt no ve esa dependencia y el DAG quedará roto con posibles ejecuciones fuera de orden. El tercero es la ambiguous column error: cuando en un join tienes una columna con el mismo nombre en las dos tablas y no especificas el alias de tabla. La solución es siempre usar alias explícitos en todos los joins. El cuarto es el relation not found: intentar usar ref de un modelo que aún no se ha ejecutado en el entorno. Esto ocurre cuando haces dbt run de un modelo concreto sin ejecutar sus dependencias. Usa siempre la opción double dash select más el signo más para incluir dependencias. El quinto es no ejecutar dbt test después de dbt run. El run no ejecuta los tests. Siempre dbt build en vez de dbt run si quieres materializar y testear en un solo comando.">
+  <div class="grid-bg"></div>
+  <div class="full-inner">
+    <div class="sh-row"><span class="chip">17 · Errores</span><h2 class="slide-h">5 errores comunes en dbt</h2></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;flex:1">
+      <div class="warn-box"><b>01 Marts como VIEW</b><br>Los marts materializados como view hacen que el dashboard ejecute la query completa en cada carga. Siempre +materialized: table en marts.</div>
+      <div class="warn-box"><b>02 source() para modelos dbt</b><br>Usar source() para referenciar un modelo dbt rompe el DAG. dbt no ve la dependencia. Siempre ref() para modelos dbt.</div>
+      <div class="warn-box"><b>03 Ambiguous column</b><br>JOIN sin alias de tabla genera 'ambiguous column'. Siempre usa alias explícitos: o.order_id, c.customer_name.</div>
+      <div class="warn-box"><b>04 Relation not found</b><br>Ejecutar dbt run --select mi_modelo sin sus deps. Usa dbt run --select +mi_modelo para incluir dependencias upstream.</div>
+      <div class="warn-box"><b>05 dbt run sin dbt test</b><br>dbt run NO ejecuta los tests. Para materializar y testear en un paso: dbt build. Siempre dbt build en CI/CD.</div>
+      <div class="tip-box"><b>Regla de oro</b> — Usa siempre dbt build en lugar de dbt run. Materializa, testa y documenta en un solo comando. Si un test falla, el build se detiene antes de llegar a los marts.</div>
+    </div>
+  </div>
+</div>
+<div class="slide bg-navy" data-title="Cierre" data-script="Y con esto cerramos el tutorial. Has aprendido a construir una arquitectura Medallion completa con dbt y BigQuery desde cero hasta producción. Tienes el proyecto dbt configurado con las tres capas Bronze, Silver y Gold, los modelos de staging que normalizan los datos crudos, los intermediate que aplican la lógica de negocio, y los marts optimizados con particionado y clustering para consultas eficientes en BigQuery. Has implementado tests genéricos y custom que validan la calidad de datos en cada capa, macros reutilizables para encapsular lógica de negocio, seeds para las tablas de catálogo, documentación automática con el lineage graph, modelos incrementales para procesar solo los datos nuevos, y un pipeline de CI/CD con GitHub Actions. Esto es exactamente la arquitectura que yo despliego en proyectos de producción para empresas que mueven millones de registros al día. Si te ha resultado útil, compártelo con tu equipo de datos. En dataflujo.com tienes el código completo descargable, y si necesitas implementar esta arquitectura en tu empresa con soporte experto, escríbeme.">
+  <div class="accent-blob" style="right:-120px;top:-120px;width:700px;height:700px;background:radial-gradient(circle,rgba(16,185,129,.18) 0%,transparent 70%)"></div>
+  <div class="accent-blob" style="left:-100px;bottom:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 70%)"></div>
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:center;height:calc(100% - 56px);text-align:center;padding:0 8vw">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem">
+      <span style="width:40px;height:2px;background:var(--green);display:inline-block"></span>
+      <span style="font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green)">Fin del Tutorial 03</span>
+      <span style="width:40px;height:2px;background:var(--green);display:inline-block"></span>
+    </div>
+    <h2 style="font-family:var(--fe);font-size:clamp(2rem,4vw,3.5rem);font-weight:900;color:#fff;line-height:1.1;margin-bottom:1.2rem">¿Listo para llevar tus datos a <em style="color:var(--green);font-style:normal">producción?</em></h2>
+    <p style="font-family:var(--fc);font-size:1rem;color:var(--t-dim);max-width:520px;line-height:1.85;margin-bottom:2rem">Has construido una arquitectura Medallion completa con dbt Core 1.8 y BigQuery. Bronze, Silver y Gold, unit tests, packages, snapshots SCD2, variables, selectors, documentación automática, modelos incrementales, Airflow y CI/CD con GitHub Actions.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:2rem">
+      <a href="#" style="background:#2563eb;color:#fff;font-family:var(--fd);font-size:.75rem;font-weight:700;padding:10px 24px;border-radius:3px;text-decoration:none;letter-spacing:.06em">Ver código en GitHub →</a>
+      <a href="../blog.html" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);font-family:var(--fd);font-size:.75rem;font-weight:700;padding:10px 24px;border-radius:3px;text-decoration:none">Leer el blog →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-n">26</div><div class="hs-l">Secciones</div></div>
+      <div class="hs"><div class="hs-n">75min</div><div class="hs-l">Duración</div></div>
+      <div class="hs"><div class="hs-n">.sql</div><div class="hs-l">Descargable</div></div>
+    </div>
+    <div class="hero-divider"></div>
+    <div style="font-family:var(--fd);font-size:.62rem;color:var(--t-faint);letter-spacing:.06em">dataflujo.com · a.morodiaz@hotmail.com · Madrid, España · Remote OK</div>
+  </div>
+</div>
+</div>
+<div class="tts-bar" id="ttsBar"><div class="tts-prog" id="ttsProg"></div></div>
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-counter" id="counter">01 / 20</div>
+    <div class="nav-title" id="navTitle"></div>
+  </div>
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="nbtn nbtn-tts" id="ttsBtn" onclick="toggleTTS()" title="Narrar con voz (Barra espaciadora)">🎙️ Narrar</button>
+    <button class="nbtn nbtn-auto" id="autoBtn" onclick="toggleAuto()" title="Auto-play: avanza slide al terminar de narrar">▶ Auto</button>
+    <button class="nbtn nbtn-prev" onclick="go(-1)">← Ant.</button>
+    <button class="nbtn nbtn-next" onclick="go(1)">Sig. →</button>
+  </div>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+let ttsOn = false;
+let autoOn = false;
+
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+  const pct = (cur+1)/total*100;
+  document.getElementById('prog').style.width = pct+'%';
+  document.getElementById('counter').textContent = String(cur+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+  document.getElementById('navTitle').textContent = slides[cur].dataset.title || '';
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  document.getElementById('spTitle').textContent = slides[cur].dataset.title || '';
+  document.getElementById('spText').textContent = slides[cur].dataset.script || '';
+  const btn = document.getElementById('spCopy');
+  btn.textContent = '📋 Copiar guión de esta slide';
+  btn.classList.remove('ok');
+}
+
+function go(d){
+  stopTTS();
+  cur = Math.max(0, Math.min(total-1, cur+d));
+  render();
+  if(autoOn) setTimeout(()=>speakCurrent(autoNext), 700);
+}
+
+function hasTTS(){ return 'speechSynthesis' in window; }
+
+function speakCurrent(onEnd){
+  if(!hasTTS()){ alert('TTS no disponible. Usa Chrome o Edge.'); return; }
+  const text = slides[cur].dataset.script || '';
+  if(!text){ if(onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.93;
+  const voices = window.speechSynthesis.getVoices();
+  const v = voices.find(v=>v.lang==='es-ES') || voices.find(v=>v.lang.startsWith('es'));
+  if(v) u.voice = v;
+  u.onstart = ()=>{ ttsOn=true; updateTTSBtn(); showTTSBar(); };
+  u.onend   = ()=>{ ttsOn=false; updateTTSBtn(); hideTTSBar(); if(onEnd) onEnd(); };
+  u.onerror = ()=>{ ttsOn=false; updateTTSBtn(); hideTTSBar(); };
+  window.speechSynthesis.speak(u);
+}
+
+function stopTTS(){
+  window.speechSynthesis.cancel();
+  ttsOn=false;
+  updateTTSBtn();
+  hideTTSBar();
+}
+
+function toggleTTS(){
+  if(ttsOn){ stopTTS(); return; }
+  speakCurrent(null);
+}
+
+function updateTTSBtn(){
+  const b=document.getElementById('ttsBtn');
+  if(!b) return;
+  if(ttsOn){ b.textContent='⏹ Parar'; b.classList.add('stop'); }
+  else     { b.textContent='🎙️ Narrar'; b.classList.remove('stop'); }
+}
+
+function showTTSBar(){
+  const bar=document.getElementById('ttsBar');
+  const prog=document.getElementById('ttsProg');
+  if(!bar||!prog) return;
+  bar.classList.add('active');
+  prog.style.transition='none'; prog.style.width='0%';
+  const words=(slides[cur].dataset.script||'').split(/\s+/).length;
+  const ms=Math.max(3000,(words/130)*60000/0.93);
+  setTimeout(()=>{ prog.style.transition=`width ${ms}ms linear`; prog.style.width='100%'; },50);
+}
+function hideTTSBar(){
+  const bar=document.getElementById('ttsBar');
+  const prog=document.getElementById('ttsProg');
+  if(!bar||!prog) return;
+  bar.classList.remove('active');
+  prog.style.transition='none'; prog.style.width='0%';
+}
+
+function autoNext(){
+  if(!autoOn) return;
+  if(cur < total-1){
+    cur++;
+    render();
+    setTimeout(()=>speakCurrent(autoNext), 700);
+  } else {
+    autoOn=false;
+    updateAutoBtn();
+  }
+}
+
+function toggleAuto(){
+  autoOn=!autoOn;
+  updateAutoBtn();
+  if(autoOn){ speakCurrent(autoNext); }
+  else      { stopTTS(); }
+}
+
+function updateAutoBtn(){
+  const b=document.getElementById('autoBtn');
+  if(!b) return;
+  if(autoOn){ b.textContent='⏹ Stop Auto'; b.classList.add('on'); }
+  else      { b.textContent='▶ Auto'; b.classList.remove('on'); }
+}
+
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i)=>{
+  const b = document.createElement('button');
+  b.className='dot';
+  b.title = slides[i].dataset.title || '';
+  b.onclick=()=>{ stopTTS(); autoOn=false; updateAutoBtn(); cur=i; render(); };
+  dotsEl.appendChild(b);
+});
+
+document.getElementById('scriptToggle').onclick=()=>{
+  document.getElementById('scriptPanel').classList.toggle('open');
+};
+
+document.getElementById('spCopy').onclick=function(){
+  navigator.clipboard.writeText(document.getElementById('spText').textContent).then(()=>{
+    this.textContent='✅ ¡Copiado! Pega en ElevenLabs';
+    this.classList.add('ok');
+    setTimeout(()=>{ this.textContent='📋 Copiar guión de esta slide'; this.classList.remove('ok'); },3000);
+  });
+};
+
+document.getElementById('spExport').onclick=function(){
+  const all = Array.from(slides).map((s,i)=>{
+    const t = s.dataset.title || `Slide ${i+1}`;
+    const sc = s.dataset.script || '';
+    return `[${String(i+1).padStart(2,'0')} — ${t}]\n${sc}`;
+  }).join('\n\n---\n\n');
+  navigator.clipboard.writeText(all).then(()=>{
+    this.textContent=`✅ ¡${total} guiones copiados! Pega en ElevenLabs`;
+    this.classList.add('ok');
+    setTimeout(()=>{ this.textContent='📤 Exportar TODOS los guiones'; this.classList.remove('ok'); },4000);
+  });
+};
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+  if(e.key==='Escape') document.getElementById('scriptPanel').classList.remove('open');
+  if(e.key===' '){ e.preventDefault(); toggleTTS(); }
+  if(e.key==='p'||e.key==='P') toggleAuto();
+});
+
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged=()=>{};
+
+render();
+</script>
+</body>
+</html>

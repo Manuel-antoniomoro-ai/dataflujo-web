@@ -1,0 +1,15 @@
+# Videos (demasiado pesados para GitHub - almacena en Drive/S3/etc)
+slides/*.mp4
+
+# ZIPs de productos (regenerables con crear_zips_v2.ps1)
+**/*.zip
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+*.swp
+*~

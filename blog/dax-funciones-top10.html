@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Las 10 funciones DAX imprescindibles en Power BI con ejemplos reales de produccion. CALCULATE, FILTER, ALL, SUMX, RANKX, DIVIDE, DATEADD y mas.">
+<title>TOP 10 funciones DAX que todo analista BI debe dominar &mdash; DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}.hdr.scrolled{box-shadow:var(--s2)}.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}.hnav a:hover,.hnav a.active{color:var(--t)}.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}.mnav.open{display:flex;flex-direction:column;gap:.25rem}.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}.iz.iz-in img{transform:scale(1);opacity:1}
+.art-hero{position:relative;height:460px;margin-top:64px}.art-hero-bg{position:absolute;inset:0}.art-hero-bg img{width:100%;height:100%;object-fit:cover}.art-hero-overlay{position:absolute;inset:0;background:rgba(8,14,28,.78);display:flex;align-items:flex-end;padding-bottom:3.5rem}.art-hero-inner{max-width:860px;padding:0 2rem}
+.art-crumb{display:flex;align-items:center;gap:.5rem;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1.25rem}.art-crumb a{color:rgba(255,255,255,.45)}.art-crumb span{color:rgba(255,255,255,.25)}
+.art-cat{display:inline-block;font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2563eb;margin-bottom:.75rem}
+.art-title{font-family:var(--fe);font-size:clamp(1.9rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.25rem;max-width:760px}
+.art-meta{display:flex;align-items:center;gap:1.5rem;font-family:var(--fd);font-size:.72rem;color:rgba(255,255,255,.45)}.art-meta strong{color:rgba(255,255,255,.7)}
+.art-body{max-width:760px;margin:0 auto;padding:72px 2rem 100px}.art-body h2{font-family:var(--fe);font-size:1.65rem;font-weight:700;color:var(--t);margin:2.75rem 0 1rem;line-height:1.25}.art-body h3{font-family:var(--fe);font-size:1.2rem;font-weight:700;color:var(--t);margin:2rem 0 .75rem}.art-body p{font-size:.97rem;color:var(--t2);line-height:1.8;margin-bottom:1.2rem}.art-body ul,.art-body ol{padding-left:1.5rem;margin-bottom:1.2rem}.art-body li{font-size:.97rem;color:var(--t2);line-height:1.75;margin-bottom:.4rem}.art-body ul li{list-style:disc}.art-body ol li{list-style:decimal}.art-body strong{color:var(--t);font-weight:600}.art-body em{font-style:italic}.art-body a{color:var(--ac);border-bottom:1px solid var(--bd2);transition:border-color .2s}.art-body a:hover{border-color:var(--ac)}
+.art-lead{font-size:1.08rem;color:var(--t);line-height:1.85;margin-bottom:2rem;border-left:3px solid var(--ac);padding-left:1.25rem}
+.art-quote{background:var(--bg2);border-left:4px solid var(--ac);padding:1.25rem 1.5rem;margin:2rem 0;border-radius:0 var(--r) var(--r) 0}.art-quote p{margin-bottom:0;font-style:italic;color:var(--t)}
+pre{background:#0f1f40;color:#e2e8f0;padding:1.5rem;border-radius:var(--r);overflow-x:auto;margin:1.5rem 0;font-size:.82rem;line-height:1.7;font-family:'Consolas','Monaco',monospace}code{background:#f0f0ec;color:#0f1f40;padding:.15rem .4rem;border-radius:3px;font-size:.84rem;font-family:'Consolas','Monaco',monospace}pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.art-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.88rem}.art-table th{background:var(--ac);color:#fff;padding:.65rem 1rem;text-align:left;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}.art-table td{padding:.6rem 1rem;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:top}.art-table tr:last-child td{border-bottom:none}.art-table tr:nth-child(even) td{background:var(--bg2)}
+.art-tip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-tip strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;margin-bottom:.4rem}.art-tip p{margin-bottom:0;font-size:.88rem;color:#1e3a5f}
+.art-warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-warn strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#c2410c;margin-bottom:.4rem}.art-warn p{margin-bottom:0;font-size:.88rem;color:#7c2d12}
+.art-divider{border:none;border-top:1px solid var(--bd);margin:2.5rem 0}
+.art-cta{background:var(--ac);border-radius:var(--r);padding:2.5rem;margin:3rem 0;text-align:center}.art-cta h3{font-family:var(--fe);font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.75rem}.art-cta p{font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:1.5rem;line-height:1.7}.btn-white{display:inline-block;background:#fff;color:var(--ac);padding:.75rem 1.75rem;border-radius:var(--r);font-family:var(--fd);font-size:.82rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}.btn-white:hover{opacity:.88}
+.art-related{border-top:1px solid var(--bd);padding-top:2.5rem;margin-top:1rem}.art-related h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:1.5rem}.rel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}.rel-card{border:1px solid var(--bd);border-radius:var(--r);padding:1.25rem;transition:border-color .2s,box-shadow .2s}.rel-card:hover{border-color:var(--bd2);box-shadow:var(--s)}.rel-cat{font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:.4rem}.rel-title{font-family:var(--fe);font-size:.95rem;font-weight:700;color:var(--t);line-height:1.3}@media(max-width:600px){.rel-grid{grid-template-columns:1fr}}
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}.ft-col ul li{margin-bottom:.5rem}.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="../index.html">Inicio</a>
+      <a href="../productos.html">Productos</a>
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../sobre-mi.html">Sobre m&#237;</a>
+      <a href="../contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="../index.html">Inicio</a><a href="../productos.html">Productos</a><a href="../blog.html">Blog</a><a href="../video-tutoriales.html">V&iacute;deos</a><a href="../sobre-mi.html">Sobre m&#237;</a><a href="../contacto.html">Contacto</a>
+</nav>
+
+<div class="art-hero">
+  <div class="art-hero-bg iz">
+    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&auto=format&fit=crop&q=80" alt="Dashboard de Business Intelligence">
+  </div>
+  <div class="art-hero-overlay">
+    <div class="art-hero-inner">
+      <nav class="art-crumb rv"><a href="../index.html">Inicio</a><span>/</span><a href="../blog.html">Blog</a><span>/</span><span>BI</span></nav>
+      <span class="art-cat">BI</span>
+      <h1 class="art-title rv d1">TOP 10 funciones DAX que todo analista BI debe dominar</h1>
+      <div class="art-meta rv d2"><span>Por <strong>Antonio Moro</strong></span><span>28 Feb 2025</span><span>6 min lectura</span></div>
+    </div>
+  </div>
+</div>
+
+<article class="art-body">
+  <p class="art-lead rv">Despu&eacute;s de revisar m&aacute;s de 200 modelos Power BI en proyectos enterprise, siempre encuentro los mismos patrones: quienes dominan estas 10 funciones DAX construyen modelos que funcionan en producci&oacute;n. Quienes no, generan medidas lentas, resultados incorrectos o paneles que nadie entiende. Aqu&iacute; est&aacute;n, con ejemplos reales.</p>
+
+  <h2 class="rv">1. CALCULATE &mdash; el coraz&oacute;n de DAX</h2>
+  <p>CALCULATE es, con diferencia, la funci&oacute;n m&aacute;s importante de DAX. Eval&uacute;a una expresi&oacute;n modificando el contexto de filtro. Sin ella, no puedes hacer casi ninguna medida avanzada.</p>
+<pre><code>-- Ventas solo de la categoria "Electronica"
+Ventas Electronica =
+CALCULATE(
+    SUM(Ventas[Importe]),
+    Productos[Categoria] = "Electronica"
+)
+
+-- Ventas acumuladas del anyo (YTD)
+Ventas YTD =
+CALCULATE(
+    SUM(Ventas[Importe]),
+    DATESYTD(Calendario[Fecha])
+)</code></pre>
+  <p><strong>Cu&aacute;ndo usarla:</strong> siempre que necesites modificar el contexto de filtro de una expresi&oacute;n. Es la base de casi todas las medidas de inteligencia temporal, comparativas y ratios.</p>
+
+  <h2 class="rv">2. FILTER &mdash; filtrado din&aacute;mico de tablas</h2>
+  <p>FILTER devuelve una tabla filtrada. Se usa habitualmente como argumento dentro de CALCULATE cuando el filtro es m&aacute;s complejo que una simple igualdad.</p>
+<pre><code>-- Clientes con mas de 10 pedidos
+Clientes Alto Volumen =
+CALCULATE(
+    COUNTROWS(Pedidos),
+    FILTER(
+        Clientes,
+        [Total Pedidos Cliente] &gt; 10
+    )
+)
+
+-- Productos con precio superior a la media
+Ventas Premium =
+CALCULATE(
+    SUM(Ventas[Importe]),
+    FILTER(Productos, Productos[Precio] &gt; AVERAGE(Productos[Precio]))
+)</code></pre>
+
+  <h2 class="rv">3. ALL / ALLEXCEPT &mdash; eliminar filtros</h2>
+  <p>ALL elimina todos los filtros de una tabla o columna. ALLEXCEPT elimina todos los filtros <em>excepto</em> los de las columnas especificadas. Son esenciales para calcular porcentajes sobre el total.</p>
+<pre><code>-- % sobre total general
+% del Total =
+DIVIDE(
+    SUM(Ventas[Importe]),
+    CALCULATE(SUM(Ventas[Importe]), ALL(Ventas))
+)
+
+-- % sobre total de la categoria (respetando filtro de fecha)
+% Categoria =
+DIVIDE(
+    SUM(Ventas[Importe]),
+    CALCULATE(
+        SUM(Ventas[Importe]),
+        ALLEXCEPT(Productos, Productos[Categoria])
+    )
+)</code></pre>
+
+  <h2 class="rv">4. SUMX / AVERAGEX &mdash; iteradores fila a fila</h2>
+  <p>Las funciones X iteran sobre cada fila de una tabla y eval&uacute;an una expresi&oacute;n. Son imprescindibles cuando necesitas calcular algo por fila antes de agregar.</p>
+<pre><code>-- Margen total: precio * (1 - descuento) * cantidad
+Margen Total =
+SUMX(
+    Ventas,
+    Ventas[Cantidad] * (Ventas[PrecioUnitario] - Ventas[Coste])
+)
+
+-- Precio medio ponderado por volumen
+Precio Medio Ponderado =
+DIVIDE(
+    SUMX(Ventas, Ventas[Cantidad] * Ventas[PrecioUnitario]),
+    SUM(Ventas[Cantidad])
+)</code></pre>
+
+  <h2 class="rv">5. RANKX &mdash; ranking din&aacute;mico</h2>
+  <p>RANKX asigna un rango a cada elemento de una tabla seg&uacute;n una expresi&oacute;n. Ideal para TOP N din&aacute;micos en tablas y visualizaciones.</p>
+<pre><code>-- Ranking de productos por ventas
+Ranking Producto =
+RANKX(
+    ALL(Productos[Nombre]),
+    [Ventas Totales],
+    ,
+    DESC,
+    DENSE
+)</code></pre>
+  <div class="art-tip">
+    <strong>Tip</strong>
+    <p>Usa DENSE para evitar saltos en el ranking (1,2,2,3 en lugar de 1,2,2,4). Especialmente importante en dashboards de ejecutivos donde los saltos generan confusi&oacute;n.</p>
+  </div>
+
+  <h2 class="rv">6. DIVIDE &mdash; divisi&oacute;n segura</h2>
+  <p>DIVIDE maneja autom&aacute;ticamente la divisi&oacute;n por cero devolviendo un valor alternativo (por defecto BLANK). Nunca uses el operador / directamente en medidas de ratio.</p>
+<pre><code>-- NUNCA hagas esto:
+Margen % MALO = [Beneficio] / [Ventas]   -- error si Ventas = 0
+
+-- Siempre usa DIVIDE:
+Margen % =
+DIVIDE(
+    [Beneficio],
+    [Ventas],
+    0   -- valor alternativo si denominador = 0
+)
+
+-- Tasa de conversion
+Tasa Conversion =
+DIVIDE([Pedidos Completados], [Visitas], BLANK())</code></pre>
+
+  <h2 class="rv">7. DATEADD / SAMEPERIODLASTYEAR &mdash; inteligencia temporal</h2>
+  <p>Estas funciones son la base de cualquier comparativa temporal. SAMEPERIODLASTYEAR es un atajo de DATEADD con -1 a&ntilde;o.</p>
+<pre><code>-- Ventas mismo periodo anyo anterior
+Ventas AA =
+CALCULATE(
+    SUM(Ventas[Importe]),
+    SAMEPERIODLASTYEAR(Calendario[Fecha])
+)
+
+-- Variacion YoY en %
+YoY % =
+DIVIDE([Ventas Totales] - [Ventas AA], [Ventas AA])
+
+-- Ventas hace 3 meses
+Ventas 3M Antes =
+CALCULATE(
+    SUM(Ventas[Importe]),
+    DATEADD(Calendario[Fecha], -3, MONTH)
+)</code></pre>
+
+  <h2 class="rv">8. RELATED &mdash; navegar relaciones</h2>
+  <p>RELATED trae un valor de una tabla relacionada (del lado &ldquo;uno&rdquo; de una relaci&oacute;n 1-N). Se usa en columnas calculadas, no en medidas.</p>
+<pre><code>-- En tabla Ventas, traer la categoria del producto
+Categoria Venta = RELATED(Productos[Categoria])
+
+-- Margen por linea usando coste de la tabla Productos
+Margen Linea =
+Ventas[Importe] - (Ventas[Cantidad] * RELATED(Productos[CosteUnitario]))</code></pre>
+
+  <h2 class="rv">9. SWITCH &mdash; l&oacute;gica condicional limpia</h2>
+  <p>SWITCH reemplaza cadenas de IF anidados con una sintaxis mucho m&aacute;s legible. Especialmente &uacute;til para segmentaciones y etiquetas.</p>
+<pre><code>-- Segmentacion de clientes por volumen
+Segmento Cliente =
+SWITCH(
+    TRUE(),
+    [Ventas Cliente] &gt;= 100000, "Platinum",
+    [Ventas Cliente] &gt;= 50000,  "Gold",
+    [Ventas Cliente] &gt;= 10000,  "Silver",
+    "Standard"
+)
+
+-- Etiqueta de semaforo
+Estado KPI =
+SWITCH(
+    TRUE(),
+    [Margen %] &gt;= 0.20, "Verde",
+    [Margen %] &gt;= 0.10, "Amarillo",
+    "Rojo"
+)</code></pre>
+
+  <h2 class="rv">10. VAR &mdash; variables para medidas limpias y eficientes</h2>
+  <p>VAR permite declarar variables dentro de una medida, mejorando la legibilidad y el rendimiento (la expresi&oacute;n se eval&uacute;a una sola vez). Es una buena pr&aacute;ctica usar VAR en cualquier medida moderadamente compleja.</p>
+<pre><code>-- Con VAR: limpio, eficiente y facil de depurar
+Margen % Limpio =
+VAR TotalVentas = SUM(Ventas[Importe])
+VAR TotalCoste  = SUM(Ventas[Coste])
+VAR Beneficio   = TotalVentas - TotalCoste
+RETURN
+DIVIDE(Beneficio, TotalVentas, 0)
+
+-- VAR para evitar recalculos en medidas temporales
+Crecimiento YoY =
+VAR VentasActual = SUM(Ventas[Importe])
+VAR VentasAA =
+    CALCULATE(
+        SUM(Ventas[Importe]),
+        SAMEPERIODLASTYEAR(Calendario[Fecha])
+    )
+RETURN
+DIVIDE(VentasActual - VentasAA, VentasAA, BLANK())</code></pre>
+
+  <div class="art-tip">
+    <strong>Regla de oro</strong>
+    <p>Si una medida tiene m&aacute;s de 3 l&iacute;neas, usa VAR. Si tiene m&aacute;s de 5, es obligatorio. El depurador de DAX Studio te lo agradece.</p>
+  </div>
+
+  <hr class="art-divider">
+  <div class="art-cta rv">
+    <h3>Dashboard Kit con m&aacute;s de 50 medidas DAX listas para usar</h3>
+    <p>Plantillas Power BI con medidas DAX de producci&oacute;n para ventas, finanzas, RRHH y log&iacute;stica. Documentadas, optimizadas y listas para adaptar a tu modelo de datos.</p>
+    <a href="../productos.html" class="btn-white">Ver recursos &rarr;</a>
+  </div>
+  <div class="art-related rv">
+    <h4>Tambi&eacute;n te puede interesar</h4>
+    <div class="rel-grid">
+      <a href="kimball-vs-data-vault.html" class="rel-card"><div class="rel-cat">Cloud</div><div class="rel-title">Kimball vs Data Vault 2.0: &iquest;qu&eacute; modelo DWH elegir?</div></a>
+      <a href="informatica-vs-talend-2025.html" class="rel-card"><div class="rel-cat">Tools</div><div class="rel-title">Informatica vs Talend: comparativa honesta 2025</div></a>
+    </div>
+  </div>
+</article>
+
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="../index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+        </div>
+      </div>
+      <div class="ft-col"><h4>Recursos</h4><ul><li><a href="../productos.html">Power BI Templates</a></li><li><a href="../productos.html">SQL Pack</a></li><li><a href="../productos.html">dbt Starter</a></li></ul></div>
+      <div class="ft-col"><h4>P&aacute;ginas</h4><ul><li><a href="../blog.html">Blog</a></li><li><a href="../sobre-mi.html">Sobre m&#237;</a></li><li><a href="../contacto.html">Contacto</a></li></ul></div>
+      <div class="ft-col"><h4>Legal</h4><ul><li><a href="../contacto.html">Aviso legal</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p></div>
+  </div>
+</footer>
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>

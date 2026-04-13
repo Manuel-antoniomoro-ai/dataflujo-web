@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Directorio completo de herramientas de IA organizadas por categoría: asistentes, datos, desarrollo, diseño, productividad y más. Por Antonio Moro — DataFlujo.">
+<title>IA Tools — Directorio de Herramientas IA · DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%2306b6d4'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--blue:#2563eb;--cyan:#06b6d4;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* PAGE HERO */
+.page-hero{position:relative;height:340px;margin-top:64px;background:linear-gradient(135deg,#080e1c 0%,#0f1f40 60%,#1a3a6b 100%);display:flex;align-items:flex-end}
+.ph-overlay{width:100%;padding-bottom:3rem}
+.ph-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.75rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2.2rem,4.5vw,3.2rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:.75rem}
+.ph-sub{font-size:.95rem;color:rgba(255,255,255,.65);max-width:560px;line-height:1.7}
+.ph-stats{display:flex;gap:3rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.ph-stat-val{font-family:var(--fd);font-size:1.6rem;font-weight:800;color:#fff;display:block;line-height:1}
+.ph-stat-lbl{font-family:var(--fd);font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:.35rem;display:block}
+
+/* TOOLBAR */
+.ia-toolbar-wrap{background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:64px;z-index:100;box-shadow:var(--s)}
+.ia-toolbar{max-width:1200px;margin:0 auto;padding:.75rem 2rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.search-box{position:relative;flex-shrink:0}
+.search-box svg{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none}
+.search-box input{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:.5rem .75rem .5rem 2.25rem;font-size:.83rem;font-family:var(--fb);color:var(--t);width:220px;outline:none;transition:border .2s}
+.search-box input:focus{border-color:var(--blue)}
+.toolbar-sep{width:1px;height:20px;background:var(--bd);flex-shrink:0}
+.toolbar-lbl{font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.cat-btn{background:none;border:1px solid var(--bd);padding:.35rem .85rem;border-radius:var(--r);font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all .2s;white-space:nowrap}
+.cat-btn:hover{border-color:var(--ac);color:var(--ac)}
+.cat-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.price-btn{border-radius:var(--r);padding:.35rem .85rem;font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:1.5px solid;transition:all .2s;white-space:nowrap}
+.price-btn[data-p="free"]{color:#065f46;border-color:#6ee7b7;background:transparent}
+.price-btn[data-p="free"].on{background:#065f46;color:#fff;border-color:#065f46}
+.price-btn[data-p="freemium"]{color:#92400e;border-color:#fde68a;background:transparent}
+.price-btn[data-p="freemium"].on{background:#92400e;color:#fff;border-color:#92400e}
+.price-btn[data-p="paid"]{color:var(--t3);border-color:var(--bd);background:transparent}
+.price-btn[data-p="paid"].on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.tool-count{font-family:var(--fd);font-size:.7rem;font-weight:700;color:var(--t3);margin-left:auto;white-space:nowrap;flex-shrink:0}
+@media(max-width:768px){.search-box input{width:160px}.ia-toolbar{padding:.65rem 1rem;gap:.5rem}}
+
+/* MAIN */
+.ia-main{max-width:1200px;margin:0 auto;padding:2.5rem 2rem 5rem;display:flex;flex-direction:column;gap:2.5rem}
+
+/* CATEGORY BLOCK */
+.ia-cat{background:#fff;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--s)}
+.ia-cat.hidden{display:none}
+.ia-cat-head{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;border-bottom:1px solid var(--bd);background:var(--bg2)}
+.ia-cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ia-cat-name{font-family:var(--fd);font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t)}
+.ia-cat-count{margin-left:auto;font-family:var(--fd);font-size:.65rem;font-weight:700;color:var(--t3);background:var(--bg3);padding:.15rem .6rem;border-radius:10px}
+
+/* TOOL GRID */
+.ia-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:1px;background:var(--bd)}
+.tool-item{background:#fff;padding:1.25rem .75rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;cursor:pointer;transition:background .2s;text-decoration:none;position:relative}
+.tool-item:hover{background:var(--bg2)}
+.tool-item.hidden{display:none!important}
+.tool-icon{font-size:1.6rem;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--bg2);transition:background .2s}
+.tool-item:hover .tool-icon{background:var(--bg3)}
+.tool-name{font-family:var(--fd);font-size:.7rem;font-weight:700;color:var(--t);text-align:center;line-height:1.3;letter-spacing:.02em}
+.tool-badges{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.tbadge{font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:.06em;text-transform:uppercase;line-height:1.5}
+.tbadge-top{background:#fff3e0;color:#c2410c}
+.tbadge-free{background:#d1fae5;color:#065f46}
+.tbadge-freemium{background:#fef3c7;color:#92400e}
+.tbadge-paid{background:var(--bg3);color:var(--t3);border:1px solid var(--bd)}
+
+/* TOOLTIP */
+.tool-item::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) scale(.93);background:var(--ac);color:#fff;font-size:.72rem;font-family:var(--fb);padding:.5rem .75rem;border-radius:var(--r);white-space:normal;text-align:center;line-height:1.45;max-width:200px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300}
+.tool-item:hover::after{opacity:1;transform:translateX(-50%) scale(1)}
+
+/* LEGEND */
+.ia-legend{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:.75rem 2rem;border-bottom:1px solid var(--bd);background:var(--bg2);max-width:100%}
+.leg{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--t3);font-family:var(--fb)}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:5rem 2rem;color:var(--t3);display:none}
+.no-results svg{opacity:.25;margin:0 auto 1rem}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}
+.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}
+.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}
+.ft-col ul li{margin-bottom:.5rem}
+.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.ph-stats{flex-wrap:wrap;gap:1.5rem}.ia-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="blog.html">Blog</a>
+      <a href="video-tutoriales.html">V&iacute;deos</a>
+      <a href="ia-tools.html" class="active">IA Tools</a>
+      <a href="sobre-mi.html">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="ia-tools.html">IA Tools</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="ph-overlay cnt">
+    <span class="ph-label">Directorio curado</span>
+    <h1 class="ph-title">IA Tools</h1>
+    <p class="ph-sub">Las mejores herramientas de Inteligencia Artificial organizadas por categoría. Gratis, freemium y de pago — filtradas para que encuentres lo que necesitas.</p>
+    <div class="ph-stats">
+      <div><span class="ph-stat-val" id="heroTotal">200+</span><span class="ph-stat-lbl">Herramientas</span></div>
+      <div><span class="ph-stat-val">18</span><span class="ph-stat-lbl">Categorías</span></div>
+      <div><span class="ph-stat-val">60%</span><span class="ph-stat-lbl">Gratis o freemium</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEGEND -->
+<div class="ia-legend">
+  <div class="leg"><div class="leg-dot" style="background:#065f46"></div>Gratis — acceso completo sin coste</div>
+  <div class="leg"><div class="leg-dot" style="background:#92400e"></div>Freemium — plan gratuito con l&iacute;mites</div>
+  <div class="leg"><div class="leg-dot" style="background:#9a9a9a"></div>De pago — requiere suscripci&oacute;n</div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="ia-toolbar-wrap">
+  <div class="ia-toolbar" id="toolbar">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar herramienta…" oninput="filterAll()">
+    </div>
+    <div class="toolbar-sep"></div>
+    <span class="toolbar-lbl">Precio</span>
+    <button class="price-btn" data-p="free"     onclick="togglePrice('free',this)">✓ Gratis</button>
+    <button class="price-btn" data-p="freemium" onclick="togglePrice('freemium',this)">◈ Freemium</button>
+    <button class="price-btn" data-p="paid"     onclick="togglePrice('paid',this)">$ De pago</button>
+    <div class="toolbar-sep"></div>
+    <span class="toolbar-lbl">Categoría</span>
+    <div id="catBtns" style="display:flex;gap:.4rem;flex-wrap:wrap"></div>
+    <span class="tool-count" id="toolCount"></span>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<main class="ia-main" id="iaMain"></main>
+
+<div class="no-results" id="noResults">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  <p style="font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--t2)">Sin resultados</p>
+  <p style="font-size:.83rem;margin-top:.35rem">Prueba otros filtros o términos de búsqueda</p>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+          <a href="https://www.youtube.com/@DataKitAcademy" target="_blank" class="ft-link">YouTube</a>
+        </div>
+      </div>
+      <div class="ft-col"><h4>Recursos</h4><ul><li><a href="productos.html">Power BI Templates</a></li><li><a href="productos.html">SQL Pack</a></li><li><a href="productos.html">dbt Starter</a></li><li><a href="productos.html">Python Scripts</a></li></ul></div>
+      <div class="ft-col"><h4>Contenido</h4><ul><li><a href="blog.html">Blog</a></li><li><a href="video-tutoriales.html">V&iacute;deos</a></li><li><a href="ia-tools.html">IA Tools</a></li></ul></div>
+      <div class="ft-col"><h4>P&aacute;ginas</h4><ul><li><a href="sobre-mi.html">Sobre m&iacute;</a></li><li><a href="contacto.html">Contacto</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p></div>
+  </div>
+</footer>
+
+<script>
+const DATA = [
+  { id:"asistentes", label:"Asistentes Generales", color:"#2563eb", tools:[
+    { name:"ChatGPT",      url:"https://chat.openai.com/",              icon:"🤖", tag:"Top", price:"freemium", tip:"GPT-4o gratis con límites. Plus $20/mes sin esperas ni límites." },
+    { name:"Claude",       url:"https://claude.ai/",                   icon:"☁️", tag:"Top", price:"freemium", tip:"Sonnet gratis con límites; Pro $20/mes con Claude 3.5 Opus." },
+    { name:"Gemini",       url:"https://gemini.google.com/",           icon:"✨", tag:"Top", price:"freemium", tip:"Flash gratis; Advanced $20/mes con Gemini Ultra y más contexto." },
+    { name:"DeepSeek",     url:"https://chat.deepseek.com/",           icon:"🔵", tag:"Top", price:"free",     tip:"Modelo chino de alto rendimiento. Chat completamente gratuito." },
+    { name:"Copilot",      url:"https://copilot.microsoft.com/",       icon:"🪟",            price:"free",     tip:"GPT-4o + búsqueda web gratis con cuenta Microsoft." },
+    { name:"Grok",         url:"https://grok.x.ai/",                  icon:"⚡",            price:"freemium", tip:"Grok 3 gratis básico; SuperGrok para uso intensivo." },
+    { name:"Mistral",      url:"https://chat.mistral.ai/",             icon:"🌬️",           price:"free",     tip:"Le Chat de Mistral: modelos open-source de alta calidad, gratis." },
+    { name:"Meta AI",      url:"https://www.meta.ai/",                 icon:"👓",            price:"free",     tip:"Llama 4 Scout/Maverick. 100% gratuito, sin registro." },
+    { name:"Perplexity",   url:"https://www.perplexity.ai/",          icon:"🔭",            price:"freemium", tip:"Asistente con búsqueda web en tiempo real. Pro $20/mes." },
+    { name:"Qwen",         url:"https://chat.qwenlm.ai/",             icon:"🌐",            price:"free",     tip:"Modelo Alibaba de alto rendimiento. Acceso gratuito." },
+    { name:"HuggingChat",  url:"https://huggingface.co/chat",         icon:"🤗",            price:"free",     tip:"Acceso gratuito a modelos open-source como Llama, Mistral y más." },
+    { name:"Pi",           url:"https://pi.ai/",                      icon:"💬",            price:"free",     tip:"IA conversacional empática. 100% gratuita, enfocada en bienestar." },
+    { name:"Poe",          url:"https://poe.com/",                    icon:"🎭",            price:"freemium", tip:"Acceso a múltiples modelos en un solo lugar. Plan gratis limitado." },
+    { name:"You.com",      url:"https://you.com/",                    icon:"🔍",            price:"freemium", tip:"Buscador con IA integrada. Pro $15/mes con funciones avanzadas." },
+    { name:"Command R+",   url:"https://coral.cohere.com/",           icon:"🧲",            price:"free",     tip:"Modelo Cohere especializado en RAG y análisis de documentos." },
+  ]},
+  { id:"datos", label:"Datos y Análisis IA", color:"#0f766e", tools:[
+    { name:"Julius AI",    url:"https://julius.ai/",                  icon:"📈", tag:"Top", price:"freemium", tip:"Analiza CSV/Excel con IA. 5 mensajes gratis/día, Pro $20/mes." },
+    { name:"Databricks AI",url:"https://www.databricks.com/",         icon:"🔥", tag:"Top", price:"freemium", tip:"Lakehouse con DBRX y Unity Catalog. Community Edition gratis." },
+    { name:"MindsDB",      url:"https://mindsdb.com/",                icon:"🗄️",           price:"freemium", tip:"Modelos de IA directamente en tu base de datos SQL. Open-source." },
+    { name:"Hex",          url:"https://hex.tech/",                   icon:"⬡",            price:"freemium", tip:"Notebooks colaborativos con IA para análisis de datos. Free tier disponible." },
+    { name:"Observable",   url:"https://observablehq.com/",           icon:"👁️",            price:"freemium", tip:"Notebooks JavaScript interactivos para visualización de datos." },
+    { name:"Power BI Copilot",url:"https://powerbi.microsoft.com/",   icon:"🔵",            price:"freemium", tip:"Genera medidas DAX y visualizaciones con lenguaje natural." },
+    { name:"Tableau AI",   url:"https://www.tableau.com/",            icon:"📊",            price:"freemium", tip:"Einstein AI: consultas en lenguaje natural sobre tu warehouse." },
+    { name:"Metabase",     url:"https://www.metabase.com/",           icon:"📉",            price:"freemium", tip:"BI open-source con asistente IA para queries. Self-hosted gratis." },
+    { name:"IBM Watson",   url:"https://www.ibm.com/watson",          icon:"🧠",            price:"freemium", tip:"Suite de IA de IBM con tier Lite gratuito muy generoso." },
+    { name:"Obviously AI", url:"https://www.obviously.ai/",           icon:"🔮",            price:"freemium", tip:"Predicciones ML en un clic sin código. Prueba gratuita disponible." },
+    { name:"Akkio",        url:"https://akkio.com/",                  icon:"📉",            price:"paid",     tip:"IA predictiva para negocios. Desde $49/mes con prueba 7 días." },
+    { name:"DataRobot",    url:"https://www.datarobot.com/",          icon:"🤖",            price:"paid",     tip:"Plataforma AutoML enterprise. Precio bajo solicitud." },
+    { name:"Redash",       url:"https://redash.io/",                  icon:"📋",            price:"free",     tip:"Herramienta de queries y dashboards. Open-source y gratuita." },
+    { name:"Superset",     url:"https://superset.apache.org/",        icon:"🚀",            price:"free",     tip:"Apache Superset: BI open-source con visualizaciones potentes." },
+  ]},
+  { id:"ingdatos", label:"Ingeniería de Datos — ETL & Pipelines", color:"#1a6b8a", tools:[
+    { name:"Cursor",       url:"https://cursor.sh/",                  icon:"🖱️", tag:"Top", price:"freemium", tip:"Escribe y depura pipelines ETL, genera DAGs de Airflow y dbt con IA." },
+    { name:"GitHub Copilot",url:"https://github.com/features/copilot",icon:"🐙", tag:"Top", price:"freemium", tip:"Autocompletado para Spark, Airflow, dbt, Pandas y SQL. Gratis personal." },
+    { name:"dbt Cloud",    url:"https://www.getdbt.com/",             icon:"⚙️",            price:"freemium", tip:"Transformaciones SQL con IA y documentación automática. Dev gratis." },
+    { name:"Apache Airflow",url:"https://airflow.apache.org/",        icon:"🌪️",           price:"free",     tip:"Orquestación de pipelines open-source. Usa Cursor para generar DAGs." },
+    { name:"Prefect",      url:"https://www.prefect.io/",             icon:"🌊",            price:"freemium", tip:"Orquestación de dataflows con observabilidad. Cloud free tier." },
+    { name:"dlt",          url:"https://dlthub.com/",                 icon:"🔄",            price:"free",     tip:"Data Load Tool open-source: pipelines Python en minutos." },
+    { name:"Airbyte",      url:"https://airbyte.com/",                icon:"🔌",            price:"freemium", tip:"Conectores ELT open-source con 350+ fuentes. Cloud free tier." },
+    { name:"Fivetran",     url:"https://www.fivetran.com/",           icon:"🔗",            price:"paid",     tip:"Sincronización de datos automatizada. Líder del mercado enterprise." },
+    { name:"Stitch",       url:"https://www.stitchdata.com/",         icon:"🧵",            price:"freemium", tip:"ELT simple y económico. Plan gratuito con límite de filas." },
+    { name:"Mage AI",      url:"https://www.mage.ai/",                icon:"🧙",            price:"free",     tip:"Alternativa moderna a Airflow, open-source, con interfaz visual." },
+    { name:"dbt Core",     url:"https://docs.getdbt.com/",            icon:"⚡",            price:"free",     tip:"Transformaciones SQL versionadas. Open-source y gratuito siempre." },
+    { name:"Great Expectations",url:"https://greatexpectations.io/",  icon:"✅",            price:"freemium", tip:"Validación y calidad de datos. Open-source con cloud opcional." },
+  ]},
+  { id:"desarrollo", label:"Desarrollo y Programación", color:"#16a34a", tools:[
+    { name:"Cursor",       url:"https://cursor.sh/",                  icon:"🖱️", tag:"Top", price:"freemium", tip:"Editor con agente IA integrado. Plan gratis generoso, Pro $20/mes." },
+    { name:"GitHub Copilot",url:"https://github.com/features/copilot",icon:"🐙", tag:"Top", price:"freemium", tip:"Autocompletado inteligente en cualquier IDE. Gratis para cuentas personales." },
+    { name:"Claude Code",  url:"https://claude.ai/",                  icon:"☁️", tag:"Top", price:"paid",     tip:"Agente de terminal de Anthropic para tareas complejas de código." },
+    { name:"Windsurf",     url:"https://codeium.com/windsurf",        icon:"🏄",            price:"freemium", tip:"Editor con agente Cascade; gratis básico, Pro $15/mes." },
+    { name:"Bolt.new",     url:"https://bolt.new/",                   icon:"⚡",            price:"freemium", tip:"Apps completas en el navegador desde un prompt. $20/mes Pro." },
+    { name:"v0 by Vercel", url:"https://v0.dev/",                     icon:"⚛️",            price:"freemium", tip:"Genera UI React/Tailwind. Plan gratuito con créditos mensuales." },
+    { name:"Lovable",      url:"https://lovable.dev/",                icon:"💜",            price:"freemium", tip:"Genera apps completas desde lenguaje natural. 5 msgs gratis/día." },
+    { name:"Replit AI",    url:"https://replit.com/ai",               icon:"👾",            price:"freemium", tip:"IDE online con IA integrada. Hacker $7/mes para IA completa." },
+    { name:"Codeium",      url:"https://codeium.com/",                icon:"🟢",            price:"free",     tip:"Autocompletado de código 100% gratuito para individuos, siempre." },
+    { name:"Aider",        url:"https://aider.chat/",                 icon:"🤝",            price:"free",     tip:"Agente de código en terminal open-source. Usa tu propia API key." },
+    { name:"Continue.dev", url:"https://continue.dev/",               icon:"▶️",            price:"free",     tip:"Extensión VSCode/JetBrains open-source con cualquier modelo." },
+    { name:"Tabnine",      url:"https://www.tabnine.com/",            icon:"⌨️",            price:"freemium", tip:"Autocompletado de código. Plan básico gratuito; Pro $12/mes." },
+    { name:"AWS Q Dev",    url:"https://aws.amazon.com/q/developer/", icon:"☁️",            price:"freemium", tip:"Asistente de AWS para código y diagnóstico. Gratis individual." },
+    { name:"Devin",        url:"https://devin.ai/",                   icon:"🤖",            price:"paid",     tip:"Agente de software autónomo de Cognition. Desde $500/mes." },
+  ]},
+  { id:"agentes", label:"Agentes y Automatización", color:"#dc2626", tools:[
+    { name:"n8n",          url:"https://n8n.io/",                     icon:"🔗", tag:"Top", price:"freemium", tip:"Automatización visual open-source. Auto-hosteable gratis; Cloud $20/mes." },
+    { name:"Zapier AI",    url:"https://zapier.com/ai",               icon:"⚡", tag:"Top", price:"freemium", tip:"100 tareas/mes gratis. Starter $19.99/mes para más automatización." },
+    { name:"Make",         url:"https://www.make.com/",               icon:"🔧",            price:"freemium", tip:"1.000 operaciones/mes gratis. Core $9/mes para proyectos serios." },
+    { name:"Dify",         url:"https://dify.ai/",                    icon:"🎯",            price:"freemium", tip:"Plataforma open-source para construir apps con LLMs y agentes." },
+    { name:"Flowise",      url:"https://flowiseai.com/",              icon:"🌊",            price:"free",     tip:"Constructor visual de agentes LangChain. Open-source y gratuito." },
+    { name:"LangChain",    url:"https://langchain.com/",              icon:"🔗",            price:"free",     tip:"Framework para construir apps con LLMs. Open-source siempre gratis." },
+    { name:"CrewAI",       url:"https://www.crewai.com/",             icon:"👥",            price:"freemium", tip:"Orquesta equipos de agentes IA. Framework open-source gratuito." },
+    { name:"AutoGPT",      url:"https://agpt.co/",                    icon:"♾️",            price:"free",     tip:"Agente autónomo open-source. Auto-hosteable completamente gratis." },
+    { name:"Relevance AI", url:"https://relevanceai.com/",            icon:"🎯",            price:"freemium", tip:"100 créditos gratis/día. Pro $19/mes para agentes sin límite." },
+    { name:"Activepieces", url:"https://www.activepieces.com/",       icon:"🧩",            price:"freemium", tip:"Alternativa open-source a Zapier. Cloud con plan gratuito generoso." },
+    { name:"Lindy",        url:"https://www.lindy.ai/",               icon:"🤝",            price:"freemium", tip:"400 tareas gratis/mes. Pro $49/mes para uso intensivo." },
+    { name:"AgentGPT",     url:"https://agentgpt.reworkd.ai/",        icon:"🕹️",           price:"freemium", tip:"Agentes autónomos en el navegador. Gratis básico con tus API keys." },
+  ]},
+  { id:"busqueda", label:"Búsqueda con IA", color:"#7c3aed", tools:[
+    { name:"Perplexity",   url:"https://www.perplexity.ai/",          icon:"🔭", tag:"Top", price:"freemium", tip:"Respuestas con fuentes citadas. Pro $20/mes para Deep Research." },
+    { name:"Copilot",      url:"https://copilot.microsoft.com/",      icon:"🪟",            price:"free",     tip:"Búsqueda web con IA integrada en Bing. 100% gratuito." },
+    { name:"Phind",        url:"https://www.phind.com/",              icon:"🧑‍💻",          price:"freemium", tip:"Buscador especializado para desarrolladores. Pro $17/mes." },
+    { name:"Kagi",         url:"https://kagi.com/",                   icon:"🔑",            price:"paid",     tip:"Búsqueda sin anuncios ni rastreo. Desde $5/mes." },
+    { name:"Exa",          url:"https://exa.ai/",                     icon:"📡",            price:"freemium", tip:"API de búsqueda semántica para agentes. Créditos gratis al registrarse." },
+    { name:"Tavily",       url:"https://tavily.com/",                 icon:"🗺️",           price:"freemium", tip:"API de búsqueda optimizada para agentes IA. Plan gratuito generoso." },
+    { name:"You.com",      url:"https://you.com/",                    icon:"🔍",            price:"freemium", tip:"Buscador personalizable con IA. Pro $15/mes con funciones avanzadas." },
+    { name:"Consensus",    url:"https://consensus.app/",              icon:"📄",            price:"freemium", tip:"Búsqueda en papers científicos con IA. 200 búsquedas gratis/mes." },
+  ]},
+  { id:"productividad", label:"Productividad y Escritura", color:"#0891b2", tools:[
+    { name:"Notion AI",    url:"https://notion.ai",                   icon:"📓", tag:"Top", price:"freemium", tip:"IA integrada en tu workspace. $8/mes sobre plan Notion Plus." },
+    { name:"Gamma",        url:"https://gamma.app/",                  icon:"🎯",            price:"freemium", tip:"Presentaciones generadas con IA en segundos. Pro $8/mes." },
+    { name:"Otter.ai",     url:"https://otter.ai/",                   icon:"🦦",            price:"freemium", tip:"Transcripción de reuniones con IA. 600 min gratis/mes." },
+    { name:"Grammarly",    url:"https://grammarly.com/",              icon:"✅",            price:"freemium", tip:"Corrección y mejora de textos. Premium $12/mes para estilo avanzado." },
+    { name:"NotebookLM",   url:"https://notebooklm.google.com/",      icon:"📔",            price:"free",     tip:"Analiza tus PDFs y genera podcasts con IA. 100% gratuito de Google." },
+    { name:"Obsidian AI",  url:"https://obsidian.md/",                icon:"💎",            price:"freemium", tip:"Notas con IA local. App gratis, plugins de IA disponibles." },
+    { name:"Fireflies",    url:"https://fireflies.ai/",               icon:"🔥",            price:"freemium", tip:"Notas y análisis de reuniones. 800 min gratuitos de almacenamiento." },
+    { name:"Beautiful.ai", url:"https://www.beautiful.ai/",           icon:"📊",            price:"paid",     tip:"Presentaciones con diseño automático. Desde $12/mes." },
+    { name:"Mem.ai",       url:"https://get.mem.ai/",                 icon:"🧠",            price:"freemium", tip:"Notas con búsqueda IA. Plan básico gratis, Pro $14.99/mes." },
+    { name:"Jasper",       url:"https://jasper.ai/",                  icon:"✒️",            price:"paid",     tip:"Generación de contenido marketing. Desde $39/mes, prueba 7 días." },
+    { name:"QuillBot",     url:"https://quillbot.com/",               icon:"🪶",            price:"freemium", tip:"Parafraseo y resumen de textos. Premium $8.33/mes sin límites." },
+    { name:"Writesonic",   url:"https://writesonic.com/",             icon:"⚡",            price:"freemium", tip:"Generación de contenido con IA. Desde $13/mes; plan gratis limitado." },
+  ]},
+  { id:"diseno", label:"Diseño y Creatividad", color:"#9333ea", tools:[
+    { name:"Midjourney",   url:"https://www.midjourney.com/",         icon:"🎨", tag:"Top", price:"paid",     tip:"La mejor calidad artística. Desde $10/mes. Sin plan gratuito." },
+    { name:"DALL·E 3",     url:"https://openai.com/dall-e-3",         icon:"🖼️",           price:"freemium", tip:"Gratis en Copilot de Microsoft; de pago en ChatGPT Plus." },
+    { name:"Adobe Firefly",url:"https://firefly.adobe.com/",          icon:"🦋",            price:"freemium", tip:"25 generaciones gratis/mes. Más con Creative Cloud." },
+    { name:"Ideogram",     url:"https://ideogram.ai/",                icon:"✍️",            price:"freemium", tip:"Excelente para texto en imágenes. 10 imágenes gratis/día." },
+    { name:"Leonardo.AI",  url:"https://leonardo.ai/",                icon:"🎭",            price:"freemium", tip:"150 créditos gratis/día. Planes desde $12/mes." },
+    { name:"Canva AI",     url:"https://www.canva.com/ai-image-generator/",icon:"🖌️",       price:"freemium", tip:"Generación de imágenes y diseño. Pro $13/mes con IA completa." },
+    { name:"Recraft",      url:"https://www.recraft.ai/",             icon:"🔷",            price:"freemium", tip:"Vectores e ilustración con IA. Plan gratuito generoso." },
+    { name:"Figma AI",     url:"https://www.figma.com/ai/",           icon:"🔲",            price:"freemium", tip:"IA nativa en Figma. Gratis en plan Starter; funciones avanzadas $15/mes." },
+    { name:"Uizard",       url:"https://uizard.io/",                  icon:"📱",            price:"freemium", tip:"Prototipado UI/UX con IA. 2 proyectos gratis; Pro $12/mes." },
+    { name:"Flux",         url:"https://blackforestlabs.ai/",         icon:"🌊",            price:"freemium", tip:"Modelo de imagen open-source de alta calidad. API con tier gratuito." },
+    { name:"Stable Diff.", url:"https://stability.ai/",               icon:"🌀",            price:"freemium", tip:"Open-source auto-hosteable gratis. API con créditos gratuitos." },
+    { name:"Looka",        url:"https://looka.com/",                  icon:"🏷️",           price:"paid",     tip:"Diseño de logos con IA. Vista gratis; descarga desde $20." },
+  ]},
+  { id:"video", label:"Vídeo y Animación", color:"#e11d48", tools:[
+    { name:"Runway ML",    url:"https://runwayml.com/",               icon:"🎬", tag:"Top", price:"freemium", tip:"125 créditos gratis al registrarse. Standard $15/mes." },
+    { name:"Sora",         url:"https://sora.com/",                   icon:"🌅", tag:"Top", price:"freemium", tip:"Vídeo IA de OpenAI. Incluido en ChatGPT Plus $20/mes." },
+    { name:"Kling AI",     url:"https://klingai.com/",                icon:"🐲",            price:"freemium", tip:"Créditos diarios gratis. Pro $10/mes para uso profesional." },
+    { name:"Veo 2",        url:"https://deepmind.google/veo/",        icon:"🎥",            price:"freemium", tip:"Modelo de vídeo de Google DeepMind. Acceso vía VideoFX." },
+    { name:"Luma Dream",   url:"https://lumalabs.ai/dream-machine",   icon:"🌙",            price:"freemium", tip:"30 generaciones gratis/mes. Pro $29.99/mes." },
+    { name:"HeyGen",       url:"https://heygen.com/",                 icon:"🧑‍💼",          price:"freemium", tip:"Avatares IA para vídeos corporativos. 1 vídeo gratis/mes." },
+    { name:"Pika Labs",    url:"https://pika.art/",                   icon:"✏️",            price:"freemium", tip:"Animación y edición IA. Pro $8/mes sin marca de agua." },
+    { name:"Synthesia",    url:"https://www.synthesia.io/",           icon:"📽️",           price:"paid",     tip:"Avatares IA para formación. Desde $22/mes." },
+    { name:"Captions",     url:"https://www.captions.ai/",            icon:"💬",            price:"freemium", tip:"Subtítulos y edición IA. Pro $7.99/mes con lip-sync." },
+    { name:"Descript",     url:"https://descript.com/",               icon:"🎚️",           price:"freemium", tip:"Edición de vídeo/audio como si fuera texto. 1h gratis." },
+    { name:"Topaz Video",  url:"https://www.topazlabs.com/topaz-video-ai",icon:"🔬",       price:"paid",     tip:"Upscaling de vídeo con IA. $299 pago único." },
+    { name:"CapCut AI",    url:"https://www.capcut.com/",             icon:"✂️",            price:"freemium", tip:"Editor de vídeo con IA. Muy potente y gratuito para móvil y web." },
+  ]},
+  { id:"audio", label:"Audio, Voz y Música", color:"#d97706", tools:[
+    { name:"ElevenLabs",   url:"https://elevenlabs.io/",              icon:"🎙️", tag:"Top", price:"freemium", tip:"La mejor síntesis de voz. 10.000 caracteres/mes gratis." },
+    { name:"Suno",         url:"https://suno.com/",                   icon:"🎵", tag:"Top", price:"freemium", tip:"Crea canciones completas con IA. 50 créditos gratis/día." },
+    { name:"Udio",         url:"https://udio.com/",                   icon:"🎶",            price:"freemium", tip:"1.200 créditos gratis/mes. Pro $10/mes para uso comercial." },
+    { name:"Adobe Podcast",url:"https://podcast.adobe.com/",          icon:"🔊",            price:"free",     tip:"Mejora la calidad del audio con IA. 100% gratuito (beta)." },
+    { name:"Whisper",      url:"https://openai.com/research/whisper", icon:"👂",            price:"free",     tip:"Transcripción de audio open-source de OpenAI. Gratuito y preciso." },
+    { name:"Murf.AI",      url:"https://murf.ai/",                    icon:"🗣️",           price:"freemium", tip:"Voces IA para vídeos y podcasts. Creator $23/mes." },
+    { name:"AIVA",         url:"https://www.aiva.ai/",                icon:"🎹",            price:"freemium", tip:"Composición musical con IA. 3 descargas gratis/mes." },
+    { name:"Udio",         url:"https://www.udio.com/",               icon:"🎸",            price:"freemium", tip:"Música generativa de alta calidad. Uso comercial en plan Pro." },
+    { name:"Descript",     url:"https://descript.com/",               icon:"🎚️",           price:"freemium", tip:"Edición de podcast como si fuera texto. 1h de transcripción gratis." },
+    { name:"Boomy",        url:"https://boomy.com/",                  icon:"🥁",            price:"freemium", tip:"Música instantánea con IA. $10/mes para publicar en Spotify." },
+  ]},
+  { id:"investigacion", label:"Investigación y Ciencia", color:"#059669", tools:[
+    { name:"NotebookLM",   url:"https://notebooklm.google.com/",      icon:"📔", tag:"Top", price:"free",     tip:"Analiza tus documentos y genera podcasts. 100% gratuito de Google." },
+    { name:"Elicit",       url:"https://elicit.com/",                 icon:"🔬",            price:"freemium", tip:"Síntesis de papers científicos. 5 créditos gratis/mes; Plus $10/mes." },
+    { name:"Consensus",    url:"https://consensus.app/",              icon:"🧬",            price:"freemium", tip:"Respuestas basadas en evidencia científica. 200 búsquedas gratis/mes." },
+    { name:"SciSpace",     url:"https://typeset.io/",                 icon:"🚀",            price:"freemium", tip:"Explica papers en lenguaje sencillo. Gratis básico, Pro $12/mes." },
+    { name:"Research Rabbit",url:"https://www.researchrabbit.ai/",    icon:"🐇",            price:"free",     tip:"Mapas de literatura científica y recomendaciones. 100% gratuito." },
+    { name:"AlphaFold DB", url:"https://alphafold.ebi.ac.uk/",        icon:"🧪",            price:"free",     tip:"Estructuras de proteínas con IA. Gratuito de DeepMind + EMBL." },
+    { name:"Scite",        url:"https://scite.ai/",                   icon:"📊",            price:"freemium", tip:"Analiza si los papers apoyan o refutan afirmaciones. Pro $20/mes." },
+    { name:"Semantic Scholar",url:"https://www.semanticscholar.org/",  icon:"📚",           price:"free",     tip:"Motor de búsqueda académico con IA del Allen Institute. Gratuito." },
+  ]},
+  { id:"negocios", label:"IA para Negocios y Marketing", color:"#1d4ed8", tools:[
+    { name:"HubSpot AI",   url:"https://www.hubspot.com/artificial-intelligence",icon:"🟠", tag:"Top", price:"freemium", tip:"CRM con IA. Plan gratuito muy completo para empezar." },
+    { name:"Copy.ai GTM",  url:"https://www.copy.ai/go-to-market",    icon:"🚀",            price:"freemium", tip:"Flujos go-to-market con IA. 2.000 palabras gratis/mes." },
+    { name:"Surfer SEO",   url:"https://surferseo.com/",              icon:"🏄",            price:"paid",     tip:"Optimización SEO con IA. Desde $69/mes." },
+    { name:"Semrush AI",   url:"https://www.semrush.com/",            icon:"📡",            price:"paid",     tip:"Suite de marketing digital. Desde $117/mes, prueba 7 días." },
+    { name:"Klaviyo AI",   url:"https://www.klaviyo.com/",            icon:"📧",            price:"freemium", tip:"Email y SMS marketing con IA. Gratis hasta 250 contactos." },
+    { name:"Intercom Fin", url:"https://www.intercom.com/fin",        icon:"🎯",            price:"paid",     tip:"Agente de soporte IA. $39/mes + $0.99 por resolución." },
+    { name:"Salesforce AI",url:"https://www.salesforce.com/artificial-intelligence/",icon:"☁️",price:"paid",  tip:"Einstein AI en planes Enterprise. Desde $150/mes." },
+    { name:"Gong",         url:"https://www.gong.io/",                icon:"🔔",            price:"paid",     tip:"Análisis de llamadas de ventas con IA. Precio bajo solicitud." },
+    { name:"Drift",        url:"https://www.drift.com/",              icon:"💬",            price:"paid",     tip:"Conversational marketing enterprise. Desde $2.500/mes." },
+    { name:"Zoho Zia",     url:"https://www.zoho.com/zia/",           icon:"🔷",            price:"freemium", tip:"IA de Zoho CRM. Plan gratis para hasta 3 usuarios." },
+  ]},
+  { id:"educacion", label:"Educación y Aprendizaje", color:"#be185d", tools:[
+    { name:"Khanmigo",     url:"https://www.khanacademy.org/khan-labs",icon:"🎓", tag:"Top", price:"freemium", tip:"Tutor IA de Khan Academy. Gratis para estudiantes de EE.UU." },
+    { name:"Duolingo Max", url:"https://www.duolingo.com/",            icon:"🦜",           price:"freemium", tip:"App gratis con anuncios. Max $14/mes con IA GPT-4." },
+    { name:"NotebookLM",   url:"https://notebooklm.google.com/",       icon:"📔",           price:"free",     tip:"Analiza libros y apuntes con IA y genera podcasts. Gratis." },
+    { name:"Quizlet AI",   url:"https://quizlet.com/",                 icon:"📚",           price:"freemium", tip:"Flashcards y tests generados por IA. Plus $7.99/mes." },
+    { name:"Photomath",    url:"https://photomath.com/",               icon:"📷",           price:"freemium", tip:"Resuelve ejercicios matemáticos paso a paso. Gratis básico." },
+    { name:"Wolfram Alpha",url:"https://www.wolframalpha.com/",        icon:"🔢",           price:"freemium", tip:"Motor computacional. Gratis básico; Pro $7.99/mes con pasos." },
+    { name:"Socratic",     url:"https://socratic.org/",                icon:"❓",           price:"free",     tip:"App de Google 100% gratuita para matemáticas y ciencias." },
+    { name:"Elicit",       url:"https://elicit.com/",                  icon:"🔬",           price:"freemium", tip:"Investigación académica asistida por IA. 5 créditos gratis/mes." },
+  ]},
+  { id:"local", label:"IA Local y Open Source", color:"#374151", tools:[
+    { name:"Ollama",       url:"https://ollama.ai/",                  icon:"🦙", tag:"Top", price:"free",     tip:"Ejecuta Llama, Mistral, Gemma y más en tu PC. 100% gratuito." },
+    { name:"LM Studio",    url:"https://lmstudio.ai/",                icon:"💻", tag:"Top", price:"free",     tip:"Interfaz gráfica para LLMs locales. Gratuito y fácil de usar." },
+    { name:"Jan.ai",       url:"https://jan.ai/",                     icon:"🗂️",           price:"free",     tip:"App de escritorio open-source para modelos locales sin internet." },
+    { name:"AnythingLLM",  url:"https://anythingllm.com/",            icon:"📂",            price:"free",     tip:"RAG local con tus documentos y cualquier LLM. Open-source." },
+    { name:"Open WebUI",   url:"https://github.com/open-webui/open-webui",icon:"🌐",        price:"free",     tip:"Interfaz tipo ChatGPT para Ollama. Auto-hosteable gratis." },
+    { name:"GPT4All",      url:"https://gpt4all.io/",                 icon:"🖥️",           price:"free",     tip:"Chat local y privado sin internet. Gratuito sin registro." },
+    { name:"Hugging Face", url:"https://huggingface.co/",             icon:"🤗",            price:"freemium", tip:"El GitHub de la IA: modelos, datasets y espacios. Pro $9/mes." },
+    { name:"ComfyUI",      url:"https://github.com/comfyanonymous/ComfyUI",icon:"🎨",       price:"free",     tip:"Stable Diffusion avanzado por nodos. Open-source y gratuito." },
+    { name:"PrivateGPT",   url:"https://privategpt.dev/",             icon:"🔒",            price:"free",     tip:"Chatea con tus documentos de forma 100% privada y local." },
+    { name:"LocalAI",      url:"https://localai.io/",                 icon:"🏠",            price:"free",     tip:"API compatible OpenAI para modelos locales. Open-source." },
+  ]},
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let activeCat   = 'all';
+let activePrices = new Set();
+
+// ── BUILD CATEGORY BUTTONS ─────────────────────────────────────────────────
+const catBtns = document.getElementById('catBtns');
+const allBtn  = document.createElement('button');
+allBtn.className = 'cat-btn on';
+allBtn.textContent = 'Todas';
+allBtn.onclick = () => setCat('all', allBtn);
+catBtns.appendChild(allBtn);
+
+DATA.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn';
+  btn.textContent = cat.label;
+  btn.onclick = () => setCat(cat.id, btn);
+  catBtns.appendChild(btn);
+});
+
+// ── BUILD TOOL GRID ────────────────────────────────────────────────────────
+const main = document.getElementById('iaMain');
+DATA.forEach(cat => {
+  const sec = document.createElement('div');
+  sec.className = 'ia-cat';
+  sec.id = `cat-${cat.id}`;
+  sec.innerHTML = `
+    <div class="ia-cat-head">
+      <div class="ia-cat-dot" style="background:${cat.color}"></div>
+      <span class="ia-cat-name">${cat.label}</span>
+      <span class="ia-cat-count" id="cnt-${cat.id}">${cat.tools.length}</span>
+    </div>
+    <div class="ia-grid">
+      ${cat.tools.map(t => {
+        const lbl = t.price==='free' ? 'Gratis' : t.price==='freemium' ? 'Freemium' : 'De pago';
+        return `<a class="tool-item" href="${t.url}" target="_blank" rel="noopener"
+          data-name="${t.name.toLowerCase()} ${(t.tip||'').toLowerCase()}"
+          data-price="${t.price}"
+          data-tip="${t.tip||t.name}">
+          <div class="tool-icon">${t.icon}</div>
+          <div class="tool-name">${t.name}</div>
+          <div class="tool-badges">
+            ${t.tag ? `<span class="tbadge tbadge-top">${t.tag}</span>` : ''}
+            <span class="tbadge tbadge-${t.price}">${lbl}</span>
+          </div>
+        </a>`;
+      }).join('')}
+    </div>`;
+  main.appendChild(sec);
+});
+
+updateCount();
+
+// ── FILTER FUNCTIONS ───────────────────────────────────────────────────────
+function setCat(id, btn) {
+  activeCat = id;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  filterAll();
+}
+
+function togglePrice(p, btn) {
+  btn.classList.toggle('on');
+  activePrices.has(p) ? activePrices.delete(p) : activePrices.add(p);
+  filterAll();
+}
+
+function filterAll() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let total = 0;
+  DATA.forEach(cat => {
+    const sec = document.getElementById(`cat-${cat.id}`);
+    if (activeCat !== 'all' && activeCat !== cat.id) { sec.classList.add('hidden'); return; }
+    sec.classList.remove('hidden');
+    let vis = 0;
+    sec.querySelectorAll('.tool-item').forEach(item => {
+      const matchQ  = !q || item.dataset.name.includes(q);
+      const matchP  = activePrices.size === 0 || activePrices.has(item.dataset.price);
+      const show    = matchQ && matchP;
+      item.classList.toggle('hidden', !show);
+      if (show) vis++;
+    });
+    document.getElementById(`cnt-${cat.id}`).textContent = vis;
+    sec.classList.toggle('hidden', vis === 0);
+    total += vis;
+  });
+  document.getElementById('toolCount').textContent = `${total} herramientas`;
+  document.getElementById('noResults').style.display = total === 0 ? 'block' : 'none';
+}
+
+function updateCount() {
+  const total = DATA.reduce((s, c) => s + c.tools.length, 0);
+  document.getElementById('toolCount').textContent = `${total} herramientas`;
+  document.getElementById('heroTotal').textContent = `${total}+`;
+}
+
+// ── NAV SCROLL ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => document.getElementById('hdr').classList.toggle('scrolled', window.scrollY > 20));
+document.getElementById('mbtn').addEventListener('click', () => document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Soy Antonio Moro, Data Engineer &amp; BI con 20+ años de experiencia y creador de DataFlujo.">
+<title>Sobre mí — DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* ANIMATIONS */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* IMAGE ZOOM */
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}
+.iz.iz-in img{transform:scale(1);opacity:1}
+
+/* SECTIONS */
+.sec-white{padding:100px 0;background:var(--bg)}.sec-gray{padding:100px 0;background:var(--bg2)}
+.sec-head{margin-bottom:3rem}
+.sec-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.75rem}
+.sec-title{font-family:var(--fe);font-size:clamp(2rem,4vw,2.75rem);font-weight:700;color:var(--t);line-height:1.2}
+.sec-sub{font-size:.95rem;color:var(--t2);margin-top:.75rem;max-width:560px;line-height:1.7}
+
+/* PAGE HERO */
+.page-hero{position:relative;height:420px;margin-top:64px}
+.ph-bg{position:absolute;inset:0;height:100%}
+.ph-bg img{width:100%;height:100%;object-fit:cover}
+.ph-overlay{position:absolute;inset:0;background:rgba(8,14,28,.76);display:flex;align-items:flex-end;padding-bottom:4rem}
+.ph-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.75rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.ph-sub{font-size:1rem;color:rgba(255,255,255,.7);max-width:540px;line-height:1.7}
+
+/* ABOUT SPLIT */
+.about-split{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.about-text p{font-size:.95rem;color:var(--t2);line-height:1.8;margin-bottom:1.25rem}
+.about-img{border-radius:2px;box-shadow:var(--s2)}
+.about-img img{width:100%;height:480px;object-fit:cover}
+@media(max-width:860px){.about-split{grid-template-columns:1fr;gap:2.5rem}}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:2rem}
+.timeline::before{content:'';position:absolute;left:0;top:.5rem;bottom:0;width:1px;background:var(--bd2)}
+.tl-item{position:relative;padding-bottom:2.5rem;padding-left:1.5rem}
+.tl-item::before{content:'';position:absolute;left:-2rem;top:.45rem;width:10px;height:10px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 0 0 2px var(--ac)}
+.tl-item:last-child{padding-bottom:0}
+.tl-period{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:.4rem}
+.tl-company{font-family:var(--fe);font-size:1.15rem;font-weight:700;color:var(--t);margin-bottom:.25rem}
+.tl-role{font-size:.88rem;color:var(--t2)}
+
+/* TECH GRID */
+.tech-grid{display:flex;flex-wrap:wrap;gap:.6rem}
+.tech-pill{font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac);border:1px solid var(--bd2);padding:.4rem 1rem;border-radius:var(--r);background:var(--bg)}
+
+/* VALUES */
+.values-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem}
+.val-card{border-top:2px solid var(--ac);padding-top:1.5rem}
+.val-num{font-family:var(--fe);font-size:2rem;font-weight:800;color:var(--bd2);line-height:1;margin-bottom:1rem}
+.val-card h3{font-family:var(--fe);font-size:1.05rem;font-weight:700;color:var(--t);margin-bottom:.6rem;line-height:1.3}
+.val-card p{font-size:.84rem;color:var(--t2);line-height:1.68}
+@media(max-width:860px){.values-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.values-grid{grid-template-columns:1fr}}
+
+/* CTA BAND */
+.cta-band{background:var(--ac);padding:80px 0;text-align:center}
+.cb-title{font-family:var(--fe);font-size:clamp(2rem,3.5vw,2.8rem);font-weight:700;color:#fff;margin-bottom:1rem;line-height:1.2}
+.cb-sub{font-size:.95rem;color:rgba(255,255,255,.65);margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7}
+.btn-white{display:inline-block;background:#fff;color:var(--ac);padding:.75rem 1.8rem;border-radius:var(--r);font-family:var(--fd);font-size:.88rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}
+.btn-white:hover{opacity:.88}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}
+.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}
+.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}
+.ft-col ul li{margin-bottom:.5rem}
+.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="blog.html">Blog</a>
+      <a href="video-tutoriales.html">V&iacute;deos</a>
+      <a href="ia-tools.html">IA Tools</a>
+      <a href="sobre-mi.html" class="active">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="ia-tools.html">IA Tools</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="ph-bg iz">
+    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1400&auto=format&fit=crop&q=80" alt="Profesional de datos">
+  </div>
+  <div class="ph-overlay">
+    <div class="cnt">
+      <span class="ph-label rv">Sobre mí</span>
+      <h1 class="ph-title rv d1">Sobre mí</h1>
+      <p class="ph-sub rv d2">20+ a&ntilde;os dise&ntilde;ando soluciones BI y pipelines ETL en entornos internacionales.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SOBRE MÍ -->
+<section class="sec-white">
+  <div class="cnt">
+    <div class="about-split">
+      <div class="rv">
+        <span class="sec-label">Sobre mí</span>
+        <h2 class="sec-title" style="margin-bottom:1.5rem">Experto en BI &amp;<br>Integraci&oacute;n de Datos</h2>
+        <p>Más de 20 años diseñando, desarrollando y optimizando soluciones BI y pipelines ETL en entornos internacionales. Mi especialidad es transformar datos complejos en insights accionables y liderar equipos multidisciplinares en proyectos de alta exigencia.</p>
+        <p>He trabajado en los sectores más exigentes: banca, seguros, telecomunicaciones y gran empresa. Todo lo que publico en DataFlujo viene de proyectos reales donde el fallo no era una opción — nada de tutoriales de juguete.</p>
+        <p>Experto en Power BI, Tableau, SQL avanzado, Informatica, Talend, dbt y plataformas cloud (Azure, GCP). Español nativo, ingl&eacute;s intermedio, franc&eacute;s C2.</p>
+        <div class="tech-grid" style="margin-top:2rem">
+          <span class="tech-pill">Power BI</span>
+          <span class="tech-pill">Tableau</span>
+          <span class="tech-pill">SQL</span>
+          <span class="tech-pill">dbt</span>
+          <span class="tech-pill">Informatica</span>
+          <span class="tech-pill">Talend</span>
+          <span class="tech-pill">BigQuery</span>
+          <span class="tech-pill">Azure DataOps</span>
+          <span class="tech-pill">Python</span>
+          <span class="tech-pill">Oracle</span>
+          <span class="tech-pill">QlikView</span>
+          <span class="tech-pill">Control-M</span>
+        </div>
+      </div>
+      <div class="about-img iz rv d2">
+        <img src="https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=600&auto=format&fit=crop&q=80" alt="Antonio Moro" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="sec-gray">
+  <div class="cnt">
+    <div class="sec-head">
+      <span class="sec-label rv">Trayectoria</span>
+      <h2 class="sec-title rv d1">Experiencia profesional</h2>
+      <p class="sec-sub rv d2">Desde 2001 trabajando en proyectos de datos de alta exigencia en banca, seguros, telecomunicaciones y gran empresa.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start">
+      <div class="timeline rv">
+        <div class="tl-item">
+          <div class="tl-period">2001 — 2010</div>
+          <div class="tl-company">Consultor&iacute;a independiente</div>
+          <div class="tl-role">Consultor BI &middot; Desarrollo de soluciones BI para toma de decisiones estrat&eacute;gicas. An&aacute;lisis de datos masivos y dashboards para m&uacute;ltiples clientes.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-period">2010 — 2013</div>
+          <div class="tl-company">IBM</div>
+          <div class="tl-role">Consultor BI &middot; Integraci&oacute;n ETL y estructuras multidimensionales. Dise&ntilde;o de dashboards y reportes para clientes enterprise.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-period">2013 — 2015</div>
+          <div class="tl-company">Soprasteria</div>
+          <div class="tl-role">Team Leader BI &middot; Direcci&oacute;n de proyectos Data Analytics. Liderazgo de equipos multidisciplinares de hasta 10 personas.</div>
+        </div>
+      </div>
+      <div class="timeline rv d1">
+        <div class="tl-item">
+          <div class="tl-period">2015 — 2018</div>
+          <div class="tl-company">Accenture</div>
+          <div class="tl-role">Team Leader BI &middot; Planificaci&oacute;n y gesti&oacute;n de proyectos BI. Dise&ntilde;o de modelos DWH y procesos ETL. Supervisi&oacute;n de equipos t&eacute;cnicos.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-period">2018 — 2022</div>
+          <div class="tl-company">L&iacute;nea Directa Aseguradora</div>
+          <div class="tl-role">Experto BI &middot; Liderazgo de proyectos y coordinaci&oacute;n de equipos t&eacute;cnicos. Dise&ntilde;o y modelado de datos para dashboards corporativos.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-period">2018 — Hoy</div>
+          <div class="tl-company">Soprasteria</div>
+          <div class="tl-role">Experto BI &amp; Integraci&oacute;n de Datos &middot; Proyectos Data en entorno internacional. ETL, migraci&oacute;n de herramientas y coordinaci&oacute;n con clientes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDUCACIÓN -->
+    <div style="margin-top:4rem;padding-top:3rem;border-top:1px solid var(--bd)">
+      <div class="timeline rv" style="max-width:420px">
+        <div class="tl-item">
+          <div class="tl-period">2001</div>
+          <div class="tl-company">Universidad de C&oacute;rdoba</div>
+          <div class="tl-role">Ingeniero Superior &middot; Programaci&oacute;n, bases de datos, sistemas distribuidos y arquitectura de software.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALORES -->
+<section class="sec-white">
+  <div class="cnt">
+    <div class="sec-head">
+      <span class="sec-label rv">Filosofía</span>
+      <h2 class="sec-title rv d1">Cómo trabajo</h2>
+    </div>
+    <div class="values-grid">
+      <div class="val-card rv">
+        <div class="val-num">01</div>
+        <h3>Producción primero</h3>
+        <p>Nada de soluciones de laboratorio. Todo lo que enseño y entrego ha funcionado en producción real, con datos reales y SLAs exigentes.</p>
+      </div>
+      <div class="val-card rv d1">
+        <div class="val-num">02</div>
+        <h3>Calidad sin compromisos</h3>
+        <p>Un pipeline mal hecho cuesta diez veces más arreglarlo que hacerlo bien. La calidad no es opcional, es la base de cualquier proyecto de datos.</p>
+      </div>
+      <div class="val-card rv d2">
+        <div class="val-num">03</div>
+        <h3>Claridad ante todo</h3>
+        <p>Los datos deben ser comprensibles. Un dashboard que nadie usa es dinero malgastado. Diseño para que los usuarios finales tomen mejores decisiones.</p>
+      </div>
+      <div class="val-card rv d3">
+        <div class="val-num">04</div>
+        <h3>Transferencia de conocimiento</h3>
+        <p>No creo en dependencias innecesarias. El objetivo es siempre que puedas mantener y evolucionar lo que construimos juntos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-band">
+  <div class="cnt">
+    <h2 class="cb-title rv">¿Hablamos?</h2>
+    <p class="cb-sub rv d1">Cuéntame tu proyecto. Respondo en menos de 48 horas.</p>
+    <a href="contacto.html" class="btn-white rv d2">Contactar &rarr;</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+          <a href="https://github.com/antonio-moro" target="_blank" class="ft-link">GitHub</a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h4>Especialización</h4>
+        <ul>
+          <li><a href="productos.html#recursos">Power BI &amp; BI</a></li>
+          <li><a href="productos.html#recursos">Data Engineering</a></li>
+          <li><a href="productos.html#recursos">SQL &amp; dbt</a></li>
+          <li><a href="productos.html#recursos">Auditoría de datos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="productos.html">Power BI Templates</a></li>
+          <li><a href="productos.html">SQL Pack</a></li>
+          <li><a href="productos.html">dbt Starter</a></li>
+          <li><a href="productos.html">Cursos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Páginas</h4>
+        <ul>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="sobre-mi.html">Sobre mí</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>

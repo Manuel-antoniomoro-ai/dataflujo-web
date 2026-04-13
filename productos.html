@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Explora los 27 recursos DataFlujo de Data Engineering &amp; BI: plantillas Power BI, SQL, dbt, Python y proyectos starter listos para desplegar.">
+<title>Productos — DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* ANIMATIONS */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* IMAGE ZOOM */
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}
+.iz.iz-in img{transform:scale(1);opacity:1}
+
+/* SECTIONS */
+.sec-white{padding:100px 0;background:var(--bg)}.sec-gray{padding:100px 0;background:var(--bg2)}
+.sec-head{margin-bottom:3rem}
+.sec-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.75rem}
+.sec-title{font-family:var(--fe);font-size:clamp(2rem,4vw,2.75rem);font-weight:700;color:var(--t);line-height:1.2}
+.sec-sub{font-size:.95rem;color:var(--t2);margin-top:.75rem;max-width:560px;line-height:1.7}
+
+/* PAGE HERO */
+.page-hero{position:relative;height:420px;margin-top:64px}
+.ph-bg{position:absolute;inset:0;height:100%}
+.ph-bg img{width:100%;height:100%;object-fit:cover}
+.ph-overlay{position:absolute;inset:0;background:rgba(8,14,28,.76);display:flex;align-items:flex-end;padding-bottom:4rem}
+.ph-label{display:block;font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:.75rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.ph-sub{font-size:1rem;color:rgba(255,255,255,.7);max-width:540px;line-height:1.7}
+
+/* SERVICES GRID */
+.srv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem}
+.srv-card{background:var(--bg);border:1px solid var(--bd);padding:2.5rem;border-radius:var(--r);transition:border-color .25s,box-shadow .25s}
+.srv-card:hover{border-color:var(--bd2);box-shadow:var(--s2)}
+.srv-cat{font-family:var(--fd);font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);margin-bottom:.75rem}
+.srv-card h3{font-family:var(--fe);font-size:1.35rem;font-weight:700;color:var(--t);margin-bottom:.75rem;line-height:1.25}
+.srv-card .srv-desc{font-size:.9rem;color:var(--t2);line-height:1.72;margin-bottom:1.5rem}
+.srv-price-tag{font-family:var(--fd);font-size:.78rem;font-weight:700;color:var(--t);background:var(--bg2);display:inline-block;padding:.3rem .85rem;border-radius:2px;margin-bottom:1.25rem;letter-spacing:.04em}
+.srv-items{margin-bottom:1.75rem}
+.srv-items li{font-size:.85rem;color:var(--t2);padding:.3rem 0;padding-left:1.1rem;position:relative;border-bottom:1px solid var(--bd)}
+.srv-items li:last-child{border-bottom:none}
+.srv-items li::before{content:'—';position:absolute;left:0;color:var(--ac);font-weight:600}
+.srv-cta{display:inline-block;background:var(--ac);color:#fff;padding:.65rem 1.4rem;border-radius:var(--r);font-family:var(--fd);font-size:.78rem;font-weight:700;letter-spacing:.04em;transition:background .2s}
+.srv-cta:hover{background:var(--ac2)}
+@media(max-width:760px){.srv-grid{grid-template-columns:1fr}}
+
+/* FULL IMAGE DIVIDER */
+.fullimg{position:relative;height:380px}
+.fullimg img{width:100%;height:100%;object-fit:cover}
+.fullimg-overlay{position:absolute;inset:0;background:rgba(8,14,28,.74);display:flex;align-items:center;justify-content:center}
+.fullimg-text{font-family:var(--fe);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;color:#fff;text-align:center;max-width:560px;line-height:1.3;padding:0 2rem}
+
+/* PRODUCT TABS */
+.tabs-wrap{margin-bottom:2rem}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem}
+.tab{background:none;border:1px solid var(--bd);padding:.38rem .9rem;border-radius:var(--r);font-family:var(--fd);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);cursor:pointer;transition:all .2s}
+.tab:hover,.tab.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pcount{font-size:.8rem;color:var(--t3);font-family:var(--fd);letter-spacing:.04em;margin-bottom:2rem}
+
+/* PRODUCT GRID */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.75rem}
+.pc{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);display:flex;flex-direction:column;transition:border-color .25s,box-shadow .25s}
+.pc:hover{border-color:var(--bd2);box-shadow:var(--s2)}
+.pc-head{background:var(--bg2);padding:1.5rem 1.5rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.pc-cat{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}
+.pc-badge{font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border:1px solid var(--bd);padding:.2rem .6rem;border-radius:2px}
+.pc-badge.bestseller{color:var(--ac);border-color:var(--ac)}
+.pc-badge.gratis{color:var(--t2);border-color:var(--bd2)}
+.pc-body{padding:1.25rem 1.5rem;flex:1}
+.pc-body h3{font-family:var(--fe);font-size:1rem;font-weight:700;color:var(--t);margin-bottom:.4rem;line-height:1.35}
+.pc-type{font-size:.76rem;color:var(--t3);margin-bottom:.65rem;font-style:italic}
+.pc-body p{font-size:.84rem;color:var(--t2);line-height:1.65;margin-bottom:.85rem}
+.pc-feat{display:flex;flex-direction:column;gap:.2rem}
+.pc-feat li{font-size:.8rem;color:var(--t2);padding:.2rem 0;padding-left:.9rem;position:relative}
+.pc-feat li::before{content:'–';position:absolute;left:0;color:var(--t3)}
+.pc-foot{padding:1.25rem 1.5rem;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.pc-price{font-family:var(--fd);font-size:1.05rem;font-weight:800;color:var(--t)}
+.pc-price .orig{font-size:.78rem;font-weight:400;color:var(--t3);text-decoration:line-through;margin-right:.3rem}
+.pc-price.free{color:var(--t2);font-size:.88rem}
+.btn-buy{display:inline-block;background:var(--ac);color:#fff;padding:.42rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.04em;transition:background .2s;border:none;cursor:pointer}
+.btn-buy:hover{background:var(--ac2)}
+.btn-buy.free-btn{background:var(--bg2);color:var(--t);border:1px solid var(--bd2)}
+.btn-buy.free-btn:hover{background:var(--bg3)}
+@media(max-width:960px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.pgrid{grid-template-columns:1fr}}
+
+/* CTA SECTION */
+.cta-section{background:var(--ac);padding:80px 0;text-align:center}
+.cta-title{font-family:var(--fe);font-size:clamp(2rem,3.5vw,2.8rem);font-weight:700;color:#fff;margin-bottom:1rem;line-height:1.2}
+.cta-sub{font-size:.95rem;color:rgba(255,255,255,.65);margin-bottom:2.25rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7}
+.btn-white{display:inline-block;background:#fff;color:var(--ac);padding:.8rem 2rem;border-radius:var(--r);font-family:var(--fd);font-size:.88rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}
+.btn-white:hover{opacity:.88}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}
+.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}
+.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}
+.ft-col ul li{margin-bottom:.5rem}
+.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+@media(max-width:480px){.ft-grid{grid-template-columns:1fr}}
+
+/* ── MODAL ─────────────────────────────────────────────────────────── */
+.modal-bd{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:900;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.modal-bd.open{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:10px;width:100%;max-width:880px;max-height:92vh;overflow:hidden;display:flex;flex-direction:row;box-shadow:0 28px 90px rgba(0,0,0,.25);transform:translateY(22px) scale(.97);transition:transform .32s cubic-bezier(.22,1,.36,1)}
+.modal-bd.open .modal-box{transform:none}
+/* left panel — product info */
+.modal-left{flex:1;padding:3rem;background:var(--ac);color:#fff;display:flex;flex-direction:column;justify-content:space-between;min-width:0;position:relative;overflow:hidden}
+.modal-left::before{content:'';position:absolute;top:-70px;right:-70px;width:220px;height:220px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
+.modal-left::after{content:'';position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:rgba(255,255,255,.04);border-radius:50%;pointer-events:none}
+.ml-cat{font-family:var(--fd);font-size:.63rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.75rem}
+.ml-title{font-family:var(--fe);font-size:1.5rem;font-weight:800;line-height:1.22;margin-bottom:.6rem}
+.ml-type{font-size:.77rem;color:rgba(255,255,255,.55);margin-bottom:1rem;font-style:italic}
+.ml-desc{font-size:.87rem;color:rgba(255,255,255,.78);line-height:1.72;margin-bottom:1.35rem}
+.ml-feats{display:flex;flex-direction:column;gap:.4rem;margin-bottom:2rem}
+.ml-feats li{font-size:.82rem;color:rgba(255,255,255,.75);padding-left:1.2rem;position:relative;line-height:1.5}
+.ml-feats li::before{content:'✓';position:absolute;left:0;color:#6ee7b7;font-weight:700;font-size:.8rem}
+.ml-price{font-family:var(--fd);font-size:1.45rem;font-weight:800;color:#fff;margin-top:auto}
+.ml-price .orig{font-size:.8rem;font-weight:400;color:rgba(255,255,255,.4);text-decoration:line-through;margin-right:.4rem}
+.modal-close{position:absolute;top:.9rem;right:.9rem;background:rgba(255,255,255,.13);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:2}
+.modal-close:hover{background:rgba(255,255,255,.25)}
+/* right panel — form */
+.modal-right{width:360px;flex-shrink:0;padding:2.75rem 2.5rem;overflow-y:auto;display:flex;flex-direction:column}
+.mr-title{font-family:var(--fe);font-size:1.3rem;font-weight:700;color:var(--t);margin-bottom:.4rem}
+.mr-sub{font-size:.83rem;color:var(--t3);margin-bottom:2rem;line-height:1.65}
+.mform{display:flex;flex-direction:column;gap:.95rem;flex:1}
+.mfield{display:flex;flex-direction:column;gap:.35rem}
+.mfield label{font-size:.75rem;font-weight:600;color:var(--t2);font-family:var(--fd);letter-spacing:.04em;text-transform:uppercase}
+.mfield input{border:1.5px solid var(--bd2);border-radius:var(--r);padding:.65rem .9rem;font-size:.88rem;color:var(--t);background:#fff;transition:border-color .2s;font-family:var(--fb);outline:none;width:100%}
+.mfield input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(15,31,64,.08)}
+.mfield input::placeholder{color:var(--t3)}
+.m-legal{font-size:.72rem;color:var(--t3);line-height:1.58;padding:.5rem 0}
+.m-legal a{color:var(--ac);text-decoration:underline}
+.m-legal a:hover{color:var(--ac2)}
+.m-check{display:flex;align-items:flex-start;gap:.65rem;cursor:pointer;padding:.25rem 0}
+.m-check input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-color:var(--ac);cursor:pointer}
+.m-check span{font-size:.74rem;color:var(--t2);line-height:1.55}
+.m-check a{color:var(--ac);text-decoration:underline}
+.m-check a:hover{color:var(--ac2)}
+.mform-btn{background:var(--ac);color:#fff;border:none;padding:.85rem 1.5rem;border-radius:var(--r);font-family:var(--fd);font-size:.82rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:background .2s;margin-top:.5rem;text-align:center}
+.mform-btn:hover{background:var(--ac2)}
+.mform-btn:disabled{opacity:.5;cursor:not-allowed}
+/* success state */
+.m-ok{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1;gap:.75rem;padding:2rem 0}
+.m-ok-icon{font-size:3rem}
+.m-ok h3{font-family:var(--fe);font-size:1.25rem;font-weight:700;color:var(--t)}
+.m-ok p{font-size:.85rem;color:var(--t3);line-height:1.7}
+/* responsive */
+@media(max-width:680px){
+  .modal-box{flex-direction:column;max-height:95vh;overflow-y:auto}
+  .modal-left{display:none}
+  .modal-right{width:100%;padding:2rem}
+}
+/* ── Badge próximamente ──────────────────────────────────────────────────── */
+.badge-soon{display:inline-block;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:#fef3c7;color:#92400e;padding:.2rem .6rem;border-radius:2px;border:1px solid #fde68a}
+/* ── Badge disponible ────────────────────────────────────────────────────── */
+.badge-available{display:inline-block;font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:#d1fae5;color:#065f46;padding:.2rem .6rem;border-radius:2px;border:1px solid #6ee7b7}
+/* ── Botón solicitar acceso ──────────────────────────────────────────────── */
+.btn-solicitar{display:inline-block;border:1.5px solid var(--ac);color:var(--ac);background:transparent;padding:.42rem 1rem;border-radius:var(--r);font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s}
+.btn-solicitar:hover{background:var(--ac);color:#fff}
+/* ── Waitlist Modal ──────────────────────────────────────────────────────── */
+.wl-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.wl-box{background:#fff;border-radius:8px;padding:2.5rem 2rem;max-width:420px;width:100%;position:relative;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.wl-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--t3);line-height:1;padding:.25rem .5rem}
+.wl-close:hover{color:var(--t)}
+.wl-label{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:.5rem}
+.wl-title{font-family:var(--fe);font-size:1.4rem;font-weight:700;color:var(--t);margin-bottom:.75rem;line-height:1.2}
+.wl-desc{font-size:.88rem;color:var(--t2);line-height:1.65;margin-bottom:1.25rem}
+.wl-field{margin-bottom:.75rem}
+.wl-field input[type="email"]{width:100%;padding:.7rem 1rem;border:1.5px solid var(--bd);border-radius:var(--r);font-family:var(--fb);font-size:.9rem;color:var(--t);outline:none;transition:border-color .2s}
+.wl-field input[type="email"]:focus{border-color:var(--ac)}
+.newsletter-rgpd{display:flex;gap:.5rem;align-items:flex-start;cursor:pointer}
+.newsletter-rgpd input[type="checkbox"]{margin-top:3px;flex-shrink:0;accent-color:var(--ac)}
+.newsletter-rgpd span{font-size:.75rem;color:var(--t3);line-height:1.5}
+.btn-newsletter{background:var(--ac);color:#fff;border:none;cursor:pointer;padding:.65rem 1.25rem;border-radius:var(--r);font-family:var(--fd);font-size:.8rem;font-weight:700;letter-spacing:.04em;white-space:nowrap;transition:background .2s;width:100%}
+.btn-newsletter:hover{background:var(--ac2)}
+.newsletter-msg{font-size:.82rem;margin-top:.75rem;padding:.6rem 1rem;border-radius:var(--r);font-family:var(--fd)}
+.newsletter-msg.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.newsletter-msg.ko{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html" class="active">Productos</a>
+      <a href="blog.html">Blog</a>
+      <a href="video-tutoriales.html">V&iacute;deos</a>
+      <a href="ia-tools.html">IA Tools</a>
+      <a href="sobre-mi.html">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="ia-tools.html">IA Tools</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="ph-bg iz">
+    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&auto=format&fit=crop&q=80" alt="Servicios de datos">
+  </div>
+  <div class="ph-overlay">
+    <div class="cnt">
+      <span class="ph-label rv">Recursos digitales</span>
+      <h1 class="ph-title rv d1">Productos</h1>
+      <p class="ph-sub rv d2">27 recursos listos para producción en Power BI, SQL, dbt, Python y más.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ESPECIALIZACIÓN -->
+<section class="sec-white">
+  <div class="cnt">
+    <div class="sec-head">
+      <span class="sec-label rv">Especialización</span>
+      <h2 class="sec-title rv d1">20+ años de experiencia real</h2>
+      <p class="sec-sub rv d2">Estas son las áreas en las que he trabajado en proyectos de producción para empresas como Accenture, IBM, Bankinter y Orange. No teoría: casos reales.</p>
+    </div>
+    <div class="srv-grid">
+
+      <div class="srv-card rv">
+        <div class="srv-cat">Business Intelligence</div>
+        <h3>BI &amp; Power BI</h3>
+        <p class="srv-desc">Soluciones Power BI end-to-end: modelo de datos, DAX avanzado y dashboards ejecutivos listos para producción. Desde el diseño hasta la entrega.</p>
+        <ul class="srv-items">
+          <li>Modelado dimensional (Kimball)</li>
+          <li>DAX avanzado y optimización de medidas</li>
+          <li>Row Level Security corporativo</li>
+          <li>Conexión a ERP/CRM vía DirectQuery</li>
+        </ul>
+      </div>
+
+      <div class="srv-card rv d1">
+        <div class="srv-cat">Ingeniería de datos</div>
+        <h3>Data Engineering &amp; ETL/ELT</h3>
+        <p class="srv-desc">Pipelines de datos escalables en cloud con las herramientas más demandadas del mercado. Desde la ingestión hasta el modelo analítico.</p>
+        <ul class="srv-items">
+          <li>Pipelines con dbt + Airflow</li>
+          <li>Migración a cloud GCP / Azure / AWS</li>
+          <li>Arquitectura medallion (Bronze/Silver/Gold)</li>
+          <li>CDC e integración incremental</li>
+        </ul>
+      </div>
+
+      <div class="srv-card rv d2">
+        <div class="srv-cat">Formación</div>
+        <h3>Formación &amp; Mentoring</h3>
+        <p class="srv-desc">Formación técnica en SQL, Power BI y Data Engineering para equipos y profesionales. Los recursos descargables de este sitio son el destilado de ese conocimiento.</p>
+        <ul class="srv-items">
+          <li>Workshops intensivos de 1 a 3 días</li>
+          <li>Mentoring 1:1 semanal</li>
+          <li>Material personalizado incluido</li>
+          <li>Seguimiento post-formación</li>
+        </ul>
+      </div>
+
+      <div class="srv-card rv d3">
+        <div class="srv-cat">Diagnóstico</div>
+        <h3>Auditoría de Datos</h3>
+        <p class="srv-desc">Revisión completa de un stack de datos: arquitectura, calidad, gobierno y plan de mejora priorizado. Los recursos de auditoría están disponibles como plantillas descargables.</p>
+        <ul class="srv-items">
+          <li>Audit de calidad de datos y linaje</li>
+          <li>Revisión modelos Power BI / DAX</li>
+          <li>Informe ejecutivo + sesión de presentación</li>
+          <li>Roadmap de mejoras priorizado</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FULL IMAGE DIVIDER -->
+<div class="fullimg iz">
+  <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&auto=format&fit=crop&q=80" alt="Data center y código" loading="lazy">
+  <div class="fullimg-overlay">
+    <p class="fullimg-text rv">27 recursos creados desde proyectos reales.<br>Listos para usar el primer día.</p>
+  </div>
+</div>
+
+<!-- TIENDA DE RECURSOS -->
+<section class="sec-white" id="recursos">
+  <div class="cnt">
+    <div class="sec-head">
+      <span class="sec-label rv">Recursos</span>
+      <h2 class="sec-title rv d1">Recursos digitales</h2>
+      <p class="sec-sub rv d2">Plantillas, scripts y guías creados desde proyectos reales en banca, telecomunicaciones y gran empresa.</p>
+    </div>
+
+    <div class="tabs-wrap rv">
+      <div class="tabs" id="prodTabs">
+        <button class="tab on" data-cat="todos">Todos (27)</button>
+        <button class="tab" data-cat="powerbi">Power BI (4)</button>
+        <button class="tab" data-cat="tableau">Tableau (2)</button>
+        <button class="tab" data-cat="sql">SQL (3)</button>
+        <button class="tab" data-cat="dbt">dbt (2)</button>
+        <button class="tab" data-cat="excel">Excel (3)</button>
+        <button class="tab" data-cat="python">Python (3)</button>
+        <button class="tab" data-cat="shell">Shell (3)</button>
+        <button class="tab" data-cat="etl">ETL (2)</button>
+        <button class="tab" data-cat="cloud">Cloud (2)</button>
+        <button class="tab" data-cat="arquitectura">Arquitectura (1)</button>
+        <button class="tab" data-cat="cursos">Cursos (2)</button>
+        <button class="tab" data-cat="gratis">Gratis</button>
+      </div>
+    </div>
+    <p class="pcount" id="pcount">Mostrando 27 productos</p>
+
+    <div class="pgrid" id="pgrid">
+
+      <!-- POWER BI -->
+      <div class="pc rv" data-cat="powerbi">
+        <div class="pc-head">
+          <div class="pc-cat">Power BI</div>
+          <div class="pc-badge bestseller">Bestseller</div>
+        </div>
+        <div class="pc-body">
+          <h3>Dashboard Kit — Finanzas</h3>
+          <p class="pc-type">Guía paso a paso + DAX listo + datos CSV demo</p>
+          <p>P&amp;L, Cashflow, Balance, Ventas y HR. Medidas DAX completas, Power Query y drill-through.</p>
+          <ul class="pc-feat">
+            <li>10 dashboards listos para desplegar</li>
+            <li>Compatible con cualquier ERP via DirectQuery</li>
+            <li>Documentación y vídeo guía incluidos</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price"><span class="orig">129€</span> €89</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="powerbi">
+        <div class="pc-head">
+          <div class="pc-cat">Power BI</div>
+          <div class="pc-badge">Operaciones</div>
+        </div>
+        <div class="pc-body">
+          <h3>Dashboard Kit — Operaciones</h3>
+          <p class="pc-type">Guía completa + DAX + datos demo · Alertas visuales</p>
+          <p>Producción, logística, entregas e incidencias. Semáforos y KPIs condicionales por turno.</p>
+          <ul class="pc-feat">
+            <li>Dashboard producción y rendimiento de planta</li>
+            <li>Logística y entregas con drill por área</li>
+            <li>Alertas visuales con semáforos KPI</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€79</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d2" data-cat="powerbi">
+        <div class="pc-head">
+          <div class="pc-cat">Power BI</div>
+          <div class="pc-badge">Contabilidad</div>
+        </div>
+        <div class="pc-body">
+          <h3>Dashboard — Contabilidad</h3>
+          <p class="pc-type">Guía + DAX + datos CSV · Conexión ERP</p>
+          <p>P&amp;L detallado, Balance general, cuentas por cobrar y pagar con aging. Conecta Excel o ERP.</p>
+          <ul class="pc-feat">
+            <li>P&amp;L con drill por cuenta contable</li>
+            <li>Aging de cuentas por cobrar y pagar</li>
+            <li>Conexión a Excel o ERP via Power Query</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€79</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d3" data-cat="powerbi">
+        <div class="pc-head">
+          <div class="pc-cat">Power BI</div>
+          <div class="pc-badge">Guía</div>
+        </div>
+        <div class="pc-body">
+          <h3>Power BI Starter Guide</h3>
+          <p class="pc-type">.md + PDF · Paso a paso completo</p>
+          <p>De cero a primer reporte publicado. Modelo de datos, DAX básico y publicación en la nube.</p>
+          <ul class="pc-feat">
+            <li>Conectar Excel, SQL y APIs</li>
+            <li>Modelo estrella y relaciones</li>
+            <li>Primeras medidas DAX explicadas</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- TABLEAU -->
+      <div class="pc rv" data-cat="tableau">
+        <div class="pc-head">
+          <div class="pc-cat">Tableau</div>
+          <div class="pc-badge">Ventas</div>
+        </div>
+        <div class="pc-body">
+          <h3>Starter Pack — Ventas</h3>
+          <p class="pc-type">Guía paso a paso + datos CSV demo</p>
+          <p>Funnel de ventas, mapa geográfico, tendencias con forecast y dashboard ejecutivo resumen.</p>
+          <ul class="pc-feat">
+            <li>Funnel de ventas por fase</li>
+            <li>Mapa geográfico de clientes</li>
+            <li>Tendencias mensuales con forecast</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€69</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="tableau">
+        <div class="pc-head">
+          <div class="pc-cat">Tableau</div>
+          <div class="pc-badge">Portfolio</div>
+        </div>
+        <div class="pc-body">
+          <h3>Public Portfolio Template</h3>
+          <p class="pc-type">Guía de publicación + 3 viz de ejemplo</p>
+          <p>Template con branding personalizable para Tableau Public. 3 visualizaciones de ejemplo incluidas.</p>
+          <ul class="pc-feat">
+            <li>Branding 100% personalizable</li>
+            <li>Instrucciones publicación Tableau Public</li>
+            <li>3 ejemplos listos para modificar</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- SQL -->
+      <div class="pc rv" data-cat="sql">
+        <div class="pc-head">
+          <div class="pc-cat">SQL</div>
+          <div class="pc-badge bestseller">Popular</div>
+        </div>
+        <div class="pc-body">
+          <h3>Templates Pack — 50+ Queries BI</h3>
+          <p class="pc-type">.sql + .md · BigQuery / Snowflake / Postgres</p>
+          <p>50+ queries de producción: window functions, cohortes, pivots, deduplicación y métricas de negocio.</p>
+          <ul class="pc-feat">
+            <li>Rankings, acumulados y running totals</li>
+            <li>Análisis de cohortes y retención</li>
+            <li>Métricas: churn, LTV, sesiones</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="sql">
+        <div class="pc-head">
+          <div class="pc-cat">SQL</div>
+          <div class="pc-badge">Entrevistas</div>
+        </div>
+        <div class="pc-body">
+          <h3>Pack — Entrevistas Data Engineer</h3>
+          <p class="pc-type">.md + .sql · Junior &rarr; Senior</p>
+          <p>100 preguntas reales de entrevistas técnicas con soluciones comentadas línea a línea.</p>
+          <ul class="pc-feat">
+            <li>100 preguntas reales de empresas tech</li>
+            <li>Soluciones explicadas paso a paso</li>
+            <li>Niveles Junior, Mid y Senior</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€39</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d2" data-cat="sql gratis">
+        <div class="pc-head">
+          <div class="pc-cat">SQL · Gratis</div>
+          <div class="pc-badge gratis">Gratis</div>
+        </div>
+        <div class="pc-body">
+          <h3>SQL Cheatsheet — Window Functions</h3>
+          <p class="pc-type">PDF · A4 imprimible · En español</p>
+          <p>La referencia de window functions más completa en español. ROW_NUMBER, LAG/LEAD, NTILE y SUM OVER.</p>
+          <ul class="pc-feat">
+            <li>ROW_NUMBER, RANK, DENSE_RANK</li>
+            <li>LAG / LEAD con ejemplos reales</li>
+            <li>SUM/AVG OVER con PARTITION BY</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price free">Gratis</div>
+          <button class="btn-buy free-btn" onclick="window.open('https://gumroad.com/','_blank')">Descargar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- DBT -->
+      <div class="pc rv" data-cat="dbt">
+        <div class="pc-head">
+          <div class="pc-cat">dbt + BigQuery</div>
+          <div class="pc-badge">Nuevo</div>
+        </div>
+        <div class="pc-body">
+          <h3>Project Starter</h3>
+          <p class="pc-type">.zip proyecto dbt completo · GCP</p>
+          <p>Arquitectura medallion lista para BigQuery: staging, intermediate y marts con tests configurados.</p>
+          <ul class="pc-feat">
+            <li>Bronze / Silver / Gold listos</li>
+            <li>Tests de calidad preconfigurados</li>
+            <li>README completo módulo a módulo</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€69</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="dbt">
+        <div class="pc-head">
+          <div class="pc-cat">dbt</div>
+          <div class="pc-badge">Avanzado</div>
+        </div>
+        <div class="pc-body">
+          <h3>Macro Library — 30+ macros Jinja</h3>
+          <p class="pc-type">.sql macros + .md · dbt Core</p>
+          <p>30+ macros reutilizables: surrogate keys, cargas incrementales, auditoría y testing avanzado.</p>
+          <ul class="pc-feat">
+            <li>Surrogate keys automáticas</li>
+            <li>Incremental loads con estrategias</li>
+            <li>Testing avanzado: rangos y combos</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€29</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- EXCEL -->
+      <div class="pc rv" data-cat="excel">
+        <div class="pc-head">
+          <div class="pc-cat">Excel</div>
+          <div class="pc-badge bestseller">Bestseller</div>
+        </div>
+        <div class="pc-body">
+          <h3>Automation con Macros VBA</h3>
+          <p class="pc-type">.bas + guía · 20 macros listas para copiar</p>
+          <p>20 macros: consolidar archivos, enviar emails con Outlook, generar PDFs y automatizar informes.</p>
+          <ul class="pc-feat">
+            <li>Consolidar múltiples hojas/archivos en lote</li>
+            <li>Enviar emails automáticos con Outlook</li>
+            <li>Generar PDFs de reportes con 1 clic</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€39</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="excel">
+        <div class="pc-head">
+          <div class="pc-cat">Excel</div>
+          <div class="pc-badge">Power Query</div>
+        </div>
+        <div class="pc-body">
+          <h3>Power Query Templates</h3>
+          <p class="pc-type">Código M + guía · 10 transformaciones</p>
+          <p>10 transformaciones comunes: unpivot, merge, limpieza, fechas y carga incremental desde carpeta.</p>
+          <ul class="pc-feat">
+            <li>Unpivot y merge de múltiples fuentes</li>
+            <li>Limpieza de texto y normalización</li>
+            <li>Carga incremental desde carpeta local</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€29</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d2" data-cat="excel python">
+        <div class="pc-head">
+          <div class="pc-cat">Excel &rarr; Python</div>
+          <div class="pc-badge">Migración</div>
+        </div>
+        <div class="pc-body">
+          <h3>Excel &rarr; Python Migrator Kit</h3>
+          <p class="pc-type">Scripts .py + Jupyter notebooks · pandas + openpyxl</p>
+          <p>Reemplaza fórmulas con pandas, fusiona archivos Excel y genera reportes automáticos con formato.</p>
+          <ul class="pc-feat">
+            <li>Leer/escribir Excel con openpyxl y pandas</li>
+            <li>Reemplazar fórmulas complejas</li>
+            <li>Generar reportes con formato automáticos</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- PYTHON -->
+      <div class="pc rv" data-cat="python">
+        <div class="pc-head">
+          <div class="pc-cat">Python</div>
+          <div class="pc-badge">Automatización</div>
+        </div>
+        <div class="pc-body">
+          <h3>Task Automation Kit</h3>
+          <p class="pc-type">Scripts .py · Windows &amp; Linux</p>
+          <p>Automatiza tareas de PC: archivos, emails, PDFs, web scraping y notificaciones a Slack/Teams.</p>
+          <ul class="pc-feat">
+            <li>Renombrar y organizar archivos en lote</li>
+            <li>Extraer datos de PDFs (pdfplumber)</li>
+            <li>Notificaciones automáticas Slack/Teams</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="python etl">
+        <div class="pc-head">
+          <div class="pc-cat">Python · ETL</div>
+          <div class="pc-badge">Pipeline</div>
+        </div>
+        <div class="pc-body">
+          <h3>Data Pipeline con Python + Airflow</h3>
+          <p class="pc-type">DAGs .py + docker-compose</p>
+          <p>DAGs de extracción API REST, transformación con pandas y carga incremental. Airflow con Docker.</p>
+          <ul class="pc-feat">
+            <li>DAG extracción desde API REST</li>
+            <li>Transformación incremental con pandas</li>
+            <li>Airflow local con Docker Compose</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€69</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d2" data-cat="python">
+        <div class="pc-head">
+          <div class="pc-cat">Python</div>
+          <div class="pc-badge">Alertas</div>
+        </div>
+        <div class="pc-body">
+          <h3>Pack de Alertas — Email / Slack</h3>
+          <p class="pc-type">Scripts .py · Cron / Windows Task</p>
+          <p>Monitorear KPIs, detectar anomalías y enviar reportes diarios automáticos por email o Slack.</p>
+          <ul class="pc-feat">
+            <li>Monitoreo de KPIs en base de datos</li>
+            <li>Detección de anomalías estadísticas</li>
+            <li>Integración Slack webhooks y Teams</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€29</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- SHELL -->
+      <div class="pc rv" data-cat="shell">
+        <div class="pc-head">
+          <div class="pc-cat">PowerShell</div>
+          <div class="pc-badge">Windows Admin</div>
+        </div>
+        <div class="pc-body">
+          <h3>Automation Pack — Windows Admin</h3>
+          <p class="pc-type">10 scripts .ps1 · Backup, AD, monitoreo, winget</p>
+          <p>Backup automático, limpieza, gestión AD, winget batch, monitoreo disco y tareas programadas.</p>
+          <ul class="pc-feat">
+            <li>Backup de carpetas con fecha automática</li>
+            <li>Gestión usuarios Active Directory</li>
+            <li>Instalar software en lote con winget</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€39</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="shell">
+        <div class="pc-head">
+          <div class="pc-cat">Bash / Shell</div>
+          <div class="pc-badge">Linux</div>
+        </div>
+        <div class="pc-body">
+          <h3>Bash Scripts Pack — Unix/Linux</h3>
+          <p class="pc-type">8 scripts .sh · Producción real</p>
+          <p>Monitoreo CPU, rotación de logs, ETL básico, SFTP, backup incremental y alertas Slack.</p>
+          <ul class="pc-feat">
+            <li>Monitoreo procesos y CPU con alertas email</li>
+            <li>Backup incremental con rsync</li>
+            <li>ETL bash: descargar, transformar y cargar</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€39</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d2" data-cat="shell">
+        <div class="pc-head">
+          <div class="pc-cat">GitHub Actions</div>
+          <div class="pc-badge">CI/CD</div>
+        </div>
+        <div class="pc-body">
+          <h3>CI/CD para Data Projects</h3>
+          <p class="pc-type">.yml workflows · GitHub Actions</p>
+          <p>Testing automático dbt, validación SQL con sqlfluff y deploy a producción al merge.</p>
+          <ul class="pc-feat">
+            <li>Testing automático dbt en cada PR</li>
+            <li>Validación SQL con sqlfluff</li>
+            <li>Notificación de resultados a Slack</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€29</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- ETL -->
+      <div class="pc rv" data-cat="etl">
+        <div class="pc-head">
+          <div class="pc-cat">ETL</div>
+          <div class="pc-badge">Python</div>
+        </div>
+        <div class="pc-body">
+          <h3>ETL Patterns con Python (sin Airflow)</h3>
+          <p class="pc-type">Scripts .py · Postgres / BigQuery / SQLite</p>
+          <p>Ingestión incremental, deduplicación por hash, manejo de errores y logs estructurados.</p>
+          <ul class="pc-feat">
+            <li>Full load, incremental y CDC simulado</li>
+            <li>Deduplicación robusta con hash de columnas</li>
+            <li>Carga a Postgres, BigQuery y SQLite</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="etl">
+        <div class="pc-head">
+          <div class="pc-cat">ETL · Informatica / Talend</div>
+          <div class="pc-badge">Enterprise</div>
+        </div>
+        <div class="pc-body">
+          <h3>Mapping Templates</h3>
+          <p class="pc-type">Guía .md + JSON/SQL equivalentes</p>
+          <p>SCD Type 2, CDC básico, lookups, aggregators y error handling para entornos enterprise.</p>
+          <ul class="pc-feat">
+            <li>SCD Type 2 historial de cambios</li>
+            <li>CDC (Change Data Capture) básico</li>
+            <li>Error handling y logging en mappings</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€59</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- CLOUD -->
+      <div class="pc rv" data-cat="cloud">
+        <div class="pc-head">
+          <div class="pc-cat">Cloud · GCP</div>
+          <div class="pc-badge">BigQuery</div>
+        </div>
+        <div class="pc-body">
+          <h3>GCP / BigQuery Setup Guide</h3>
+          <p class="pc-type">.md + PDF · De cero a producción</p>
+          <p>Crear proyecto GCP, IAM, BigQuery, particionado, clustering, alertas de coste y conexiones.</p>
+          <ul class="pc-feat">
+            <li>Configurar IAM y service accounts</li>
+            <li>Particionado y clustering BigQuery</li>
+            <li>Conectar con dbt, Looker Studio y Power BI</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€39</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="cloud">
+        <div class="pc-head">
+          <div class="pc-cat">Cloud · Azure</div>
+          <div class="pc-badge">ADF</div>
+        </div>
+        <div class="pc-body">
+          <h3>Azure Data Factory Pipelines Starter</h3>
+          <p class="pc-type">ARM templates + .md · ADF</p>
+          <p>Pipelines de ingestión API REST, copia desde Blob Storage, incremental con watermark y alertas.</p>
+          <ul class="pc-feat">
+            <li>Pipeline ingestión desde API REST</li>
+            <li>Pipeline copia Blob Storage &rarr; SQL</li>
+            <li>Incremental con watermark + alertas email</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- ARQUITECTURA -->
+      <div class="pc rv" data-cat="arquitectura">
+        <div class="pc-head">
+          <div class="pc-cat">Arquitectura de Datos</div>
+          <div class="pc-badge">Guía completa</div>
+        </div>
+        <div class="pc-body">
+          <h3>Data Warehouse Architecture Guide</h3>
+          <p class="pc-type">PDF + .md · Diagramas incluidos</p>
+          <p>Kimball vs Inmon, arquitectura medallion, naming conventions, SCD y checklist de calidad.</p>
+          <ul class="pc-feat">
+            <li>Modelo estrella vs copo de nieve</li>
+            <li>Medallion: Bronze, Silver y Gold</li>
+            <li>SCD 1, 2 y 3 con ejemplos reales</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price">€49</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <!-- CURSOS -->
+      <div class="pc rv" data-cat="cursos">
+        <div class="pc-head">
+          <div class="pc-cat">Curso completo</div>
+          <div class="pc-badge bestseller">Top ventas</div>
+        </div>
+        <div class="pc-body">
+          <h3>dbt + BigQuery desde cero</h3>
+          <p class="pc-type">Proyecto dbt completo + guías .md · 7 módulos</p>
+          <p>De la instalación al deploy en GCP. Tests, macros, documentación y proyecto final incluido.</p>
+          <ul class="pc-feat">
+            <li>7 módulos guiados paso a paso</li>
+            <li>Staging, intermediate y marts</li>
+            <li>Tests, macros y lineaje de datos</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price"><span class="orig">297€</span> €197</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+      <div class="pc rv d1" data-cat="cursos">
+        <div class="pc-head">
+          <div class="pc-cat">Curso</div>
+          <div class="pc-badge">SQL Avanzado</div>
+        </div>
+        <div class="pc-body">
+          <h3>SQL Avanzado para Data Engineers</h3>
+          <p class="pc-type">PDF + ejercicios .sql · BigQuery / Snowflake</p>
+          <p>Window functions, CTEs recursivas, optimización con EXPLAIN y patrones analíticos avanzados.</p>
+          <ul class="pc-feat">
+            <li>Window functions en profundidad</li>
+            <li>CTEs recursivas y jerarquías</li>
+            <li>EXPLAIN, índices y query plans</li>
+          </ul>
+        </div>
+        <div class="pc-foot">
+          <div class="pc-price"><span class="orig">149€</span> €99</div>
+          <button class="btn-buy" onclick="window.open('https://gumroad.com/','_blank')">Comprar &rarr;</button>
+        </div>
+      </div>
+
+    </div><!-- /pgrid -->
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cnt">
+    <h2 class="cta-title rv">¿Necesitas algo a medida?</h2>
+    <p class="cta-sub rv d1">Si los recursos no cubren exactamente lo que necesitas, puedo trabajar directamente contigo. Cuéntame el proyecto.</p>
+    <a href="contacto.html" class="btn-white rv d2">Hablemos &rarr;</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+          <a href="https://github.com/antonio-moro" target="_blank" class="ft-link">GitHub</a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h4>Especialización</h4>
+        <ul>
+          <li><a href="productos.html#recursos">Power BI &amp; BI</a></li>
+          <li><a href="productos.html#recursos">Data Engineering</a></li>
+          <li><a href="productos.html#recursos">SQL &amp; dbt</a></li>
+          <li><a href="productos.html#recursos">Auditoría de datos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="#recursos">Power BI Templates</a></li>
+          <li><a href="#recursos">SQL Pack</a></li>
+          <li><a href="#recursos">dbt Starter</a></li>
+          <li><a href="#recursos">Cursos</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Páginas</h4>
+        <ul>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="sobre-mi.html">Sobre mí</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ── MODAL LEAD CAPTURE ─────────────────────────────────────────── -->
+<div class="modal-bd" id="modalBd" role="dialog" aria-modal="true" aria-labelledby="mlTitle">
+  <div class="modal-box" id="modalBox">
+
+    <!-- Panel izquierdo: info del recurso -->
+    <div class="modal-left">
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+      <div>
+        <div class="ml-cat" id="mlCat"></div>
+        <h2 class="ml-title" id="mlTitle"></h2>
+        <p class="ml-type" id="mlType"></p>
+        <p class="ml-desc" id="mlDesc"></p>
+        <ul class="ml-feats" id="mlFeats"></ul>
+      </div>
+      <div class="ml-price" id="mlPrice"></div>
+    </div>
+
+    <!-- Panel derecho: formulario -->
+    <div class="modal-right">
+      <h3 class="mr-title">¿Te interesa este recurso?</h3>
+      <p class="mr-sub">Déjame tus datos y te contacto en menos de 24h.</p>
+
+      <form class="mform" id="mForm" novalidate>
+        <div class="mfield">
+          <label for="mName">Nombre completo *</label>
+          <input type="text" id="mName" name="nombre" placeholder="Tu nombre completo" required autocomplete="name">
+        </div>
+        <div class="mfield">
+          <label for="mEmail">Correo electrónico *</label>
+          <input type="email" id="mEmail" name="email" placeholder="tu@email.com" required autocomplete="email">
+        </div>
+        <div class="mfield">
+          <label for="mWa">Número de WhatsApp *</label>
+          <input type="tel" id="mWa" name="whatsapp" placeholder="+34 600 000 000" required autocomplete="tel">
+        </div>
+
+        <p class="m-legal">Para obtener más información revisa nuestras <a href="legal.html" target="_blank">Condiciones Legales</a>.</p>
+
+        <label class="m-check">
+          <input type="checkbox" id="mPrivacy" required>
+          <span>He leído y acepto la <a href="privacidad.html" target="_blank">Política de Privacidad</a>.*</span>
+        </label>
+
+        <button type="submit" class="mform-btn" id="mBtn">Solicitar información →</button>
+      </form>
+
+      <div class="m-ok" id="mOk">
+        <div class="m-ok-icon">✅</div>
+        <h3>¡Recibido!</h3>
+        <p>Te contactaré en menos de 24h con toda la información sobre <strong id="mOkTitle"></strong>.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+
+// ── Precios desde config.js ──────────────────────────────────────────
+if(typeof AM !== 'undefined' && AM.precios) {
+  document.querySelectorAll('.pc').forEach(card => {
+    const title = card.querySelector('h3')?.textContent?.trim() || '';
+    const data  = AM.precios[title];
+    const el    = card.querySelector('.pc-price');
+    if(!el) return;
+    if(!AM.mostrarPrecios) {
+      el.innerHTML = '<span style="opacity:.5;font-size:.78rem;font-weight:500">Consultar precio</span>';
+      return;
+    }
+    if(data === undefined) return; // no está en config → mantiene HTML original
+    if(data.precio === 0) {
+      el.innerHTML = '<span style="color:#10b981;font-weight:700;font-size:1.05rem">Gratis</span>';
+    } else if(data.orig) {
+      el.innerHTML = `<span class="orig">${data.orig}€</span> €${data.precio}`;
+    } else {
+      el.innerHTML = `€${data.precio}`;
+    }
+  });
+}
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const cat=btn.dataset.cat;
+    let count=0;
+    document.querySelectorAll('.pc').forEach(card=>{
+      const cats=(card.dataset.cat||'').split(' ');
+      const show=cat==='todos'||cats.includes(cat);
+      card.style.display=show?'':'none';
+      if(show)count++;
+    });
+    document.getElementById('pcount').textContent='Mostrando '+count+' producto'+(count!==1?'s':'');
+  });
+});
+
+// ── MODAL ─────────────────────────────────────────────────────────────
+// Quitar los onclick inline de Gumroad para que el modal pueda interceptar
+document.querySelectorAll('.btn-buy').forEach(btn => btn.removeAttribute('onclick'));
+
+const modalBd = document.getElementById('modalBd');
+let _curProd = '';
+
+function openModal(srcEl) {
+  const isSrv = srcEl.classList.contains('srv-card');
+  let cat, title, type, desc, feats, priceHtml;
+
+  if(isSrv) {
+    cat       = srcEl.querySelector('.srv-cat')?.textContent || '';
+    title     = srcEl.querySelector('h3')?.textContent || '';
+    type      = '';
+    desc      = srcEl.querySelector('.srv-desc')?.textContent || '';
+    feats     = [...srcEl.querySelectorAll('.srv-items li')].map(li => li.textContent.trim());
+    priceHtml = srcEl.querySelector('.srv-price-tag')?.textContent || '';
+  } else {
+    cat       = srcEl.querySelector('.pc-cat')?.textContent || '';
+    title     = srcEl.querySelector('h3')?.textContent || '';
+    type      = srcEl.querySelector('.pc-type')?.textContent || '';
+    desc      = srcEl.querySelector('.pc-body > p:not(.pc-type)')?.textContent || '';
+    feats     = [...srcEl.querySelectorAll('.pc-feat li')].map(li => li.textContent.trim());
+    priceHtml = srcEl.querySelector('.pc-price')?.innerHTML || '';
+  }
+
+  _curProd = title;
+  document.getElementById('mlCat').textContent  = cat;
+  document.getElementById('mlTitle').textContent = title;
+  document.getElementById('mlType').textContent  = type;
+  document.getElementById('mlDesc').textContent  = desc;
+  document.getElementById('mlPrice').innerHTML   = priceHtml;
+  document.getElementById('mlFeats').innerHTML   = feats.map(f => `<li>${f}</li>`).join('');
+  document.getElementById('mOkTitle').textContent = title;
+
+  // Reset form / success state
+  document.getElementById('mForm').reset();
+  document.getElementById('mForm').style.display  = 'flex';
+  document.getElementById('mOk').style.display    = 'none';
+
+  modalBd.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('mName').focus(), 300);
+}
+
+function closeModal() {
+  modalBd.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Abrir desde tarjetas de producto
+document.getElementById('pgrid')?.addEventListener('click', e => {
+  const btn = e.target.closest('.btn-buy');
+  if(btn) { e.preventDefault(); openModal(btn.closest('.pc')); }
+});
+
+// Abrir desde tarjetas de servicio
+document.querySelectorAll('.srv-cta').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); openModal(a.closest('.srv-card')); });
+});
+
+// Cerrar: botón, fondo, Escape
+document.getElementById('modalClose')?.addEventListener('click', closeModal);
+modalBd.addEventListener('click', e => { if(e.target === modalBd) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && modalBd.classList.contains('open')) closeModal(); });
+
+// Enviar formulario → backend /api/modal
+document.getElementById('mForm')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const name  = document.getElementById('mName').value.trim();
+  const email = document.getElementById('mEmail').value.trim();
+  const wa    = document.getElementById('mWa').value.trim();
+  const priv  = document.getElementById('mPrivacy').checked;
+  if (!name || !email || !wa || !priv) return;
+
+  const btn = e.target.querySelector('.mform-btn');
+  const originalText = btn.textContent;
+  btn.textContent = 'Enviando…'; btn.disabled = true;
+
+  try {
+    const r = await fetch('http://localhost:3001/api/modal', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name, email, whatsapp: wa, product: _curProd })
+    });
+    const json = await r.json();
+    if (json.ok) {
+      document.getElementById('mForm').style.display = 'none';
+      document.getElementById('mOk').style.display   = 'flex';
+    } else {
+      btn.textContent = originalText; btn.disabled = false;
+      alert(json.error || 'Error al enviar. Inténtalo de nuevo.');
+    }
+  } catch(err) {
+    btn.textContent = originalText; btn.disabled = false;
+    alert('No se pudo conectar con el servidor. ¿Está arrancado el backend?');
+  }
+});
+// ── Transformación a modo waitlist ────────────────────────────────────────
+// Para marcar un producto como no disponible: añadir data-disponible="false" a su div.pc
+document.querySelectorAll('.pc').forEach(tarjeta => {
+  const precioEl   = tarjeta.querySelector('.pc-price');
+  const btnComprar = tarjeta.querySelector('.btn-buy');
+  const titulo     = tarjeta.querySelector('h3')?.textContent?.trim() || 'este recurso';
+  const disponible = tarjeta.dataset.disponible !== 'false';
+
+  if (precioEl) {
+    const badge     = document.createElement('span');
+    badge.className = disponible ? 'badge-available' : 'badge-soon';
+    badge.textContent = disponible ? 'Disponible' : 'Próximamente';
+    precioEl.replaceWith(badge);
+  }
+
+  if (btnComprar) {
+    const btnSolicitar           = document.createElement('button');
+    btnSolicitar.className       = 'btn-solicitar';
+    btnSolicitar.textContent     = 'Solicitar acceso';
+    btnSolicitar.dataset.recurso = titulo;
+    btnSolicitar.setAttribute('onclick', 'abrirWaitlist(this)');
+    btnComprar.replaceWith(btnSolicitar);
+  }
+});
+</script>
+
+<!-- MODAL WAITLIST -->
+<div id="modalWaitlist" class="wl-overlay" style="display:none" onclick="cerrarWaitlist(event)">
+  <div class="wl-box">
+    <button class="wl-close" onclick="cerrarWaitlist()">&times;</button>
+    <p class="wl-label">Acceso anticipado</p>
+    <h3 class="wl-title">Sé el primero en acceder</h3>
+    <p class="wl-desc">Te avisaré en cuanto <strong id="wlRecursoNombre"></strong> esté disponible. Sin spam, solo el aviso cuando esté listo.</p>
+    <form id="formWaitlist">
+      <input type="hidden" id="wlRecurso" name="recurso">
+      <div class="wl-field">
+        <input type="email" id="wlEmail" placeholder="tu@email.com" required autocomplete="email">
+      </div>
+      <label class="newsletter-rgpd" style="margin-bottom:.75rem">
+        <input type="checkbox" id="wlRgpd" required>
+        <span>Acepto que DataFlujo me contacte cuando este recurso esté disponible.</span>
+      </label>
+      <button type="submit" class="btn-newsletter" style="width:100%">Apuntarme a la lista &rarr;</button>
+      <p class="newsletter-msg" id="msgWaitlist" style="display:none"></p>
+    </form>
+  </div>
+</div>
+
+<script src="waitlist.js"></script>
+</body>
+</html>

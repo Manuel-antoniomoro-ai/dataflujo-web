@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Política de Privacidad de DataFlujo — Antonio Moro. Información sobre el tratamiento de datos personales conforme al RGPD.">
+<title>Política de Privacidad — DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%2306b6d4'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{--bg:#ffffff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+
+/* NAV */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}
+.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}
+.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}
+.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}
+.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}
+.hnav a:hover,.hnav a.active{color:var(--t)}
+.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}
+.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}
+.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}
+.mnav.open{display:flex;flex-direction:column;gap:.25rem}
+.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+
+/* CABECERA DE PÁGINA */
+.page-header{background:var(--ac);padding:100px 0 60px;margin-top:64px}
+.ph-label{display:block;font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1rem}
+.ph-title{font-family:var(--fe);font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:.75rem}
+.ph-meta{font-size:.85rem;color:rgba(255,255,255,.5)}
+
+/* CONTENIDO LEGAL */
+.legal-wrap{max-width:780px;margin:0 auto;padding:80px 2rem}
+.legal-wrap h2{font-family:var(--fe);font-size:1.45rem;font-weight:700;color:var(--t);margin:2.5rem 0 1rem;padding-top:1rem;border-top:1px solid var(--bd)}
+.legal-wrap h2:first-of-type{border-top:none;margin-top:0}
+.legal-wrap h3{font-family:var(--fd);font-size:.88rem;font-weight:700;color:var(--t);letter-spacing:.04em;margin:1.5rem 0 .6rem}
+.legal-wrap p{font-size:.93rem;color:var(--t2);line-height:1.8;margin-bottom:1rem}
+.legal-wrap ul{margin:.75rem 0 1rem 1.5rem;list-style:disc}
+.legal-wrap ul li{font-size:.93rem;color:var(--t2);line-height:1.75;margin-bottom:.4rem}
+.legal-wrap a{color:var(--ac);text-decoration:underline}
+.legal-wrap a:hover{color:var(--ac2)}
+.legal-box{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem 2rem;margin:1.5rem 0}
+.legal-box p{margin:0;font-size:.88rem}
+.legal-table{width:100%;border-collapse:collapse;margin:1rem 0}
+.legal-table th,.legal-table td{text-align:left;padding:.65rem 1rem;font-size:.86rem;border-bottom:1px solid var(--bd)}
+.legal-table th{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--bg2)}
+
+/* FOOTER */
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}
+.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;margin-top:2rem}
+.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34" aria-hidden="true"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="blog.html">Blog</a>
+      <a href="video-tutoriales.html">V&iacute;deos</a>
+      <a href="sobre-mi.html">Sobre m&iacute;</a>
+      <a href="contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="index.html">Inicio</a>
+  <a href="productos.html">Productos</a>
+  <a href="blog.html">Blog</a>
+  <a href="video-tutoriales.html">V&iacute;deos</a>
+  <a href="sobre-mi.html">Sobre m&iacute;</a>
+  <a href="contacto.html">Contacto</a>
+</nav>
+
+<!-- CABECERA -->
+<div class="page-header">
+  <div class="cnt">
+    <span class="ph-label">Legal</span>
+    <h1 class="ph-title">Pol&iacute;tica de Privacidad</h1>
+    <p class="ph-meta">Última actualización: 12 de abril de 2025</p>
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="legal-wrap">
+
+  <div class="legal-box">
+    <p><strong>Responsable del tratamiento:</strong> Antonio Moro D&iacute;az &middot; <a href="mailto:a.morodiaz@hotmail.com">a.morodiaz@hotmail.com</a><br>
+    <strong>Sitio web:</strong> dataflujo.com &middot; antonio-moro.es</p>
+  </div>
+
+  <h2>1. ¿Quién es el responsable del tratamiento?</h2>
+  <p>En cumplimiento del Reglamento (UE) 2016/679 del Parlamento Europeo (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD), te informamos de que el responsable del tratamiento de tus datos personales es:</p>
+  <ul>
+    <li><strong>Nombre:</strong> Antonio Moro D&iacute;az</li>
+    <li><strong>Actividad:</strong> Consultor independiente — Data Engineering &amp; Business Intelligence</li>
+    <li><strong>Email de contacto:</strong> <a href="mailto:a.morodiaz@hotmail.com">a.morodiaz@hotmail.com</a></li>
+    <li><strong>Sitio web:</strong> dataflujo.com</li>
+  </ul>
+
+  <h2>2. ¿Qué datos recopilamos?</h2>
+  <p>Recogemos únicamente los datos que nos facilitas de forma voluntaria a través de los distintos formularios del sitio:</p>
+  <table class="legal-table">
+    <thead>
+      <tr>
+        <th>Formulario</th>
+        <th>Datos recogidos</th>
+        <th>Finalidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Contacto</td>
+        <td>Nombre, email, empresa, teléfono, motivo, mensaje</td>
+        <td>Responder tu consulta</td>
+      </tr>
+      <tr>
+        <td>Solicitar información de producto</td>
+        <td>Nombre, email, WhatsApp</td>
+        <td>Enviarte información del recurso solicitado</td>
+      </tr>
+      <tr>
+        <td>Waitlist / Lista de espera</td>
+        <td>Nombre, email, producto de interés</td>
+        <td>Notificarte cuando el recurso esté disponible</td>
+      </tr>
+      <tr>
+        <td>Newsletter / Suscripción</td>
+        <td>Email</td>
+        <td>Enviar artículos y actualizaciones periódicas</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>No recopilamos datos especialmente protegidos (salud, ideología, origen étnico, etc.). No realizamos perfiles automatizados ni decisiones automatizadas con tus datos.</p>
+
+  <h2>3. ¿Con qué base legal tratamos tus datos?</h2>
+  <p>El tratamiento de tus datos personales se basa en:</p>
+  <ul>
+    <li><strong>Consentimiento explícito</strong> (art. 6.1.a RGPD): marcas la casilla de aceptación antes de enviar cualquier formulario.</li>
+    <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): para el mantenimiento y seguridad del servicio.</li>
+  </ul>
+  <p>Puedes retirar tu consentimiento en cualquier momento sin que ello afecte a la licitud del tratamiento previo.</p>
+
+  <h2>4. ¿Con quién compartimos tus datos?</h2>
+  <p>Tus datos no se venden, alquilan ni ceden a terceros con fines comerciales. Pueden ser compartidos con:</p>
+  <ul>
+    <li><strong>Proveedor de email (SMTP):</strong> los datos pasan a través del servidor de correo para enviar las notificaciones correspondientes (Hotmail/Outlook de Microsoft, sometido al acuerdo de transferencia UE–EE.UU.).</li>
+    <li><strong>Plataforma de hosting:</strong> el servidor donde se aloja el sitio web almacena los datos temporalmente en ficheros de log.</li>
+  </ul>
+  <p>Cuando sea técnicamente necesario transferir datos fuera del Espacio Económico Europeo, lo haremos con las garantías adecuadas (cláusulas contractuales tipo o proveedores adheridos al EU-U.S. Data Privacy Framework).</p>
+
+  <h2>5. ¿Durante cuánto tiempo conservamos tus datos?</h2>
+  <ul>
+    <li><strong>Formulario de contacto:</strong> hasta resolver tu consulta y, como máximo, 2 años desde el último intercambio.</li>
+    <li><strong>Solicitud de información de producto:</strong> hasta que se complete la gestión comercial, máximo 3 años.</li>
+    <li><strong>Waitlist:</strong> hasta que el producto esté disponible y se te haya notificado, o hasta que solicites tu eliminación.</li>
+    <li><strong>Newsletter:</strong> mientras mantengas la suscripción activa. Puedes darte de baja en cualquier momento.</li>
+  </ul>
+
+  <h2>6. ¿Cuáles son tus derechos?</h2>
+  <p>Conforme al RGPD tienes derecho a:</p>
+  <ul>
+    <li><strong>Acceso:</strong> saber qué datos tenemos sobre ti.</li>
+    <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
+    <li><strong>Supresión ("derecho al olvido"):</strong> solicitar que eliminemos tus datos.</li>
+    <li><strong>Limitación del tratamiento:</strong> pedirnos que restrinjamos el uso de tus datos.</li>
+    <li><strong>Portabilidad:</strong> recibir tus datos en formato estructurado y legible por máquina.</li>
+    <li><strong>Oposición:</strong> oponerte al tratamiento basado en interés legítimo.</li>
+    <li><strong>Retirada del consentimiento:</strong> sin efectos retroactivos.</li>
+  </ul>
+  <p>Para ejercer cualquiera de estos derechos, envíanos un email a <a href="mailto:a.morodiaz@hotmail.com">a.morodiaz@hotmail.com</a> indicando claramente tu solicitud y adjuntando una copia de tu documento de identidad. Responderemos en un plazo máximo de 30 días.</p>
+  <p>Si consideras que el tratamiento no se ajusta a la normativa, tienes derecho a presentar una reclamación ante la <strong>Agencia Española de Protección de Datos (AEPD)</strong>: <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>.</p>
+
+  <h2>7. Cookies y tecnologías de rastreo</h2>
+  <p>Este sitio web <strong>no utiliza cookies de rastreo ni analítica de terceros</strong>. No se instalan cookies más allá de las estrictamente necesarias para el funcionamiento del formulario de contacto (session token temporal).</p>
+  <p>Si en el futuro implementamos cookies analíticas o de publicidad, actualizaremos esta política y solicitaremos tu consentimiento explícito.</p>
+
+  <h2>8. Seguridad</h2>
+  <p>Aplicamos medidas técnicas y organizativas apropiadas para proteger tus datos frente a accesos no autorizados, pérdida o destrucción accidental:</p>
+  <ul>
+    <li>Transmisión de datos cifrada mediante HTTPS/TLS.</li>
+    <li>Acceso restringido a los datos almacenados en servidor.</li>
+    <li>Los ficheros de datos (p.ej. waitlist.json) se almacenan en directorio no accesible públicamente.</li>
+  </ul>
+
+  <h2>9. Enlaces a otros sitios</h2>
+  <p>Este sitio puede contener enlaces a sitios web de terceros (p.ej. LinkedIn, GitHub, plataformas de cursos). No nos hacemos responsables de las prácticas de privacidad de esos sitios. Te recomendamos revisar sus políticas de privacidad antes de facilitarles tus datos.</p>
+
+  <h2>10. Menores de edad</h2>
+  <p>Este sitio no está dirigido a menores de 14 años. No recopilamos conscientemente datos personales de menores. Si eres padre/madre o tutor y crees que tu hijo ha facilitado datos, contáctanos para eliminarlos.</p>
+
+  <h2>11. Cambios en esta política</h2>
+  <p>Podemos actualizar esta Política de Privacidad periódicamente para reflejar cambios en nuestras prácticas o en la normativa aplicable. La fecha de "última actualización" al inicio de esta página refleja la versión vigente. En caso de cambios sustanciales, te informaremos mediante un aviso visible en el sitio web.</p>
+
+  <h2>12. Contacto</h2>
+  <p>Para cualquier consulta relacionada con esta política o con el tratamiento de tus datos personales, puedes contactarnos en:</p>
+  <div class="legal-box">
+    <p>
+      <strong>Antonio Moro D&iacute;az</strong><br>
+      Email: <a href="mailto:a.morodiaz@hotmail.com">a.morodiaz@hotmail.com</a><br>
+      Web: <a href="https://dataflujo.com">dataflujo.com</a>
+    </p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-bot" style="margin-top:0;padding-top:0;border-top:none">
+      <p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; <a href="privacidad.html" style="color:rgba(255,255,255,.4)">Privacidad</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => document.querySelector('.hdr').classList.toggle('scrolled', window.scrollY > 20));
+document.getElementById('mbtn')?.addEventListener('click', () => document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>

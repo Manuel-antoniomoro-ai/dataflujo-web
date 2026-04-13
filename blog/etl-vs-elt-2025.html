@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ETL vs ELT en 2025: analisis tecnico completo. Por que el cloud ha cambiado el paradigma, comparativa de herramientas y cuando usar cada enfoque.">
+<title>ETL vs ELT en 2025: &iquest;cu&aacute;l domina el mercado cloud? &mdash; DataFlujo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f1f40' rx='12'/><rect x='8' y='54' width='18' height='38' rx='3' fill='white' opacity='.7'/><rect x='30' y='28' width='18' height='64' rx='3' fill='white' opacity='.7'/><rect x='52' y='60' width='18' height='32' rx='3' fill='white' opacity='.7'/><rect x='74' y='6' width='18' height='86' rx='3' fill='%232563eb'/><rect x='4' y='94' width='92' height='4' rx='2' fill='white' opacity='.5'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#f8f8f6;--bg3:#f0f0ec;--t:#0a0a0a;--t2:#4a4a4a;--t3:#9a9a9a;--ac:#0f1f40;--ac2:#1a3a6b;--bd:rgba(0,0,0,.09);--bd2:rgba(0,0,0,.16);--r:4px;--s:0 2px 12px rgba(0,0,0,.06);--s2:0 8px 32px rgba(0,0,0,.11);--fb:'Inter','Segoe UI',system-ui,sans-serif;--fe:'Playfair Display',Georgia,serif;--fd:'Syne','Arial Black',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}body{font-family:var(--fb);background:var(--bg);color:var(--t);overflow-x:hidden;line-height:1.65}img{max-width:100%;display:block}a{text-decoration:none;color:inherit}ul{list-style:none}
+.cnt{max-width:1200px;margin:0 auto;padding:0 2rem}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:#fff;border-bottom:1px solid var(--bd);transition:box-shadow .3s}.hdr.scrolled{box-shadow:var(--s2)}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 2rem;height:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.65rem;line-height:1}.logo-icon{display:flex;align-items:flex-end;color:var(--ac);flex-shrink:0}.logo-brand{font-family:var(--fe);font-size:1.12rem;font-weight:700;line-height:1;letter-spacing:-.02em}.logo-data{color:var(--t)}.logo-flujo{background:linear-gradient(90deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.logo-sub{font-family:var(--fd);font-size:.5rem;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.hnav{display:flex;align-items:center;gap:.25rem}.hnav a{font-size:.83rem;font-weight:500;color:var(--t2);padding:.4rem .9rem;transition:color .2s;letter-spacing:.01em;font-family:var(--fd)}.hnav a:hover,.hnav a.active{color:var(--t)}.nav-cta{background:var(--ac)!important;color:#fff!important;padding:.4rem 1.1rem!important;font-weight:600!important}.nav-cta:hover{background:var(--ac2)!important}
+.mbtn{display:none;background:none;border:1px solid var(--bd);padding:.35rem .7rem;cursor:pointer;font-size:1rem}.mnav{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--bd);padding:1rem 2rem;z-index:199;box-shadow:var(--s2)}.mnav.open{display:flex;flex-direction:column;gap:.25rem}.mnav a{font-size:.9rem;color:var(--t2);padding:.65rem 0;border-bottom:1px solid var(--bd);font-family:var(--fd)}
+@media(max-width:768px){.hnav{display:none}.mbtn{display:block}}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.iz{overflow:hidden}.iz img{width:100%;display:block;transform:scale(1.07);transition:transform 1.4s cubic-bezier(.16,1,.3,1),opacity .8s ease;opacity:.88}.iz.iz-in img{transform:scale(1);opacity:1}
+.art-hero{position:relative;height:460px;margin-top:64px}.art-hero-bg{position:absolute;inset:0}.art-hero-bg img{width:100%;height:100%;object-fit:cover}.art-hero-overlay{position:absolute;inset:0;background:rgba(8,14,28,.78);display:flex;align-items:flex-end;padding-bottom:3.5rem}.art-hero-inner{max-width:860px;padding:0 2rem}
+.art-crumb{display:flex;align-items:center;gap:.5rem;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:1.25rem}.art-crumb a{color:rgba(255,255,255,.45);transition:color .2s}.art-crumb a:hover{color:rgba(255,255,255,.8)}.art-crumb span{color:rgba(255,255,255,.25)}
+.art-cat{display:inline-block;font-family:var(--fd);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2563eb;margin-bottom:.75rem}
+.art-title{font-family:var(--fe);font-size:clamp(1.9rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.25rem;max-width:760px}
+.art-meta{display:flex;align-items:center;gap:1.5rem;font-family:var(--fd);font-size:.72rem;color:rgba(255,255,255,.45)}.art-meta strong{color:rgba(255,255,255,.7)}
+.art-body{max-width:760px;margin:0 auto;padding:72px 2rem 100px}.art-body h2{font-family:var(--fe);font-size:1.65rem;font-weight:700;color:var(--t);margin:2.75rem 0 1rem;line-height:1.25}.art-body h3{font-family:var(--fe);font-size:1.2rem;font-weight:700;color:var(--t);margin:2rem 0 .75rem}.art-body p{font-size:.97rem;color:var(--t2);line-height:1.8;margin-bottom:1.2rem}.art-body ul,.art-body ol{padding-left:1.5rem;margin-bottom:1.2rem}.art-body li{font-size:.97rem;color:var(--t2);line-height:1.75;margin-bottom:.4rem}.art-body ul li{list-style:disc}.art-body ol li{list-style:decimal}.art-body strong{color:var(--t);font-weight:600}.art-body em{font-style:italic}.art-body a{color:var(--ac);border-bottom:1px solid var(--bd2);transition:border-color .2s}.art-body a:hover{border-color:var(--ac)}
+.art-lead{font-size:1.08rem;color:var(--t);line-height:1.85;margin-bottom:2rem;border-left:3px solid var(--ac);padding-left:1.25rem}
+.art-quote{background:var(--bg2);border-left:4px solid var(--ac);padding:1.25rem 1.5rem;margin:2rem 0;border-radius:0 var(--r) var(--r) 0}.art-quote p{margin-bottom:0;font-style:italic;color:var(--t)}
+pre{background:#0f1f40;color:#e2e8f0;padding:1.5rem;border-radius:var(--r);overflow-x:auto;margin:1.5rem 0;font-size:.82rem;line-height:1.7;font-family:'Consolas','Monaco',monospace}code{background:#f0f0ec;color:#0f1f40;padding:.15rem .4rem;border-radius:3px;font-size:.84rem;font-family:'Consolas','Monaco',monospace}pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.art-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.88rem}.art-table th{background:var(--ac);color:#fff;padding:.65rem 1rem;text-align:left;font-family:var(--fd);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}.art-table td{padding:.6rem 1rem;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:top}.art-table tr:last-child td{border-bottom:none}.art-table tr:nth-child(even) td{background:var(--bg2)}
+.art-tip{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-tip strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;margin-bottom:.4rem}.art-tip p{margin-bottom:0;font-size:.88rem;color:#1e3a5f}
+.art-warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);padding:1.1rem 1.25rem;margin:1.5rem 0}.art-warn strong{display:block;font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#c2410c;margin-bottom:.4rem}.art-warn p{margin-bottom:0;font-size:.88rem;color:#7c2d12}
+.art-divider{border:none;border-top:1px solid var(--bd);margin:2.5rem 0}
+.art-cta{background:var(--ac);border-radius:var(--r);padding:2.5rem;margin:3rem 0;text-align:center}.art-cta h3{font-family:var(--fe);font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.75rem}.art-cta p{font-size:.88rem;color:rgba(255,255,255,.65);margin-bottom:1.5rem;line-height:1.7}.btn-white{display:inline-block;background:#fff;color:var(--ac);padding:.75rem 1.75rem;border-radius:var(--r);font-family:var(--fd);font-size:.82rem;font-weight:700;letter-spacing:.04em;transition:opacity .2s}.btn-white:hover{opacity:.88}
+.art-related{border-top:1px solid var(--bd);padding-top:2.5rem;margin-top:1rem}.art-related h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:1.5rem}.rel-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}.rel-card{border:1px solid var(--bd);border-radius:var(--r);padding:1.25rem;transition:border-color .2s,box-shadow .2s}.rel-card:hover{border-color:var(--bd2);box-shadow:var(--s)}.rel-cat{font-family:var(--fd);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:.4rem}.rel-title{font-family:var(--fe);font-size:.95rem;font-weight:700;color:var(--t);line-height:1.3}@media(max-width:600px){.rel-grid{grid-template-columns:1fr}}
+.footer{background:var(--t);color:#fff;padding:72px 0 32px}.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}.ft-brand p{font-size:.83rem;color:rgba(255,255,255,.45);margin-top:1rem;line-height:1.7}.ft-social{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}.ft-link{font-size:.8rem;color:rgba(255,255,255,.45);transition:color .2s}.ft-link:hover{color:#fff}.ft-col h4{font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1rem}.ft-col ul li{margin-bottom:.5rem}.ft-col ul li a{font-size:.83rem;color:rgba(255,255,255,.5);transition:color .2s}.ft-col ul li a:hover{color:#fff}.ft-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem}.ft-bot p{font-size:.75rem;color:rgba(255,255,255,.28)}
+@media(max-width:768px){.ft-grid{grid-template-columns:1fr 1fr;gap:2rem}.ft-brand{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#2563eb"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+      <div><div class="logo-brand"><span class="logo-data">Data</span><span class="logo-flujo">Flujo</span></div><div class="logo-sub">by antonio-moro.es</div></div>
+    </a>
+    <nav class="hnav">
+      <a href="../index.html">Inicio</a>
+      <a href="../productos.html">Productos</a>
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../sobre-mi.html">Sobre m&#237;</a>
+      <a href="../contacto.html" class="nav-cta">Contacto</a>
+    </nav>
+    <button class="mbtn" id="mbtn">&#9776;</button>
+  </div>
+</header>
+<nav class="mnav" id="mnav">
+  <a href="../index.html">Inicio</a><a href="../productos.html">Productos</a><a href="../blog.html">Blog</a><a href="../video-tutoriales.html">V&iacute;deos</a><a href="../sobre-mi.html">Sobre m&#237;</a><a href="../contacto.html">Contacto</a>
+</nav>
+
+<div class="art-hero">
+  <div class="art-hero-bg iz">
+    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&auto=format&fit=crop&q=80" alt="Infraestructura de datos cloud">
+  </div>
+  <div class="art-hero-overlay">
+    <div class="art-hero-inner">
+      <nav class="art-crumb rv"><a href="../index.html">Inicio</a><span>/</span><a href="../blog.html">Blog</a><span>/</span><span>ETL</span></nav>
+      <span class="art-cat">ETL</span>
+      <h1 class="art-title rv d1">ETL vs ELT en 2025: &iquest;cu&aacute;l domina el mercado cloud?</h1>
+      <div class="art-meta rv d2"><span>Por <strong>Antonio Moro</strong></span><span>12 Mar 2025</span><span>8 min lectura</span></div>
+    </div>
+  </div>
+</div>
+
+<article class="art-body">
+  <p class="art-lead rv">Durante m&aacute;s de dos d&eacute;cadas trabajando en proyectos de datos, he visto c&oacute;mo el paradigma ETL &mdash;que durante a&ntilde;os fue la &uacute;nica opci&oacute;n v&aacute;lida&mdash; ha cedido terreno de forma dr&aacute;stica frente al ELT en entornos cloud. No es una cuesti&oacute;n de moda: es un cambio estructural impulsado por la capacidad de c&oacute;mputo casi ilimitada de plataformas como BigQuery, Snowflake o Redshift.</p>
+
+  <h2 class="rv">Qu&eacute; es ETL y c&oacute;mo funciona</h2>
+  <p><strong>ETL</strong> (Extract, Transform, Load) es el proceso cl&aacute;sico de integraci&oacute;n de datos. Los datos se extraen de los sistemas fuente, se transforman en un servidor intermedio y <em>despu&eacute;s</em> se cargan ya procesados en el Data Warehouse. La transformaci&oacute;n ocurre <strong>antes</strong> de llegar al repositorio central.</p>
+<pre><code>FUENTES           SERVIDOR ETL             DESTINO
+[CRM]    --+
+[ERP]    --+-&gt; [EXTRACT] -&gt; [TRANSFORM] -&gt; [LOAD] -&gt; [DWH]
+[Web]    --+
+[APIs]        (limpieza, joins,           (datos ya
+               reglas de negocio)          transformados)</code></pre>
+  <p>El servidor ETL act&uacute;a como intermediario. Toda la l&oacute;gica de transformaci&oacute;n &mdash;limpieza, normalizaci&oacute;n, c&aacute;lculos derivados, joins entre tablas de distintas fuentes&mdash; se ejecuta en ese motor. Esto requiere recursos de c&oacute;mputo propios y suele ser el cuello de botella en vol&uacute;menes grandes.</p>
+
+  <h2 class="rv">Qu&eacute; es ELT y por qu&eacute; el cloud lo cambi&oacute; todo</h2>
+  <p><strong>ELT</strong> (Extract, Load, Transform) invierte el orden: los datos se cargan <em>en bruto</em> directamente en el Data Warehouse cloud y las transformaciones se ejecutan <strong>dentro</strong> del propio DWH usando la potencia de c&oacute;mputo nativo del cloud.</p>
+<pre><code>FUENTES           DESTINO CLOUD                TRANSFORMACION
+[CRM]    --+
+[ERP]    --+-&gt; [EXTRACT] -&gt; [LOAD RAW] -&gt; [TRANSFORM SQL] -&gt; [MARTS]
+[Web]    --+
+[APIs]        (datos en bruto,              (SQL sobre BigQuery /
+               sin procesar)                Snowflake / Redshift)</code></pre>
+
+  <div class="art-tip">
+    <strong>Dato clave</strong>
+    <p>BigQuery procesa 1 TB por unos 5 USD. Un servidor ETL dedicado para hacer lo mismo on-premise puede costar cientos de euros/hora en licencias e infraestructura. Esta diferencia de coste es lo que hace que ELT sea el nuevo est&aacute;ndar.</p>
+  </div>
+
+  <p>Plataformas como <strong>Google BigQuery</strong>, <strong>Snowflake</strong> o <strong>Amazon Redshift</strong> ejecutan transformaciones SQL complejas sobre terabytes en segundos usando arquitectura MPP (Massively Parallel Processing). El coste marginal de transformar in-situ es tan bajo que ya no tiene sentido pagar por un servidor ETL dedicado.</p>
+
+  <h2 class="rv">Herramientas ETL cl&aacute;sicas</h2>
+  <h3>Informatica PowerCenter / IDMC</h3>
+  <p>El est&aacute;ndar de facto durante 20 a&ntilde;os en entornos enterprise. Ofrece entorno visual potente, excelente soporte 24/7, conectores para cualquier sistema imaginable y capacidades avanzadas de calidad de dato. Su principal desventaja: el <strong>precio</strong>. Una licencia enterprise puede superar los 200.000 &euro;/a&ntilde;o. Su nueva versi&oacute;n cloud IDMC ha modernizado el portfolio pero mantiene el modelo de precios premium.</p>
+  <h3>Microsoft SSIS</h3>
+  <p>Integrado en el ecosistema Microsoft, es la elecci&oacute;n natural para empresas con SQL Server. La herramienta visual de dise&ntilde;o de paquetes es familiar para equipos de DBA. Sus limitaciones aparecen en escalabilidad horizontal y entornos no-Microsoft. Con Azure Data Factory, Microsoft ha pivotado hacia un modelo m&aacute;s cercano al ELT moderno.</p>
+  <h3>Talend</h3>
+  <p>Open source con versi&oacute;n enterprise. Buen equilibrio precio/funcionalidad. Genera c&oacute;digo Java ejecutable, lo que puede ser una ventaja (portabilidad) o desventaja (complejidad de depuraci&oacute;n). Adquirido por Qlik en 2023, el roadmap tiene cierta incertidumbre.</p>
+
+  <h2 class="rv">Herramientas ELT modernas</h2>
+  <h3>dbt (data build tool)</h3>
+  <p>Se ha convertido en el est&aacute;ndar de transformaci&oacute;n ELT. dbt no mueve datos: ejecuta SQL <em>dentro</em> del DWH y a&ntilde;ade gesti&oacute;n de dependencias, tests autom&aacute;ticos, documentaci&oacute;n y linaje de datos. Compatible con BigQuery, Snowflake, Redshift, Databricks y m&aacute;s. Su enfoque SQL-first lo hace accesible a cualquier analista.</p>
+  <h3>Fivetran</h3>
+  <p>Conector gestionado para la fase de ingesta (Extract + Load). M&aacute;s de 300 conectores predefinidos y mantenidos autom&aacute;ticamente. Precio por fila procesada puede ser alto en vol&uacute;menes grandes, pero el ahorro en mantenimiento justifica el coste en la mayor&iacute;a de proyectos medianos.</p>
+  <h3>Airbyte</h3>
+  <p>Alternativa open source a Fivetran. M&aacute;s de 350 conectores, disponible self-hosted o como Airbyte Cloud. Ideal para equipos que quieren control total sobre la infraestructura. Los conectores personalizados son f&aacute;ciles de construir gracias al SDK en Python.</p>
+
+  <h2 class="rv">Comparativa ETL vs ELT</h2>
+  <table class="art-table">
+    <thead><tr><th>Criterio</th><th>ETL cl&aacute;sico</th><th>ELT moderno</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Rendimiento a escala</strong></td><td>Limitado por servidor intermedio</td><td>Escala con el DWH cloud (MPP)</td></tr>
+      <tr><td><strong>Coste infraestructura</strong></td><td>Alto (servidor ETL dedicado)</td><td>Bajo (pago por consulta en DWH)</td></tr>
+      <tr><td><strong>Latencia</strong></td><td>Alta (transform antes de cargar)</td><td>Baja (carga inmediata, transform on-demand)</td></tr>
+      <tr><td><strong>Flexibilidad cambios</strong></td><td>R&iacute;gida (redise&ntilde;ar jobs)</td><td>Alta (cambiar SQL en dbt, deploy en segundos)</td></tr>
+      <tr><td><strong>Linaje y documentaci&oacute;n</strong></td><td>Variable seg&uacute;n herramienta</td><td>Excelente (dbt genera DAG y docs autom&aacute;ticos)</td></tr>
+      <tr><td><strong>Privacidad PII antes de DWH</strong></td><td>S&iacute; (anonimizar antes de cargar)</td><td>Requiere controles extra en el DWH</td></tr>
+      <tr><td><strong>Requiere DWH cloud potente</strong></td><td>No</td><td>S&iacute; (BigQuery, Snowflake, Redshift)</td></tr>
+      <tr><td><strong>Curva de aprendizaje</strong></td><td>Alta (herramientas propietarias)</td><td>Media (SQL + Git + dbt)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="rv">Cu&aacute;ndo todav&iacute;a tiene sentido el ETL cl&aacute;sico</h2>
+  <p>El ETL cl&aacute;sico no desaparece, pero queda relegado a nichos espec&iacute;ficos:</p>
+  <ul>
+    <li><strong>Regulaci&oacute;n estricta (GDPR, PCI-DSS, HIPAA):</strong> cuando los datos PII no pueden almacenarse en bruto antes de ser anonimizados. ETL garantiza que el dato sensible nunca toca el DWH sin transformar.</li>
+    <li><strong>Sistemas legacy on-premise:</strong> si tu DWH es SQL Server 2012 o un Teradata antiguo, no tienes la capacidad de c&oacute;mputo para ejecutar transformaciones pesadas in-situ.</li>
+    <li><strong>Calidad de dato cr&iacute;tica pre-carga:</strong> en banca o seguros puede ser obligatorio rechazar registros inv&aacute;lidos antes de que lleguen al repositorio central.</li>
+    <li><strong>Transformaciones no-SQL complejas:</strong> cuando la l&oacute;gica requiere Python, Java o procesamiento imperativo que no se puede expresar limpiamente en SQL.</li>
+  </ul>
+
+  <div class="art-warn">
+    <strong>Ojo con la inercia</strong>
+    <p>Si tu empresa ya est&aacute; en cloud y mantienes ETL cl&aacute;sico por costumbre, est&aacute;s pagando dos veces: el servidor ETL y el DWH cloud. Eval&uacute;a la migraci&oacute;n a ELT antes de renovar licencias.</p>
+  </div>
+
+  <h2 class="rv">Casos de uso reales</h2>
+  <h3>Caso 1: Retailer con 50M de transacciones diarias</h3>
+  <p>Un cliente del sector retail pasaba 4 horas cada noche ejecutando jobs SSIS para transformar logs de ventas antes de cargarlos en SQL Server DWH. Tras migrar a <strong>Airbyte + BigQuery + dbt</strong>, el proceso completo tard&oacute; 18 minutos. El coste mensual de infraestructura baj&oacute; un 60% y el equipo pas&oacute; de mantener 200 paquetes SSIS a 40 modelos dbt versionados en Git.</p>
+  <h3>Caso 2: Banco con datos de tarjetas (PCI-DSS)</h3>
+  <p>Una entidad bancaria mantiene Informatica PowerCenter para la ingesta de transacciones. Los datos PAN se tokenizan en el servidor Informatica <em>antes</em> de llegar al DWH. Este es un caso donde el ETL sigue siendo la arquitectura correcta: PCI-DSS exige minimizar los datos de tarjetas lo antes posible en el flujo.</p>
+
+  <div class="art-quote">
+    <p>&ldquo;El mejor pipeline de datos es aquel que tu equipo puede entender, modificar y mantener. En 2025, ese pipeline suele estar escrito en SQL y versionado en Git.&rdquo;</p>
+  </div>
+
+  <h2 class="rv">Conclusi&oacute;n</h2>
+  <p>En 2025, si est&aacute;s construyendo un nuevo proyecto de datos sobre cualquier DWH cloud, <strong>ELT es el enfoque por defecto</strong>. La combinaci&oacute;n Fivetran/Airbyte (ingesta) + dbt (transformaci&oacute;n) + BigQuery/Snowflake (compute) es el stack m&aacute;s adoptado por los mejores equipos de datos del mundo. El ETL cl&aacute;sico sobrevive en nichos muy espec&iacute;ficos de cumplimiento regulatorio y sistemas legacy.</p>
+
+  <hr class="art-divider">
+  <div class="art-cta rv">
+    <h3>Pack de plantillas dbt listas para BigQuery y Snowflake</h3>
+    <p>Modelos dbt de staging, marts y core con tests gen&eacute;ricos preconfigurados, documentaci&oacute;n autom&aacute;tica y estructura de carpetas lista para producci&oacute;n. Ahorra semanas de configuraci&oacute;n inicial.</p>
+    <a href="../productos.html" class="btn-white">Ver recursos &rarr;</a>
+  </div>
+  <div class="art-related rv">
+    <h4>Tambi&eacute;n te puede interesar</h4>
+    <div class="rel-grid">
+      <a href="dbt-data-warehouse-2025.html" class="rel-card"><div class="rel-cat">Cloud</div><div class="rel-title">dbt en 2025: el est&aacute;ndar del Data Warehouse moderno</div></a>
+      <a href="sql-window-functions.html" class="rel-card"><div class="rel-cat">SQL</div><div class="rel-title">SQL Window Functions: la gu&iacute;a definitiva con 20 ejemplos</div></a>
+    </div>
+  </div>
+</article>
+
+<footer class="footer">
+  <div class="cnt">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <a href="../index.html" class="logo">
+          <div class="logo-icon" style="color:rgba(255,255,255,.6)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 46" width="38" height="34"><rect x="2" y="25" width="9" height="18" rx="1.5" fill="currentColor" opacity=".7"/><rect x="14" y="12" width="9" height="31" rx="1.5" fill="currentColor" opacity=".7"/><rect x="26" y="29" width="9" height="14" rx="1.5" fill="currentColor" opacity=".7"/><rect x="38" y="3" width="9" height="40" rx="1.5" fill="#93c5fd"/><rect x="0" y="44" width="50" height="2" rx="1" fill="currentColor"/></svg></div>
+          <div><div class="logo-brand" style="color:#fff"><span class="logo-data" style="color:#fff">Data</span><span class="logo-flujo" style="color:#93c5fd">Flujo</span></div><div class="logo-sub" style="color:rgba(255,255,255,.38)">by antonio-moro.es</div></div>
+        </a>
+        <p>Recursos digitales de Data Engineering &amp; BI con 20+ a&ntilde;os de experiencia real en producci&oacute;n.</p>
+        <div class="ft-social">
+          <a href="mailto:a.morodiaz@hotmail.com" class="ft-link">a.morodiaz@hotmail.com</a>
+          <a href="https://linkedin.com/in/antonio-moro-diaz-62346213b" target="_blank" class="ft-link">LinkedIn</a>
+        </div>
+      </div>
+      <div class="ft-col"><h4>Recursos</h4><ul><li><a href="../productos.html">Power BI Templates</a></li><li><a href="../productos.html">SQL Pack</a></li><li><a href="../productos.html">dbt Starter</a></li></ul></div>
+      <div class="ft-col"><h4>P&aacute;ginas</h4><ul><li><a href="../blog.html">Blog</a></li><li><a href="../sobre-mi.html">Sobre m&#237;</a></li><li><a href="../contacto.html">Contacto</a></li></ul></div>
+      <div class="ft-col"><h4>Legal</h4><ul><li><a href="../contacto.html">Aviso legal</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><p>&copy; 2025 DataFlujo &middot; antonio-moro.es &middot; Todos los derechos reservados</p></div>
+  </div>
+</footer>
+<script>
+const ro=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('in');ro.unobserve(v.target)}}),{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+const zo=new IntersectionObserver(e=>e.forEach(v=>{if(v.isIntersecting){v.target.classList.add('iz-in');zo.unobserve(v.target)}}),{threshold:.06});
+document.querySelectorAll('.iz').forEach(el=>zo.observe(el));
+window.addEventListener('scroll',()=>document.querySelector('.hdr').classList.toggle('scrolled',window.scrollY>20));
+document.getElementById('mbtn')?.addEventListener('click',()=>document.getElementById('mnav').classList.toggle('open'));
+</script>
+</body>
+</html>
