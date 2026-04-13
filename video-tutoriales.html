@@ -334,8 +334,7 @@ const videos = [
     duracion: "55 min", nivel: "Avanzado",
     tags: ["dbt", "BigQuery", "Medallion", "GCP"],
     vistas: null,
-    youtubeId: "VIDEO_ID_003",  // ← reemplaza con tu ID real
-    localVideoSrc: "slides/Pipelines_de_Datos_Modernos.mp4",
+    youtubeId: "j8jgrE3qqUI",
     slidesUrl: "slides/dbt-medallion-bigquery.html",
     thumbContent: `<div class="nodes"><div class="node">RAW</div><span class="node-arrow">→</span><div class="node">STG</div><span class="node-arrow">→</span><div class="node">MART</div></div>`
   },
@@ -346,8 +345,7 @@ const videos = [
     duracion: "38 min", nivel: "Intermedio",
     tags: ["Airflow", "ELT", "Salesforce", "CDC"],
     vistas: null,
-    youtubeId: "VIDEO_ID_004",  // ← reemplaza con tu ID real
-    localVideoSrc: "slides/Superpoderes_de_Airflow.mp4",
+    youtubeId: "P5sg7hoUQgs",
     slidesUrl: null,
     thumbContent: `<div class="pipeline"><div class="pipe-step">① Extract — Salesforce API</div><div class="pipe-step">② Transform — dbt models</div><div class="pipe-step">③ Load — BigQuery MERGE</div></div>`
   },
@@ -358,8 +356,7 @@ const videos = [
     duracion: "22 min", nivel: "Todos los niveles",
     tags: ["Snowflake", "BigQuery", "Cloud DWH", "Costes"],
     vistas: null,
-    youtubeId: "VIDEO_ID_005",  // ← reemplaza con tu ID real
-    localVideoSrc: "slides/La_Guerra_de_Datos_se_Deshiela.mp4",
+    youtubeId: "W66PPuheoYw",
     slidesUrl: "slides/elt_airflow_autopresentation.html",
     thumbContent: `<div class="nodes"><div class="node" style="background:rgba(37,99,235,.3);border-color:rgba(37,99,235,.6)">BQ</div><span class="node-arrow" style="font-size:1.2rem;color:rgba(255,255,255,.5)">vs</span><div class="node" style="background:rgba(139,92,246,.3);border-color:rgba(139,92,246,.6)">SF</div></div>`
   }
@@ -379,7 +376,7 @@ function renderCards() {
     const real = isRealVideo(v.youtubeId);
     const hasLocal = !!v.localVideoSrc;
     const clickable = real || hasLocal;
-    const vistasTxt = v.vistas ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${v.vistas} vistas` : (hasLocal ? '🎬 Ver vídeo' : '🎬 Próximamente');
+    const vistasTxt = v.vistas ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${v.vistas} vistas` : (clickable ? '🎬 Ver vídeo' : '🎬 Próximamente');
     return `
     <div class="video-card cat-${v.cat} rv${i>0?' d'+Math.min(i,3):''}" data-id="${v.id}">
       <div class="thumb"${clickable ? ` onclick="openModal('${v.id}')" style="cursor:pointer"` : ''}>
